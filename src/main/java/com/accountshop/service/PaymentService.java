@@ -1,6 +1,5 @@
 package com.accountshop.service;
 
-import com.accountshop.config.PayOSProperties;
 import com.accountshop.dto.request.PaymentRequest;
 import com.accountshop.entity.Order;
 import com.accountshop.entity.PaymentMethod;
