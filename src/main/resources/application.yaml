@@ -82,6 +82,10 @@ app:
   upload-dir: ./uploads
   admin-email: admin@accountshop.com
   base-url: http://localhost:9090
+  bank:
+    name: "MB Bank"
+    account-number: "0379886918"
+    account-holder: "Trần Thanh Vũ"
 
 logging:
   level:
