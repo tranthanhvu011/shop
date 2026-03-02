@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/default}">
+
+<head>
+    <title>Dashboard</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Navbar scrollable tabs -->
+        <div class="navbarContainer">
+            <div class="navbarWrapper">
+                <div class="navScrollContainer">
+                    <div class="navList">
+                        <a th:href="@{/dashboard}" class="navTabBtn active">Dashboard</a>
+                        <a th:href="@{/orders}" class="navTabBtn">Đơn hàng</a>
+                        <a th:href="@{/profile}" class="navTabBtn">Hồ sơ</a>
+                        <a th:href="@{/messages}" class="navTabBtn">Tin nhắn</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboardContent">
+            <h1 class="welcomeTitle">
+                Xin chào, <span class="gradient-text" th:text="${currentUser.username}">User</span>!
+            </h1>
+
+            <div class="quickLinks">
+                <a th:href="@{/orders}" class="card quickLink">
+                    <div class="quickLinkIcon orders">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <path d="M16 10a4 4 0 0 1-8 0" />
+                        </svg>
+                    </div>
+                    <h3>Đơn hàng</h3>
+                    <p>Xem lịch sử đơn hàng</p>
+                </a>
+                <a th:href="@{/messages}" class="card quickLink">
+                    <div class="quickLinkIcon messages">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                    </div>
+                    <h3>Tin nhắn</h3>
+                    <p>Chat với hỗ trợ</p>
+                </a>
+                <a th:href="@{/profile}" class="card quickLink">
+                    <div class="quickLinkIcon profile">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                    </div>
+                    <h3>Hồ sơ</h3>
+                    <p>Quản lý thông tin cá nhân</p>
+                </a>
+            </div>
+
+            <div class="card infoCard">
+                <h2>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
+                        stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    Thông tin tài khoản
+                </h2>
+                <div class="infoGrid">
+                    <div class="infoItem">
+                        <span class="infoLabel">Username</span>
+                        <span class="infoValue" th:text="${currentUser.username}">username</span>
+                    </div>
+                    <div class="infoItem">
+                        <span class="infoLabel">Email</span>
+                        <span class="infoValue" th:text="${currentUser.email}">email</span>
+                    </div>
+                    <div class="infoItem">
+                        <span class="infoLabel">Họ tên</span>
+                        <span th:if="${currentUser.firstName != null || currentUser.lastName != null}" class="infoValue"
+                            th:text="${(currentUser.firstName != null ? currentUser.firstName : '') + ' ' + (currentUser.lastName != null ? currentUser.lastName : '')}">N/A</span>
+                        <span th:unless="${currentUser.firstName != null || currentUser.lastName != null}"
+                            class="infoValueMuted">Chưa cập nhật</span>
+                    </div>
+                    <div class="infoItem">
+                        <span class="infoLabel">Điện thoại</span>
+                        <span th:if="${currentUser.phone != null}" class="infoValue"
+                            th:text="${currentUser.phone}">N/A</span>
+                        <span th:unless="${currentUser.phone != null}" class="infoValueMuted">Chưa cập nhật</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

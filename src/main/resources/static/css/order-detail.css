@@ -1,0 +1,597 @@
+/* ═══════════════════════════════════════
+   Order Detail — Premium Design System
+   ═══════════════════════════════════════ */
+
+@keyframes odFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes odPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 30%, transparent);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px transparent;
+    }
+}
+
+/* ── Page ── */
+.order-detail-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+    animation: odFadeInUp .4s ease both;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: .9rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: all .2s;
+}
+
+.back-link:hover {
+    color: var(--text-color);
+    transform: translateX(-3px);
+}
+
+/* ── Header ── */
+.order-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.order-number-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.order-number-title svg {
+    color: var(--primary);
+}
+
+/* ── Status Badges ── */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status-pending {
+    background: color-mix(in srgb, #f59e0b 12%, transparent);
+    color: #f59e0b;
+    border: 1px solid color-mix(in srgb, #f59e0b 20%, transparent);
+}
+
+.status-processing {
+    background: color-mix(in srgb, #3b82f6 12%, transparent);
+    color: #3b82f6;
+    border: 1px solid color-mix(in srgb, #3b82f6 20%, transparent);
+}
+
+.status-completed {
+    background: color-mix(in srgb, #10b981 12%, transparent);
+    color: #10b981;
+    border: 1px solid color-mix(in srgb, #10b981 20%, transparent);
+}
+
+.status-cancelled {
+    background: color-mix(in srgb, #ef4444 12%, transparent);
+    color: #ef4444;
+    border: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+}
+
+.status-refunded {
+    background: color-mix(in srgb, #8b5cf6 12%, transparent);
+    color: #8b5cf6;
+    border: 1px solid color-mix(in srgb, #8b5cf6 20%, transparent);
+}
+
+.order-date {
+    font-size: .85rem;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    display: block;
+}
+
+/* ── Timeline ── */
+.timeline {
+    display: flex;
+    align-items: center;
+    padding: 32px 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    margin-bottom: 28px;
+    justify-content: center;
+    gap: 0;
+    animation: odFadeInUp 0.4s 0.1s ease both;
+}
+
+.timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 80px;
+    position: relative;
+}
+
+.timeline-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-darker, rgba(0, 0, 0, .15));
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    transition: all .3s;
+}
+
+.timeline-label {
+    font-size: .75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: center;
+}
+
+.timeline-connector {
+    width: 80px;
+    height: 3px;
+    background: var(--border-color);
+    margin: 0 8px;
+    flex-shrink: 0;
+    align-self: center;
+    margin-bottom: 24px;
+    border-radius: 2px;
+    transition: background .3s;
+}
+
+.timeline-step.completed .timeline-icon {
+    background: linear-gradient(135deg, var(--primary), var(--success, #10b981));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.timeline-step.completed .timeline-label {
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+.timeline-step.active .timeline-icon {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    animation: odPulse 2s infinite;
+}
+
+.timeline-step.active .timeline-label {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.timeline-step.cancelled .timeline-icon {
+    background: color-mix(in srgb, #ef4444 15%, transparent);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.timeline-step.cancelled .timeline-label {
+    color: #ef4444;
+}
+
+.timeline-connector.completed {
+    background: linear-gradient(90deg, var(--primary), var(--success, #10b981));
+}
+
+/* ── Content Grid ── */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 28px;
+    align-items: flex-start;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: sticky;
+    top: 100px;
+}
+
+/* ── Section ── */
+.od-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 26px;
+    transition: all .3s;
+    animation: odFadeInUp 0.4s 0.2s ease both;
+}
+
+.od-section:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-title svg {
+    color: var(--primary);
+}
+
+/* ── Items ── */
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.od-item {
+    display: flex;
+    gap: 14px;
+    padding: 16px;
+    background: var(--bg-darker, rgba(0, 0, 0, .15));
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    transition: all .3s;
+}
+
+.od-item:hover {
+    border-color: color-mix(in srgb, var(--primary) 25%, var(--border-color));
+    transform: translateY(-1px);
+}
+
+.od-item-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--bg-darker, rgba(0, 0, 0, .15));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+}
+
+.od-item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.od-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.od-item-name {
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--text-color);
+}
+
+.od-item-meta {
+    font-size: .78rem;
+    color: var(--text-muted);
+}
+
+.od-item-price {
+    flex-shrink: 0;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-end;
+}
+
+.od-item-total {
+    font-weight: 800;
+    font-size: .95rem;
+    color: var(--primary);
+}
+
+.od-item-unit {
+    font-size: .73rem;
+    color: var(--text-muted);
+}
+
+/* ── Account Info ── */
+.account-section {
+    margin-top: 12px;
+    padding: 16px;
+    background: color-mix(in srgb, var(--primary) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent);
+    border-radius: 14px;
+}
+
+.account-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: .85rem;
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+
+.account-entry {
+    padding: 10px 14px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.account-label {
+    font-size: .75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.account-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .85rem;
+    color: var(--text-color);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 4px 0;
+}
+
+.copy-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: .75rem;
+    transition: all .2s;
+    margin-left: auto;
+    font-family: inherit;
+}
+
+.copy-btn:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+
+/* ── Price Summary ── */
+.price-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: .9rem;
+}
+
+.price-label {
+    color: var(--text-muted);
+}
+
+.price-value {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.discount-value {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.price-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 25%, transparent), transparent);
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 2px solid color-mix(in srgb, var(--primary) 25%, var(--border-color));
+}
+
+.total-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.total-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--success, #10b981));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Info Grid ── */
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-size: .85rem;
+    color: var(--text-muted);
+}
+
+.info-value {
+    font-size: .85rem;
+    color: var(--text-color);
+    font-weight: 600;
+    text-align: right;
+}
+
+/* ── Actions ── */
+.od-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cancel-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid color-mix(in srgb, #ef4444 30%, var(--border-color));
+    background: color-mix(in srgb, #ef4444 8%, transparent);
+    color: #ef4444;
+    font-weight: 600;
+    font-size: .9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all .3s;
+    font-family: inherit;
+}
+
+.cancel-btn:hover {
+    background: color-mix(in srgb, #ef4444 15%, transparent);
+    transform: translateY(-1px);
+}
+
+.buy-again-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--primary);
+    border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+    font-size: .78rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .2s;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.buy-again-btn:hover {
+    background: color-mix(in srgb, var(--primary) 20%, transparent);
+    transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════ */
+@media (max-width:900px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .right-column {
+        position: static;
+    }
+
+    .timeline {
+        padding: 24px 16px;
+    }
+
+    .timeline-connector {
+        width: 40px;
+    }
+}
+
+@media (max-width:640px) {
+    .order-detail-page {
+        padding: 20px 14px 60px;
+    }
+
+    .order-number-title {
+        font-size: 1.25rem;
+    }
+
+    .timeline-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .timeline-connector {
+        width: 24px;
+    }
+}

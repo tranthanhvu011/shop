@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/default}">
+
+<head>
+    <title>Giỏ hàng</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/cart.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="cartWrapper">
+            <div class="cartHeader">
+                <div>
+                    <h1>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" style="vertical-align:-3px">
+                            <circle cx="9" cy="21" r="1" />
+                            <circle cx="20" cy="21" r="1" />
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                        </svg>
+                        Giỏ hàng
+                    </h1>
+                    <p class="cartCount" id="cartCountText">Đang tải...</p>
+                </div>
+                <button class="clearCartBtn" onclick="clearCart()" id="clearBtn" style="display:none"
+                    aria-label="Xóa tất cả sản phẩm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    Xóa tất cả
+                </button>
+            </div>
+
+            <div id="cartContent">
+                <!-- Skeleton Loading -->
+                <div class="cartLayout">
+                    <div class="cartItems">
+                        <div class="skeletonItem" aria-hidden="true">
+                            <div class="skeletonImg shimmer"></div>
+                            <div class="skeletonInfo">
+                                <div class="skeletonLine shimmer" style="width:60%"></div>
+                                <div class="skeletonLine shimmer" style="width:40%;height:12px"></div>
+                                <div class="skeletonLine shimmer" style="width:30%;height:12px"></div>
+                            </div>
+                            <div class="skeletonPrice shimmer"></div>
+                        </div>
+                        <div class="skeletonItem" aria-hidden="true">
+                            <div class="skeletonImg shimmer"></div>
+                            <div class="skeletonInfo">
+                                <div class="skeletonLine shimmer" style="width:55%"></div>
+                                <div class="skeletonLine shimmer" style="width:35%;height:12px"></div>
+                                <div class="skeletonLine shimmer" style="width:25%;height:12px"></div>
+                            </div>
+                            <div class="skeletonPrice shimmer"></div>
+                        </div>
+                    </div>
+                    <div class="cartSummarySkeleton" aria-hidden="true">
+                        <div class="skeletonLine shimmer" style="width:50%;height:18px;margin-bottom:20px"></div>
+                        <div class="skeletonLine shimmer" style="width:100%;height:14px"></div>
+                        <div class="skeletonLine shimmer" style="width:100%;height:14px"></div>
+                        <div class="skeletonLine shimmer" style="width:100%;height:14px"></div>
+                        <div style="margin-top:20px">
+                            <div class="skeletonLine shimmer" style="width:100%;height:48px;border-radius:14px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', loadCart);
+
+            async function loadCart() {
+                try {
+                    const data = await fetchApi('/api/cart');
+                    renderCart(data);
+                } catch (e) {
+                    document.getElementById('cartContent').innerHTML = `
+                        <div class="cartEmpty">
+                            <div class="emptyIcon emptyIconError">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
+                                </svg>
+                            </div>
+                            <h2>Không thể tải giỏ hàng</h2>
+                            <p>${e.message}</p>
+                            <button onclick="loadCart()" class="emptyAction">Thử lại</button>
+                        </div>`;
+                }
+            }
+
+            function renderCart(data) {
+                const container = document.getElementById('cartContent');
+                const items = data.items || [];
+
+                if (items.length === 0) {
+                    container.innerHTML = `
+                        <div class="cartEmpty">
+                            <div class="emptyIcon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                    <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                                </svg>
+                            </div>
+                            <h2>Giỏ hàng trống</h2>
+                            <p>Hãy khám phá và thêm sản phẩm yêu thích vào giỏ hàng!</p>
+                            <a href="/products" class="emptyAction">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                </svg>
+                                Khám phá ngay
+                            </a>
+                        </div>`;
+                    document.getElementById('cartCountText').textContent = '0 sản phẩm';
+                    document.getElementById('clearBtn').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('cartCountText').textContent = data.totalQuantity + ' sản phẩm';
+                document.getElementById('clearBtn').style.display = 'inline-flex';
+
+                let html = '<div class="cartLayout"><div class="cartItems">';
+                items.forEach((item, idx) => {
+                    const imgHtml = item.imageUrl
+                        ? `<img src="${item.imageUrl}" alt="${item.productName}" loading="lazy">`
+                        : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>`;
+
+                    const detailUrl = item.productSlug ? '/products/' + item.productSlug : '#';
+
+                    html += `
+                    <div class="cartItem" id="item-${item.pricingId}" style="animation-delay:${idx * 60}ms">
+                        <a href="${detailUrl}" class="cartItemImg" title="Xem chi tiết">${imgHtml}</a>
+                        <div class="cartItemInfo">
+                            <a href="${detailUrl}" class="cartItemName">${item.productName || 'Sản phẩm'}</a>
+                            <div class="cartItemMeta">
+                                ${item.variantName ? `<span class="metaBadge">${item.variantName}</span>` : ''}
+                                ${item.durationLabel ? `<span class="metaBadge metaBadgeDuration">${item.durationLabel}</span>` : ''}
+                            </div>
+                            <div class="qtyControl">
+                                <button class="qtyBtn" onclick="updateQty(${item.pricingId}, ${item.quantity - 1})" aria-label="Giảm số lượng">−</button>
+                                <span class="qtyLabel">${item.quantity}</span>
+                                <button class="qtyBtn" onclick="updateQty(${item.pricingId}, ${item.quantity + 1})" aria-label="Tăng số lượng">+</button>
+                            </div>
+                        </div>
+                        <div class="cartItemRight">
+                            <div>
+                                <div class="cartItemPrice">${formatPrice(item.unitPrice * item.quantity)}</div>
+                                ${item.quantity > 1 ? `<div class="cartItemUnit">${formatPrice(item.unitPrice)}/cái</div>` : ''}
+                            </div>
+                            <button class="removeBtn" onclick="removeItem(${item.pricingId})" title="Xóa sản phẩm">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                                Xóa
+                            </button>
+                        </div>
+                    </div>`;
+                });
+                html += '</div>';
+
+                // Summary Sidebar
+                html += `
+                <div class="cartSummary">
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        Đơn hàng
+                    </h3>
+                    <div class="summaryRow">
+                        <span class="label">Sản phẩm</span>
+                        <span class="value">${data.totalItems} loại</span>
+                    </div>
+                    <div class="summaryRow">
+                        <span class="label">Số lượng</span>
+                        <span class="value">${data.totalQuantity} cái</span>
+                    </div>
+                    <div class="summaryDivider"></div>
+                    <div class="summaryTotal">
+                        <span class="label">Tổng cộng</span>
+                        <span class="value">${formatPrice(data.totalPrice)}</span>
+                    </div>
+                    <a href="/checkout" class="checkoutBtn" id="checkoutBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                        Thanh toán
+                    </a>
+                    <div class="summarySecure">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Giao dịch an toàn & bảo mật
+                    </div>
+                </div>`;
+
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            async function updateQty(pricingId, qty) {
+                if (qty < 1) { removeItem(pricingId); return; }
+                const item = document.getElementById('item-' + pricingId);
+                if (item) item.style.opacity = '0.6';
+                try {
+                    await fetchApi('/api/cart/update', {
+                        method: 'PUT',
+                        body: JSON.stringify({ pricingId, quantity: qty })
+                    });
+                    loadCart();
+                } catch (e) {
+                    if (item) item.style.opacity = '1';
+                }
+            }
+
+            async function removeItem(pricingId) {
+                const item = document.getElementById('item-' + pricingId);
+                if (item) {
+                    item.classList.add('cartItemRemoving');
+                }
+                try {
+                    await fetchApi('/api/cart/remove/' + pricingId, { method: 'DELETE' });
+                    showToast('Đã xóa khỏi giỏ hàng', 'success');
+                    setTimeout(() => loadCart(), 250);
+                } catch (e) {
+                    if (item) item.classList.remove('cartItemRemoving');
+                }
+            }
+
+            async function clearCart() {
+                const confirmed = await showConfirm('Xóa tất cả sản phẩm trong giỏ hàng?', {
+                    title: 'Xóa giỏ hàng',
+                    type: 'danger',
+                    danger: true,
+                    confirmText: 'Xóa tất cả',
+                });
+                if (!confirmed) return;
+                try {
+                    await fetchApi('/api/cart/clear', { method: 'DELETE' });
+                    showToast('Đã xóa giỏ hàng', 'success');
+                    loadCart();
+                } catch (e) { }
+            }
+        </script>
+    </th:block>
+</body>
+
+</html>

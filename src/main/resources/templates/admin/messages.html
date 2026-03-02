@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout}">
+
+<head>
+    <title>Tin nhắn</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/admin-messages.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="messagesPage">
+            <div class="messagesContainer">
+                <!-- Sidebar: Conversations List -->
+                <aside class="conversationList" id="convList">
+                    <div class="convHeader">
+                        <h2>Tin nhắn</h2>
+                        <span class="unreadBadge" th:if="${totalUnread != null && totalUnread > 0}"
+                            th:text="${totalUnread}">0</span>
+                    </div>
+                    <div class="convSearch">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" placeholder="Tìm kiếm hội thoại..." class="convSearchInput">
+                    </div>
+                    <div class="convItems">
+                        <th:block th:each="conv : ${conversations}">
+                            <a th:href="@{/admin/messages/{id}(id=${conv.id})}" class="convItem"
+                                th:classappend="${selectedConv != null && selectedConv.id == conv.id} ? 'convItemActive'">
+                                <div class="convAvatar">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                </div>
+                                <div class="convInfo">
+                                    <div class="convName" th:text="${conv.user.username}">User</div>
+                                    <div class="convPreview"
+                                        th:text="${conv.lastMessage != null ? conv.lastMessage : 'Chưa có tin nhắn'}">
+                                        Tin nhắn cuối...</div>
+                                </div>
+                                <div class="convMeta">
+                                    <span class="convTime" th:if="${conv.lastMessageAt != null}"
+                                        th:text="${#temporals.format(conv.lastMessageAt, 'HH:mm')}">12:00</span>
+                                    <span class="unreadBadge-conv"
+                                        th:if="${conv.adminUnreadCount != null && conv.adminUnreadCount > 0}"
+                                        th:text="${conv.adminUnreadCount}">1</span>
+                                </div>
+                            </a>
+                        </th:block>
+
+                        <div class="convEmpty" th:if="${conversations == null || conversations.isEmpty()}">
+                            <div style="opacity:0.3">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                </svg>
+                            </div>
+                            <p>Chưa có tin nhắn từ khách hàng</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Chat Area -->
+                <div class="chatArea">
+                    <div th:if="${selectedConv != null}">
+                        <!-- Chat Header -->
+                        <div class="chatHeader">
+                            <button class="backBtn"
+                                onclick="document.getElementById('convList').classList.toggle('showMobile')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="19" y1="12" x2="5" y2="12" />
+                                    <polyline points="12 19 5 12 12 5" />
+                                </svg>
+                            </button>
+                            <div class="chatUserInfo">
+                                <div class="chatAvatar">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="chatUserName" th:text="${selectedConv.user.username}">User</div>
+                                    <div class="chatStatus">Trực tuyến</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Messages -->
+                        <div class="chatMessages" id="chatMessages">
+                            <th:block th:each="msg : ${messages}">
+                                <div class="messageBubble"
+                                    th:classappend="${msg.senderType.name() == 'ADMIN'} ? 'sent' : 'received'">
+                                    <div class="msgSender" th:if="${msg.senderType.name() == 'USER'}"
+                                        style="font-size:11px;opacity:0.6;margin-bottom:2px"
+                                        th:text="${msg.senderName}">User</div>
+                                    <div class="msgContent" th:text="${msg.content}">Message</div>
+                                    <div class="msgTime" th:text="${#temporals.format(msg.createdAt, 'HH:mm')}">12:00
+                                    </div>
+                                </div>
+                            </th:block>
+                        </div>
+
+                        <!-- Input -->
+                        <div class="chatInputArea">
+                            <form th:action="@{/admin/messages/{id}/send(id=${selectedConv.id})}" method="post"
+                                class="chatInputForm">
+                                <input type="text" name="content" class="chatInput" placeholder="Nhập tin nhắn..."
+                                    autocomplete="off" required>
+                                <button type="submit" class="sendBtn">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <line x1="22" y1="2" x2="11" y2="13" />
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- No conversation selected -->
+                    <div th:unless="${selectedConv != null}" class="chatEmpty">
+                        <div style="opacity:0.2">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                        </div>
+                        <h3>Chọn một hội thoại</h3>
+                        <p>Chọn khách hàng từ danh sách bên trái để trả lời</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <th:block layout:fragment="scripts">
+        <script>
+            // Auto scroll to bottom
+            var chatArea = document.getElementById('chatMessages');
+            if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+        </script>
+    </th:block>
+</body>
+
+</html>

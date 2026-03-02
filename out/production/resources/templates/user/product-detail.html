@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout/default}">
+
+<head>
+    <title th:text="${product.name}">Chi tiết sản phẩm</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/product-detail.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="pd-page">
+            <!-- Breadcrumbs -->
+            <nav class="pd-breadcrumbs" aria-label="Breadcrumb">
+                <a th:href="@{/}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    Trang chủ
+                </a>
+                <span class="pd-breadcrumbs__sep">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                </span>
+                <a th:href="@{/products}">Khám phá</a>
+                <span class="pd-breadcrumbs__sep" th:if="${product.category != null}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                </span>
+                <span th:if="${product.category != null}" th:text="${product.category.name}">Danh mục</span>
+                <span class="pd-breadcrumbs__sep">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                </span>
+                <span class="pd-breadcrumbs__current" th:text="${product.name}">Tên sản phẩm</span>
+            </nav>
+
+            <!-- Main Grid: Left (content) + Right (sidebar) -->
+            <div class="pd-grid">
+                <!-- Left Column -->
+                <div class="pd-main">
+                    <!-- Hero Section -->
+                    <div class="pd-hero">
+                        <!-- Title -->
+                        <h1 class="pd-title" th:text="${product.name}">Tên sản phẩm</h1>
+                        <!-- Stats Row -->
+                        <div class="pd-stats">
+                            <div class="pd-stats__item pd-stats__rating">
+                                <div class="pd-stars">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <svg th:class="${i <= (product.ratingAvg != null ? product.ratingAvg : 0)} ? 'pd-star pd-star--filled' : 'pd-star'"
+                                            width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                        </svg>
+                                    </th:block>
+                                </div>
+                                <span class="pd-stats__value"
+                                    th:text="${product.ratingAvg != null ? #numbers.formatDecimal(product.ratingAvg, 1, 1) : '0.0'}">0.0</span>
+                            </div>
+                            <span class="pd-stats__divider"></span>
+                            <div class="pd-stats__item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                                    <line x1="3" y1="6" x2="21" y2="6" />
+                                    <path d="M16 10a4 4 0 0 1-8 0" />
+                                </svg>
+                                <span th:text="'Đã bán ' + ${product.totalSold != null ? product.totalSold : 0}">Đã bán
+                                    0</span>
+                            </div>
+                            <span class="pd-stats__divider"></span>
+                            <div class="pd-stats__item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                </svg>
+                                <span th:text="${product.ratingCount != null ? product.ratingCount : 0} + ' đánh giá'">0
+                                    đánh giá</span>
+                            </div>
+                        </div>
+
+                        <!-- Gallery -->
+                        <div class="pd-gallery">
+                            <div class="pd-gallery__main" id="mainImageWrapper">
+                                <img th:if="${product.images != null && !product.images.isEmpty()}"
+                                    th:src="${product.images[0].imageUrl}" id="mainImage" alt="Product"
+                                    onclick="openLightbox()">
+                                <div th:unless="${product.images != null && !product.images.isEmpty()}"
+                                    class="pd-gallery__empty">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.5" opacity="0.3">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                        <circle cx="8.5" cy="8.5" r="1.5" />
+                                        <polyline points="21 15 16 10 5 21" />
+                                    </svg>
+                                    <span>Chưa có ảnh</span>
+                                </div>
+                            </div>
+                            <div class="pd-gallery__thumbs"
+                                th:if="${product.images != null && product.images.size() > 1}">
+                                <th:block th:each="img, iter : ${product.images}">
+                                    <button class="pd-gallery__thumb" th:classappend="${iter.index == 0} ? 'active'"
+                                        th:data-url="${img.imageUrl}" onclick="selectThumb(this)" type="button">
+                                        <img th:src="${img.imageUrl}" alt="thumb">
+                                    </button>
+                                </th:block>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabbed Content -->
+                    <div class="pd-tabs">
+                        <div class="pd-tabs__nav" role="tablist">
+                            <button class="pd-tabs__btn active" onclick="switchTab(this, 'description')" role="tab"
+                                aria-selected="true" type="button">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                    <line x1="16" y1="13" x2="8" y2="13" />
+                                    <line x1="16" y1="17" x2="8" y2="17" />
+                                </svg>
+                                Mô tả
+                            </button>
+                            <button class="pd-tabs__btn" onclick="switchTab(this, 'reviews')" role="tab"
+                                aria-selected="false" type="button">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polygon
+                                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                                Đánh giá
+                                <span class="pd-tabs__badge" th:if="${reviews != null}"
+                                    th:text="${reviews.totalElements}">0</span>
+                            </button>
+                            <button class="pd-tabs__btn" onclick="switchTab(this, 'qa')" role="tab"
+                                aria-selected="false" type="button">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                                Hỏi đáp
+                                <span class="pd-tabs__badge" th:if="${questions != null}"
+                                    th:text="${questions.size()}">0</span>
+                            </button>
+                            <div class="pd-tabs__indicator"></div>
+                        </div>
+
+                        <!-- Tab: Description -->
+                        <div class="pd-tabs__panel active" id="tab-description">
+                            <div class="pd-description" th:text="${product.detailDescription}">Mô tả sản phẩm...
+                            </div>
+                        </div>
+
+                        <!-- Tab: Reviews -->
+                        <div class="pd-tabs__panel" id="tab-reviews" th:if="${reviews != null}">
+                            <!-- Rating Summary -->
+                            <div class="pd-rating-summary"
+                                th:if="${product.ratingCount != null && product.ratingCount > 0}">
+                                <div class="pd-rating-summary__score">
+                                    <span class="pd-rating-summary__number"
+                                        th:text="${#numbers.formatDecimal(product.ratingAvg, 1, 1)}">0.0</span>
+                                    <span class="pd-rating-summary__label"
+                                        th:text="${product.ratingCount} + ' đánh giá'">0 đánh giá</span>
+                                </div>
+                            </div>
+
+                            <!-- Review List -->
+                            <div class="pd-reviews">
+                                <div class="pd-review" th:each="review : ${reviews}">
+                                    <div class="pd-review__header">
+                                        <div class="pd-review__user">
+                                            <div class="pd-review__avatar"
+                                                th:text="${review.buyer.username.substring(0,1).toUpperCase()}">U</div>
+                                            <div>
+                                                <div class="pd-review__name" th:text="${review.buyer.username}">User
+                                                </div>
+                                                <div class="pd-review__date"
+                                                    th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy')}">
+                                                    01/01/2026</div>
+                                            </div>
+                                        </div>
+                                        <div class="pd-review__stars">
+                                            <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                                <svg th:class="${i <= review.rating} ? 'pd-star pd-star--filled' : 'pd-star'"
+                                                    width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                                    <polygon
+                                                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                                </svg>
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                    <p class="pd-review__comment" th:text="${review.comment}">Comment</p>
+                                </div>
+                            </div>
+
+                            <!-- Empty Reviews -->
+                            <div class="pd-empty" th:if="${reviews.isEmpty()}">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" opacity="0.3">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                </svg>
+                                <h3>Chưa có đánh giá</h3>
+                                <p>Hãy là người đầu tiên đánh giá sản phẩm này.</p>
+                            </div>
+                        </div>
+
+                        <!-- Tab: Q&A -->
+                        <div class="pd-tabs__panel" id="tab-qa" th:if="${questions != null}">
+                            <div class="pd-qa-list" th:if="${!questions.isEmpty()}">
+                                <div class="pd-qa" th:each="q : ${questions}">
+                                    <div class="pd-qa__question">
+                                        <span class="pd-qa__badge pd-qa__badge--q">H</span>
+                                        <div class="pd-qa__content">
+                                            <span th:text="${q.question}">Question</span>
+                                            <span class="pd-qa__asker" th:text="'— ' + ${q.asker.username}">User</span>
+                                        </div>
+                                    </div>
+                                    <div class="pd-qa__answer" th:if="${q.answer != null}">
+                                        <span class="pd-qa__badge pd-qa__badge--a">Đ</span>
+                                        <span th:text="${q.answer}">Answer</span>
+                                    </div>
+                                    <div class="pd-qa__no-answer" th:unless="${q.answer != null}">Chưa có câu trả
+                                        lời</div>
+                                </div>
+                            </div>
+                            <div class="pd-empty" th:if="${questions.isEmpty()}">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" opacity="0.3">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                                <h3>Chưa có câu hỏi</h3>
+                                <p>Hãy là người đầu tiên đặt câu hỏi về sản phẩm này.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Sidebar -->
+                <div class="pd-sidebar">
+                    <div class="pd-sidebar__sticky">
+                        <div class="pd-card">
+                            <!-- Variant Selector -->
+                            <div class="pd-selector" th:if="${product.variants != null && !product.variants.isEmpty()}">
+                                <div class="pd-selector__title">Chọn gói</div>
+                                <div class="pd-variants">
+                                    <th:block th:each="variant, iter : ${product.variants}">
+                                        <button class="pd-variant-btn" th:classappend="${iter.index == 0} ? 'selected'"
+                                            th:data-variant-id="${variant.id}" th:text="${variant.name}"
+                                            onclick="selectVariant(this)" type="button">Variant</button>
+                                    </th:block>
+                                </div>
+                            </div>
+
+                            <!-- Duration Selector -->
+                            <div class="pd-selector" th:if="${product.variants != null && !product.variants.isEmpty()}"
+                                id="durationSection">
+                                <div class="pd-selector__title">Thời hạn</div>
+                                <div class="pd-durations" id="durationList">
+                                    <th:block th:each="pricing, iter : ${product.variants[0].pricingList}">
+                                        <button class="pd-duration-btn" th:classappend="${iter.index == 0} ? 'selected'"
+                                            th:data-price="${pricing.price}" th:data-original="${pricing.originalPrice}"
+                                            th:data-stock="${pricing.availableStock}" th:data-pricing-id="${pricing.id}"
+                                            onclick="selectDuration(this)" type="button">
+                                            <span th:text="${pricing.durationMonths} + ' tháng'">1 tháng</span>
+                                            <span class="pd-stock"
+                                                th:classappend="${pricing.availableStock <= 3 ? 'pd-stock--low' : ''} + ' ' + ${pricing.availableStock == 0 ? 'pd-stock--empty' : ''}"
+                                                th:text="'Còn ' + ${pricing.availableStock}">Còn 10</span>
+                                        </button>
+                                    </th:block>
+                                </div>
+                            </div>
+
+                            <!-- Price Display -->
+                            <div class="pd-price">
+                                <span class="pd-price__original" id="originalPrice"
+                                    style="display:none;text-decoration:line-through;color:var(--text-muted);font-size:.9rem;margin-right:8px"></span>
+                                <span class="pd-price__current" id="currentPrice"
+                                    th:text="${product.minPrice != null ? #numbers.formatDecimal(product.minPrice, 0, 'COMMA', 0, 'POINT') + '₫' : 'Liên hệ'}">0₫</span>
+                                <span class="pd-price__discount" id="discountBadge"
+                                    style="display:none;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 10px;border-radius:20px;font-size:.8rem;font-weight:600;margin-left:8px"></span>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div class="pd-selector">
+                                <div class="pd-selector__title">Số lượng</div>
+                                <div class="pd-qty">
+                                    <button class="pd-qty__btn" onclick="changeQty(-1)" type="button"
+                                        aria-label="Giảm số lượng">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <line x1="5" y1="12" x2="19" y2="12" />
+                                        </svg>
+                                    </button>
+                                    <input type="number" class="pd-qty__input" id="qtyInput" value="1" min="1"
+                                        aria-label="Số lượng" oninput="changeQty(0)">
+                                    <button class="pd-qty__btn" onclick="changeQty(1)" type="button"
+                                        aria-label="Tăng số lượng">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="5" x2="12" y2="19" />
+                                            <line x1="5" y1="12" x2="19" y2="12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="pd-price">
+                                <span class="pd-price__original" id="originalPrice_sum"
+                                    style="display:none;text-decoration:line-through;color:var(--text-muted);font-size:.9rem;margin-right:8px"></span>
+                                <span class="pd-price__current" id="currentPrice_sum"
+                                    th:text="${product.minPrice != null ? #numbers.formatDecimal(product.minPrice, 0, 'COMMA', 0, 'POINT') + '₫' : 'Liên hệ'}">0₫</span>
+                                <span class="pd-price__discount" id="discountBadge_sum"
+                                    style="display:none;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 10px;border-radius:20px;font-size:.8rem;font-weight:600;margin-left:8px"></span>
+                            </div>
+                            <!-- CTA Buttons -->
+                            <div class="pd-cta">
+                                <button class="pd-cta__primary" sec:authorize="isAuthenticated()" onclick="buyNow()"
+                                    type="button">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                                    </svg>
+                                    Mua ngay
+                                </button>
+                                <button class="pd-cta__secondary" sec:authorize="isAuthenticated()"
+                                    onclick="addToCart()" type="button">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="9" cy="21" r="1" />
+                                        <circle cx="20" cy="21" r="1" />
+                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                                    </svg>
+                                    Thêm vào giỏ
+                                </button>
+                                <a th:href="@{/login}" sec:authorize="!isAuthenticated()" class="pd-cta__primary"
+                                    style="justify-content:center;text-decoration:none">
+                                    Đăng nhập để mua
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lightbox -->
+        <div class="pd-lightbox" id="lightbox" onclick="closeLightbox(event)">
+            <button class="pd-lightbox__close" onclick="closeLightbox()" type="button" aria-label="Đóng">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+            <img class="pd-lightbox__img" id="lightboxImg" alt="Product fullscreen">
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            const productId = /*[[${product.id}]]*/ 0;
+            let variantData = [];
+
+            // Load variant data via AJAX (avoids Thymeleaf circular ref serialization)
+            (async function loadVariants() {
+                try {
+                    const res = await fetch('/api/products/' + productId + '/variants');
+                    if (res.ok) {
+                        const data = await res.json();
+                        variantData = data.variants || [];
+                    }
+                } catch (e) { console.warn('Failed to load variants', e); }
+            })();
+
+            // === Gallery ===
+            function selectThumb(btn) {
+                document.querySelectorAll('.pd-gallery__thumb').forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+                const img = document.getElementById('mainImage');
+                if (img) {
+                    img.style.opacity = '0';
+                    setTimeout(() => {
+                        img.src = btn.getAttribute('data-url');
+                        img.style.opacity = '1';
+                    }, 200);
+                }
+            }
+
+            function openLightbox() {
+                const mainImg = document.getElementById('mainImage');
+                if (!mainImg) return;
+                document.getElementById('lightboxImg').src = mainImg.src;
+                document.getElementById('lightbox').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeLightbox(e) {
+                if (e && e.target !== e.currentTarget && !e.target.closest('.pd-lightbox__close')) return;
+                document.getElementById('lightbox').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // === Tabs ===
+            function switchTab(btn, tabName) {
+                // Update buttons
+                document.querySelectorAll('.pd-tabs__btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+
+                // Update panels
+                document.querySelectorAll('.pd-tabs__panel').forEach(p => p.classList.remove('active'));
+                const panel = document.getElementById('tab-' + tabName);
+                if (panel) panel.classList.add('active');
+
+                // Move indicator
+                updateTabIndicator();
+            }
+
+            function updateTabIndicator() {
+                const activeBtn = document.querySelector('.pd-tabs__btn.active');
+                const indicator = document.querySelector('.pd-tabs__indicator');
+                if (activeBtn && indicator) {
+                    const nav = document.querySelector('.pd-tabs__nav');
+                    const navRect = nav.getBoundingClientRect();
+                    const btnRect = activeBtn.getBoundingClientRect();
+                    indicator.style.width = btnRect.width + 'px';
+                    indicator.style.left = (btnRect.left - navRect.left) + 'px';
+                }
+            }
+
+            // Init indicator + auto-trigger duration selection
+            window.addEventListener('load', () => {
+                updateTabIndicator();
+                const selectedDuration = document.querySelector('.pd-duration-btn.selected');
+                if (selectedDuration) selectDuration(selectedDuration);
+            });
+            window.addEventListener('resize', updateTabIndicator);
+
+            // === Variants & Duration ===
+            function selectVariant(btn) {
+                document.querySelectorAll('.pd-variant-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                const variantId = btn.getAttribute('data-variant-id');
+                const variant = variantData.find(v => v.id == variantId);
+                if (variant && variant.pricings) {
+                    const durationList = document.getElementById('durationList');
+                    if (durationList) {
+                        let html = '';
+                        variant.pricings.forEach((p, i) => {
+                            const stockClass = p.stock <= 3 ? 'pd-stock--low' : '';
+                            const emptyClass = p.stock === 0 ? 'pd-stock--empty' : '';
+                            html += `<button class="pd-duration-btn ${i === 0 ? 'selected' : ''}"
+                                data-price="${p.price}" data-original="${p.originalPrice || ''}"
+                                data-stock="${p.stock}" data-pricing-id="${p.id}"
+                                onclick="selectDuration(this)" type="button">
+                                <span>${p.durationLabel || 'Mặc định'}</span>
+                                <span class="pd-stock ${stockClass} ${emptyClass}">Còn ${p.stock}</span>
+                            </button>`;
+                        });
+                        durationList.innerHTML = html;
+                        // Auto-trigger selectDuration on the first button
+                        const firstBtn = durationList.querySelector('.pd-duration-btn');
+                        if (firstBtn) selectDuration(firstBtn);
+                    }
+                }
+            }
+
+            function selectDuration(btn) {
+                document.querySelectorAll('.pd-duration-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                const price = parseFloat(btn.getAttribute('data-price'));
+                const original = parseFloat(btn.getAttribute('data-original'));
+                const stock = parseInt(btn.getAttribute('data-stock') || '0');
+                document.getElementById('currentPrice').textContent = formatPrice(price);
+
+                // Show original price with discount badge
+                const origEl = document.getElementById('originalPrice');
+                const discEl = document.getElementById('discountBadge');
+                if (original && original > price) {
+                    origEl.textContent = formatPrice(original);
+                    origEl.style.display = 'inline';
+                    const pct = Math.round((1 - price / original) * 100);
+                    discEl.textContent = '-' + pct + '%';
+                    discEl.style.display = 'inline';
+                } else {
+                    origEl.style.display = 'none';
+                    discEl.style.display = 'none';
+                }
+
+                // Enforce quantity max = stock
+                const qtyInput = document.getElementById('qtyInput');
+                if (parseInt(qtyInput.value) > stock) qtyInput.value = Math.max(1, stock);
+
+                // Disable CTA if out of stock
+                const ctaPrimary = document.querySelector('.pd-cta__primary');
+                const ctaSecondary = document.querySelector('.pd-cta__secondary');
+                if (stock <= 0) {
+                    if (ctaPrimary) { ctaPrimary.disabled = true; ctaPrimary.style.opacity = '0.5'; }
+                    if (ctaSecondary) { ctaSecondary.disabled = true; ctaSecondary.style.opacity = '0.5'; }
+                } else {
+                    if (ctaPrimary) { ctaPrimary.disabled = false; ctaPrimary.style.opacity = '1'; }
+                    if (ctaSecondary) { ctaSecondary.disabled = false; ctaSecondary.style.opacity = '1'; }
+                }
+
+                // Update sum price (price × quantity)
+                const qty = parseInt(qtyInput.value) || 1;
+                document.getElementById('currentPrice_sum').textContent = formatPrice(price * qty);
+                const origSumEl = document.getElementById('originalPrice_sum');
+                const discSumEl = document.getElementById('discountBadge_sum');
+                if (original && original > price) {
+                    origSumEl.textContent = formatPrice(original * qty);
+                    origSumEl.style.display = 'inline';
+                    const sumPct = Math.round((1 - price / original) * 100);
+                    discSumEl.textContent = '-' + sumPct + '%';
+                    discSumEl.style.display = 'inline';
+                } else {
+                    origSumEl.style.display = 'none';
+                    discSumEl.style.display = 'none';
+                }
+            }
+
+            function changeQty(delta) {
+                const inp = document.getElementById('qtyInput');
+                const durationBtn = document.querySelector('.pd-duration-btn.selected');
+                const maxStock = durationBtn ? parseInt(durationBtn.getAttribute('data-stock') || '10') : 10;
+                let v = parseInt(inp.value) + delta;
+                if (v < 1) v = 1;
+                if (v > maxStock) v = maxStock;
+                inp.value = v;
+                const price = parseFloat(durationBtn.getAttribute('data-price'));
+                const original = parseFloat(durationBtn.getAttribute('data-original'));
+                document.getElementById('currentPrice_sum').textContent = formatPrice(price * v);
+
+                const origSumEl = document.getElementById('originalPrice_sum');
+                const discSumEl = document.getElementById('discountBadge_sum');
+                if (original && original > price) {
+                    origSumEl.textContent = formatPrice(original * v);
+                    origSumEl.style.display = 'inline';
+                    const pct = Math.round((1 - price / original) * 100);
+                    discSumEl.textContent = '-' + pct + '%';
+                    discSumEl.style.display = 'inline';
+                } else {
+                    origSumEl.style.display = 'none';
+                    discSumEl.style.display = 'none';
+                }
+            }
+
+            function getSelectedData() {
+                const variantBtn = document.querySelector('.pd-variant-btn.selected');
+                const durationBtn = document.querySelector('.pd-duration-btn.selected');
+                if (!durationBtn) {
+                    showToast('Vui lòng chọn thời hạn', 'warning');
+                    return null;
+                }
+                const stock = parseInt(durationBtn.getAttribute('data-stock') || '0');
+                if (stock <= 0) {
+                    showToast('Sản phẩm đã hết hàng', 'error');
+                    return null;
+                }
+                return {
+                    productId: productId,
+                    variantId: variantBtn ? parseInt(variantBtn.getAttribute('data-variant-id')) : null,
+                    pricingId: parseInt(durationBtn.getAttribute('data-pricing-id')),
+                    quantity: parseInt(document.getElementById('qtyInput').value) || 1
+                };
+            }
+
+            async function addToCart() {
+                const data = getSelectedData();
+                if (!data) return;
+                try {
+                    const result = await fetchApi('/api/cart/add', {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                    showToast('Đã thêm vào giỏ hàng!', 'success');
+                } catch (e) {
+                    // Error handled by fetchApi
+                }
+            }
+
+            async function buyNow() {
+                const data = getSelectedData();
+                if (!data) return;
+                try {
+                    window.location.href = '/checkout?pricingIds=' + data.pricingId + '&quantities=' + data.quantity;
+                } catch (e) { }
+            }
+        </script>
+    </th:block>
+</body>
+
+</html>

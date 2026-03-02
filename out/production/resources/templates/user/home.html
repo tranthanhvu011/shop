@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout/default}">
+
+<head>
+    <title>Trang chủ</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/home.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="home">
+            <!-- Hero -->
+            <section class="hero">
+                <div class="heroContent">
+                    <h1 class="heroTitle">
+                        <span class="gradient">Mua bán tài khoản</span><br>
+                        Nhanh chóng &amp; An toàn
+                    </h1>
+                    <p class="heroDescription">
+                        Nền tảng mua bán tài khoản số uy tín hàng đầu.
+                        Giao dịch an toàn, bảo hành đầy đủ, hỗ trợ 24/7.
+                    </p>
+                    <div class="heroActions">
+                        <a th:href="@{/products}" class="btnPrimary">Khám phá ngay →</a>
+                        <a th:href="@{/help}" class="btnSecondary">Hướng dẫn</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features -->
+            <section class="features">
+                <h2 class="sectionTitle">Tại sao chọn chúng tôi?</h2>
+                <div class="featureGrid">
+                    <div class="card">
+                        <div class="feature">
+                            <div class="featureIcon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                </svg>
+                            </div>
+                            <h3>Giao dịch tức thì</h3>
+                            <p>Nhận tài khoản ngay sau khi thanh toán. Tự động cấp phát, không cần chờ đợi.</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="feature">
+                            <div class="featureIcon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
+                            </div>
+                            <h3>An toàn & Bảo mật</h3>
+                            <p>Mọi giao dịch được bảo vệ. Đảm bảo thông tin tài khoản của bạn an toàn tuyệt đối.</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="feature">
+                            <div class="featureIcon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                </svg>
+                            </div>
+                            <h3>Hỗ trợ 24/7</h3>
+                            <p>Đội ngũ hỗ trợ luôn sẵn sàng giúp đỡ bạn bất cứ lúc nào qua chat trực tuyến.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA -->
+            <section class="cta" sec:authorize="!isAuthenticated()">
+                <div class="card">
+                    <div class="ctaContent">
+                        <h2>Sẵn sàng bắt đầu?</h2>
+                        <p>Tham gia ngay để trải nghiệm dịch vụ mua bán tài khoản tốt nhất.</p>
+                        <a th:href="@{/register}" class="btnPrimary">Đăng ký miễn phí →</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+
+</html>

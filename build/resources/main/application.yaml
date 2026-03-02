@@ -1,0 +1,89 @@
+server:
+  port: 9090
+  servlet:
+    session:
+      timeout: 30m
+payos:
+  webhook-url: "https://nonadoptable-doria-shockingly.ngrok-free.dev/webhook/payos"  # thêm /webhook/payos
+  client-id: "ff8d8ec5-ccc0-4d72-9c1b-ff0fa5e2d5bb"
+  api-key: "b1badf41-73c3-4f04-8b4d-70c5ee0828da"
+  checksum-key: "3e6d69ac4db2ced7a7ec9de5bd28b48afc958e7dbe98d537730a6a7e63ed6a7d"
+spring:
+  session:
+    store-type: redis
+    redis:
+      namespace: accountshop:session
+  application:
+    name: AccountShop
+
+  # Database
+  datasource:
+    url: jdbc:mysql://localhost:3306/accountshop_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456789
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  # Redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 5000ms
+
+
+  # Thymeleaf
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+
+  # Mail (optional — for password reset)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:vutranorhilsun@gmail.com}
+    password: ${MAIL_PASSWORD:psyd kmim ofsv qpmc}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # Kafka
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: accountshop-email-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+  # File upload
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# App custom config
+app:
+  upload-dir: ./uploads
+  admin-email: admin@accountshop.com
+  base-url: http://localhost:9090
+
+logging:
+  level:
+    com.accountshop: DEBUG
+    org.springframework.security: DEBUG

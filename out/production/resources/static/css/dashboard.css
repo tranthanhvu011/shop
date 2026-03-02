@@ -1,0 +1,321 @@
+/* ═══════════════════════════════════════
+   Dashboard Page — Premium Design System
+   ═══════════════════════════════════════ */
+
+@keyframes dashFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes dashShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* ── Navbar ── */
+.navbarContainer {
+    background: var(--nav-bg);
+    padding: 16px 0;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 100%;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbarWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.navScrollContainer {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+}
+
+.navScrollContainer::-webkit-scrollbar {
+    display: none;
+}
+
+.navList {
+    display: flex;
+    gap: 12px;
+    padding: 4px 45px;
+    user-select: none;
+    width: max-content;
+    min-width: 100%;
+}
+
+.navTabBtn {
+    flex-shrink: 0;
+    padding: 10px 24px;
+    background: var(--nav-btn-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 25px;
+    color: var(--nav-btn-text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    text-decoration: none;
+}
+
+.navTabBtn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.navTabBtn.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+/* ── Content Area ── */
+.dashboardContent {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+    animation: dashFadeIn 0.5s ease both;
+}
+
+.welcomeTitle {
+    font-size: 1.85rem;
+    font-weight: 800;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.02em;
+    animation: dashFadeIn 0.5s ease both;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Quick Links ── */
+.quickLinks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    margin-bottom: 36px;
+}
+
+.quickLink {
+    text-decoration: none;
+    color: inherit;
+    padding: 28px 24px;
+    border-radius: 20px;
+    transition: all 0.35s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.quickLink::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+}
+
+.quickLink:nth-child(1) {
+    animation: dashFadeIn 0.5s 0.1s ease both;
+}
+
+.quickLink:nth-child(2) {
+    animation: dashFadeIn 0.5s 0.2s ease both;
+}
+
+.quickLink:nth-child(3) {
+    animation: dashFadeIn 0.5s 0.3s ease both;
+}
+
+.quickLink:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+.quickLink:hover::before {
+    opacity: 1;
+}
+
+.quickLinkIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    transition: all 0.35s ease;
+}
+
+.quickLink:hover .quickLinkIcon {
+    transform: scale(1.1) rotate(-3deg);
+}
+
+.quickLinkIcon.orders {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--primary);
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.15);
+}
+
+.quickLinkIcon.messages {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--secondary);
+    box-shadow: 0 2px 10px rgba(139, 92, 246, 0.15);
+}
+
+.quickLinkIcon.profile {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--info);
+    box-shadow: 0 2px 10px rgba(6, 182, 212, 0.15);
+}
+
+.quickLink h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text-color);
+}
+
+.quickLink p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Info Card ── */
+.infoCard {
+    border-radius: 20px;
+    padding: 32px 28px;
+    animation: dashFadeIn 0.5s 0.4s ease both;
+    position: relative;
+    overflow: hidden;
+}
+
+.infoCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+    background-size: 200% 100%;
+    animation: dashShimmer 3s linear infinite;
+}
+
+.infoCard h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+    background: var(--bg-darker);
+    border-radius: 14px;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
+}
+
+.infoItem:hover {
+    border-color: var(--border-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.infoLabel {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.infoValue {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-color);
+    word-break: break-word;
+}
+
+.infoValueMuted {
+    font-size: 0.92rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ═══════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════ */
+@media (max-width: 640px) {
+    .infoGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .quickLinks {
+        grid-template-columns: 1fr;
+    }
+
+    .welcomeTitle {
+        font-size: 1.5rem;
+    }
+
+    .dashboardContent {
+        padding: 20px 16px 60px;
+    }
+}

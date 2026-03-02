@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/default}">
+
+<head>
+    <title>Hồ sơ</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/profile.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="profilePage">
+            <h1 class="pageTitle">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+                Hồ sơ cá nhân
+            </h1>
+
+
+            <!-- Profile Header Card -->
+            <div class="card">
+                <div class="profileHeaderCard">
+                    <div class="avatarWrapper">
+                        <div class="avatar">
+                            <img th:if="${currentUser.avatar != null}" th:src="${currentUser.avatar}" alt="Avatar">
+                            <span th:unless="${currentUser.avatar != null}"
+                                th:text="${currentUser.username.substring(0,1).toUpperCase()}">U</span>
+                        </div>
+                        <div class="avatarBadge badgeActive" th:if="${currentUser.enabled}">✓</div>
+                    </div>
+                    <div class="headerInfo">
+                        <h2
+                            th:text="${currentUser.firstName != null || currentUser.lastName != null ? (currentUser.firstName ?: '') + ' ' + (currentUser.lastName ?: '') : currentUser.username}">
+                            Username</h2>
+                        <p>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                            <span th:text="${currentUser.email}">email</span>
+                        </p>
+                        <span class="roleBadge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                            <span
+                                th:text="${currentUser.roles != null ? #strings.listJoin(currentUser.roles, ', ') : 'USER'}">USER</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Info Card -->
+            <div class="card">
+                <div class="sectionTitle">
+                    <div class="sectionTitleLeft">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        Thông tin cá nhân
+                    </div>
+                    <button class="editBtn" onclick="toggleEdit('personalInfo')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        Chỉnh sửa
+                    </button>
+                </div>
+
+                <!-- View Mode -->
+                <div class="infoGrid" id="personalInfoView">
+                    <div class="infoItem">
+                        <span class="infoLabel">Username</span>
+                        <span class="infoValue" th:text="${currentUser.username}">username</span>
+                    </div>
+                    <div class="infoItem">
+                        <span class="infoLabel">Email</span>
+                        <span class="infoValue" th:text="${currentUser.email}">email</span>
+                    </div>
+                    <div class="infoItem">
+                        <span class="infoLabel">Họ</span>
+                        <span th:if="${currentUser.firstName != null}" class="infoValue"
+                            th:text="${currentUser.firstName}">N/A</span>
+                        <span th:unless="${currentUser.firstName != null}" class="infoValueMuted">Chưa cập nhật</span>
+                    </div>
+                    <div class="infoItem">
+                        <span class="infoLabel">Tên</span>
+                        <span th:if="${currentUser.lastName != null}" class="infoValue"
+                            th:text="${currentUser.lastName}">N/A</span>
+                        <span th:unless="${currentUser.lastName != null}" class="infoValueMuted">Chưa cập nhật</span>
+                    </div>
+                    <div class="infoItem">
+                        <span class="infoLabel">Điện thoại</span>
+                        <span th:if="${currentUser.phone != null}" class="infoValue"
+                            th:text="${currentUser.phone}">N/A</span>
+                        <span th:unless="${currentUser.phone != null}" class="infoValueMuted">Chưa cập nhật</span>
+                    </div>
+
+                </div>
+
+                <!-- Edit Mode -->
+                <form th:action="@{/profile}" method="post" id="personalInfoEdit" style="display:none">
+                    <div class="formRow">
+                        <div class="formGroup">
+                            <label>Họ</label>
+                            <input type="text" name="firstName" class="formInput" th:value="${currentUser.firstName}"
+                                placeholder="Nhập họ">
+                        </div>
+                        <div class="formGroup">
+                            <label>Tên</label>
+                            <input type="text" name="lastName" class="formInput" th:value="${currentUser.lastName}"
+                                placeholder="Nhập tên">
+                        </div>
+                    </div>
+                    <div class="formGroup">
+                        <label>Điện thoại</label>
+                        <input type="text" name="phone" class="formInput" th:value="${currentUser.phone}"
+                            placeholder="Nhập số điện thoại">
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="btnPrimary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                <polyline points="17 21 17 13 7 13 7 21" />
+                                <polyline points="7 3 7 8 15 8" />
+                            </svg>
+                            Lưu thay đổi
+                        </button>
+                        <button type="button" class="btnSecondary" onclick="toggleEdit('personalInfo')">Hủy</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="card">
+                <div class="sectionTitle">
+                    <div class="sectionTitleLeft">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        Đổi mật khẩu
+                    </div>
+                </div>
+                <form th:action="@{/profile/change-password}" method="post">
+                    <div class="formGroup">
+                        <label>Mật khẩu hiện tại</label>
+                        <input type="password" name="currentPassword" class="formInput"
+                            placeholder="Nhập mật khẩu hiện tại" required>
+                    </div>
+                    <div class="formRow">
+                        <div class="formGroup">
+                            <label>Mật khẩu mới</label>
+                            <input type="password" name="newPassword" class="formInput" placeholder="Tối thiểu 6 ký tự"
+                                required minlength="6">
+                        </div>
+                        <div class="formGroup">
+                            <label>Xác nhận mật khẩu</label>
+                            <input type="password" name="confirmPassword" class="formInput"
+                                placeholder="Nhập lại mật khẩu mới" required minlength="6">
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button type="submit" class="btnPrimary">Đổi mật khẩu</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Account Meta -->
+            <div class="card">
+                <div class="sectionTitle">
+                    <div class="sectionTitleLeft">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                        Thông tin tài khoản
+                    </div>
+                </div>
+                <div class="metaGrid">
+                    <div class="metaItem">
+                        <div class="metaIcon metaIconDefault">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                        </div>
+                        <div class="metaText">
+                            <div class="metaLabel">Ngày tham gia</div>
+                            <div class="metaValue" th:text="${#temporals.format(currentUser.createdAt, 'dd/MM/yyyy')}">
+                                01/01/2026</div>
+                        </div>
+                    </div>
+                    <div class="metaItem">
+                        <div class="metaIcon metaIconSuccess">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg>
+                        </div>
+                        <div class="metaText">
+                            <div class="metaLabel">Trạng thái</div>
+                            <div class="metaValue" th:text="${currentUser.enabled ? 'Đang hoạt động' : 'Bị khóa'}">Đang
+                                hoạt động</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <th:block layout:fragment="scripts">
+        <script>
+            function toggleEdit(section) {
+                var view = document.getElementById(section + 'View');
+                var edit = document.getElementById(section + 'Edit');
+                if (edit.style.display === 'none') {
+                    view.style.display = 'none';
+                    edit.style.display = 'block';
+                } else {
+                    view.style.display = 'grid';
+                    edit.style.display = 'none';
+                }
+            }
+
+        </script>
+    </th:block>
+</body>
+
+</html>

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/default}">
+
+<head>
+    <title>Thanh toán - AccountShop</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/checkout.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Empty state: no cart items -->
+        <div th:if="${cartItems == null || cartItems.isEmpty()}" class="checkout-page">
+            <div class="empty-checkout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 01-8 0" />
+                </svg>
+                <h2>Giỏ hàng trống</h2>
+                <p>Hãy thêm sản phẩm vào giỏ trước khi thanh toán</p>
+                <a th:href="@{/products}" class="back-btn">
+                    ← Khám phá sản phẩm
+                </a>
+            </div>
+        </div>
+
+        <!-- Checkout content -->
+        <div th:unless="${cartItems == null || cartItems.isEmpty()}" class="checkout-page">
+            <h1 class="page-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 01-8 0" />
+                </svg>
+                Thanh toán
+            </h1>
+            <p class="page-subtitle">Kiểm tra đơn hàng và chọn phương thức thanh toán</p>
+
+            <form th:action="@{/checkout}" method="post" id="checkoutForm">
+                <!-- Hidden inputs: product data -->
+                <th:block th:each="item : ${cartItems}">
+                    <input type="hidden" name="pricingIds" th:value="${item.pricingId}">
+                    <input type="hidden" name="quantities" th:value="${item.quantity}">
+                </th:block>
+                <div class="checkout-layout">
+                    <!-- LEFT COLUMN -->
+                    <div class="left-col">
+                        <!-- Order Items -->
+                        <div class="ck-card">
+                            <h3 class="card-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                                </svg>
+                                Sản phẩm (<span th:text="${#lists.size(cartItems)}">0</span>)
+                            </h3>
+                            <div class="order-items">
+                                <div th:each="item : ${cartItems}" class="order-item">
+                                    <div class="item-img">
+                                        <img th:if="${item.imageUrl}" th:src="${item.imageUrl}"
+                                            th:alt="${item.productName}">
+                                        <svg th:unless="${item.imageUrl}" width="24" height="24" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path
+                                                d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                                        </svg>
+                                    </div>
+                                    <div class="item-info">
+                                        <div class="item-name" th:text="${item.productName}">Product Name</div>
+                                        <div class="item-meta">
+                                            <span th:if="${item.variantName}"
+                                                th:text="${item.variantName}">Variant</span>
+                                            <span th:if="${item.durationLabel}" class="meta-badge"
+                                                th:text="${item.durationLabel}">1 tháng</span>
+                                        </div>
+                                        <div class="item-qty" th:text="'Số lượng: ' + ${item.quantity}">Số lượng: 1
+                                        </div>
+                                    </div>
+                                    <div class="item-price-col">
+                                        <span class="item-price"
+                                            th:text="${item.subtotal != null ? #numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT') + '₫' : #numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</span>
+                                        <span th:if="${item.quantity > 1}" class="item-unit-price"
+                                            th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT')} + '₫/cái'">0₫/cái</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coupon -->
+                        <div class="ck-card">
+                            <h3 class="card-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                                </svg>
+                                Mã giảm giá
+                            </h3>
+                            <div class="coupon-group">
+                                <input type="text" name="couponCode" class="coupon-input"
+                                    placeholder="Nhập mã giảm giá...">
+                                <button type="button" class="coupon-btn" onclick="applyCoupon()">Áp dụng</button>
+                            </div>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="ck-card">
+                            <h3 class="card-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                    <line x1="16" y1="13" x2="8" y2="13" />
+                                    <line x1="16" y1="17" x2="8" y2="17" />
+                                </svg>
+                                Ghi chú
+                            </h3>
+                            <textarea name="note" class="note-textarea" placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+                                maxlength="500"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN -->
+                    <div class="right-col">
+                        <!-- Payment Methods -->
+                        <div class="ck-card">
+                            <h3 class="card-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                    <line x1="1" y1="10" x2="23" y2="10" />
+                                </svg>
+                                Phương thức thanh toán
+                            </h3>
+                            <div class="payment-tabs">
+                                <div class="payment-tab active" data-method="BANK_TRANSFER"
+                                    onclick="selectPayment(this)">
+                                    <span class="payment-tab-icon">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                            <line x1="1" y1="10" x2="23" y2="10" />
+                                        </svg>
+                                    </span> Chuyển khoản
+                                </div>
+                                <div class="payment-tab" data-method="MOMO" onclick="selectPayment(this)">
+                                    <span class="payment-tab-icon">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                                            <line x1="12" y1="18" x2="12.01" y2="18" />
+                                        </svg>
+                                    </span> MoMo
+                                </div>
+                                <div class="payment-tab" data-method="VISA" onclick="selectPayment(this)">
+                                    <span class="payment-tab-icon">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                            <line x1="1" y1="10" x2="23" y2="10" />
+                                        </svg>
+                                    </span> Visa
+                                </div>
+                            </div>
+                            <input type="hidden" name="paymentMethod" id="paymentMethod" value="BANK_TRANSFER">
+
+                            <!-- Bank Transfer -->
+                            <!--                            <div class="payment-content" id="pay-BANK_TRANSFER">-->
+                            <!--                                <div class="qr-section">-->
+                            <!--                                    <div class="qr-box">-->
+                            <!--                                        <div class="qr-placeholder">-->
+                            <!--                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none"-->
+                            <!--                                                stroke="currentColor" stroke-width="1.5">-->
+                            <!--                                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />-->
+                            <!--                                                <line x1="1" y1="10" x2="23" y2="10" />-->
+                            <!--                                            </svg>-->
+                            <!--                                            VietQR-->
+                            <!--                                        </div>-->
+                            <!--                                    </div>-->
+                            <!--                                    <p class="qr-instruction">-->
+                            <!--                                        Quét mã QR bằng app ngân hàng <strong>bất kỳ</strong><br>-->
+                            <!--                                        Hỗ trợ: VietcomBank, Techcombank, MBBank, ACB...-->
+                            <!--                                    </p>-->
+                            <!--                                </div>-->
+                            <!--                            </div>-->
+
+                            <!-- MoMo -->
+                            <!--                            <div class="payment-content" id="pay-MOMO" style="display:none">-->
+                            <!--                                <div class="qr-section">-->
+                            <!--                                    <div class="qr-box">-->
+                            <!--                                        <div class="qr-placeholder">-->
+                            <!--                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none"-->
+                            <!--                                                stroke="currentColor" stroke-width="1.5">-->
+                            <!--                                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />-->
+                            <!--                                                <line x1="12" y1="18" x2="12.01" y2="18" />-->
+                            <!--                                            </svg>-->
+                            <!--                                            MOMO-->
+                            <!--                                        </div>-->
+                            <!--                                    </div>-->
+                            <!--                                    <p class="qr-instruction">-->
+                            <!--                                        Quét mã QR bằng ứng dụng <strong>MoMo</strong><br>-->
+                            <!--                                        Hoặc chuyển đến SĐT: <strong>0123 456 789</strong>-->
+                            <!--                                    </p>-->
+                            <!--                                </div>-->
+                            <!--                            </div>-->
+
+                            <!-- Visa -->
+                            <!--                            <div class="payment-content" id="pay-VISA" style="display:none">-->
+                            <!--                                <div style="display:flex;flex-direction:column;gap:14px">-->
+                            <!--                                    <div style="display:flex;flex-direction:column;gap:6px">-->
+                            <!--                                        <label style="font-size:.8rem;color:var(&#45;&#45;text-muted);font-weight:500">Tên chủ-->
+                            <!--                                            thẻ</label>-->
+                            <!--                                        <input class="coupon-input" placeholder="NGUYEN VAN A"-->
+                            <!--                                            style="text-transform:uppercase">-->
+                            <!--                                    </div>-->
+                            <!--                                    <div style="display:flex;flex-direction:column;gap:6px">-->
+                            <!--                                        <label style="font-size:.8rem;color:var(&#45;&#45;text-muted);font-weight:500">Số-->
+                            <!--                                            thẻ</label>-->
+                            <!--                                        <input class="coupon-input" placeholder="4242 4242 4242 4242" maxlength="19">-->
+                            <!--                                    </div>-->
+                            <!--                                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">-->
+                            <!--                                        <div style="display:flex;flex-direction:column;gap:6px">-->
+                            <!--                                            <label style="font-size:.8rem;color:var(&#45;&#45;text-muted);font-weight:500">Ngày-->
+                            <!--                                                hết hạn</label>-->
+                            <!--                                            <input class="coupon-input" placeholder="MM/YY" maxlength="5">-->
+                            <!--                                        </div>-->
+                            <!--                                        <div style="display:flex;flex-direction:column;gap:6px">-->
+                            <!--                                            <label-->
+                            <!--                                                style="font-size:.8rem;color:var(&#45;&#45;text-muted);font-weight:500">CVV</label>-->
+                            <!--                                            <input class="coupon-input" type="password" placeholder="•••" maxlength="4">-->
+                            <!--                                        </div>-->
+                            <!--                                    </div>-->
+                            <!--                                </div>-->
+                            <!--                            </div>-->
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="summary-card">
+                            <h3 class="card-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                                Tổng đơn hàng
+                            </h3>
+                            <div class="summary-rows">
+                                <div class="summary-row">
+                                    <span class="summary-label"
+                                        th:text="'Tạm tính (' + ${#lists.size(cartItems)} + ' SP)'">Tạm tính</span>
+                                    <span class="summary-value"
+                                        th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                                </div>
+                                <div class="summary-divider"></div>
+                            </div>
+                            <div class="total-row">
+                                <span class="total-label">Tổng cộng</span>
+                                <span class="total-value"
+                                    th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                            </div>
+
+                            <button type="submit" class="place-order-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                                    <line x1="3" y1="6" x2="21" y2="6" />
+                                    <path d="M16 10a4 4 0 01-8 0" />
+                                </svg>
+                                <span
+                                    th:text="'Đặt hàng — ' + ${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + '₫'">Đặt
+                                    hàng</span>
+                            </button>
+                            <div class="security-note">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
+                                Giao dịch an toàn & mã hóa SSL
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ═══ Payment Modal ═══ -->
+        <div class="pm-overlay" id="paymentModal">
+            <div class="pm-modal">
+                <!-- Header -->
+                <div class="pm-header">
+                    <div class="pm-header__icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="pm-title">Xác nhận thanh toán</h3>
+                        <p class="pm-subtitle" id="pmMethodLabel">Chuyển khoản ngân hàng</p>
+                    </div>
+                    <button class="pm-close" onclick="closePaymentModal()" type="button" aria-label="Đóng">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Amount -->
+                <div class="pm-amount-section">
+                    <span class="pm-amount-label">Số tiền cần thanh toán</span>
+                    <span class="pm-amount-value" id="pmAmount">0₫</span>
+                    <span class="pm-amount-discount" id="pmDiscount" style="display:none"></span>
+                </div>
+
+                <!-- Payment Content: Bank Transfer -->
+                <div class="pm-content" id="pmBank">
+                    <div class="pm-qr-wrapper">
+                        <div class="pm-qr-box" id="pmQrBox">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" opacity=".4">
+                                <rect x="3" y="3" width="7" height="7" />
+                                <rect x="14" y="3" width="7" height="7" />
+                                <rect x="3" y="14" width="7" height="7" />
+                                <rect x="14" y="14" width="4" height="4" />
+                                <line x1="21" y1="14" x2="21" y2="21" />
+                                <line x1="14" y1="21" x2="21" y2="21" />
+                            </svg>
+                            <span>QR Code</span>
+                        </div>
+                    </div>
+                    <div class="pm-bank-info">
+                        <div class="pm-bank-row">
+                            <span class="pm-bank-label">Ngân hàng</span>
+                            <span class="pm-bank-value">VietcomBank</span>
+                        </div>
+                        <div class="pm-bank-row">
+                            <span class="pm-bank-label">Số tài khoản</span>
+                            <span class="pm-bank-value pm-copy" onclick="copyText(this, '1234567890')">
+                                1234567890
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="pm-bank-row">
+                            <span class="pm-bank-label">Chủ tài khoản</span>
+                            <span class="pm-bank-value">ACCOUNTSHOP JSC</span>
+                        </div>
+                        <div class="pm-bank-row">
+                            <span class="pm-bank-label">Nội dung CK</span>
+                            <span class="pm-bank-value pm-copy" id="pmTransferNote"
+                                onclick="copyText(this, this.textContent.trim())">
+                                Đang tạo...
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="pm-note">Quét mã QR bằng app ngân hàng <strong>bất kỳ</strong> hoặc chuyển khoản theo
+                        thông
+                        tin trên</p>
+                </div>
+
+                <!-- Payment Content: MoMo -->
+                <div class="pm-content" id="pmMomo" style="display:none">
+                    <div class="pm-qr-wrapper">
+                        <div class="pm-qr-box">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#a50064"
+                                stroke-width="1.5" opacity=".6">
+                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                                <line x1="12" y1="18" x2="12.01" y2="18" />
+                            </svg>
+                            <span style="color:#a50064">MoMo QR</span>
+                        </div>
+                    </div>
+                    <div class="pm-bank-info">
+                        <div class="pm-bank-row">
+                            <span class="pm-bank-label">Số điện thoại</span>
+                            <span class="pm-bank-value pm-copy" onclick="copyText(this, '0123456789')">
+                                0123 456 789
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="pm-bank-row">
+                            <span class="pm-bank-label">Nội dung</span>
+                            <span class="pm-bank-value" id="pmMomoNote">Đang tạo...</span>
+                        </div>
+                    </div>
+                    <p class="pm-note">Mở ứng dụng <strong>MoMo</strong> → Quét mã hoặc chuyển tiền đến SĐT trên</p>
+                </div>
+
+                <!-- Payment Content: Visa -->
+                <div class="pm-content" id="pmVisa" style="display:none">
+                    <div class="pm-visa-form">
+                        <div class="pm-field">
+                            <label>Tên chủ thẻ</label>
+                            <input class="pm-input" id="pmCardName" placeholder="NGUYEN VAN A"
+                                style="text-transform:uppercase">
+                        </div>
+                        <div class="pm-field">
+                            <label>Số thẻ</label>
+                            <input class="pm-input" id="pmCardNumber" placeholder="4242 4242 4242 4242" maxlength="19"
+                                oninput="formatCardNumber(this)">
+                        </div>
+                        <div class="pm-field-row">
+                            <div class="pm-field">
+                                <label>Ngày hết hạn</label>
+                                <input class="pm-input" id="pmCardExpiry" placeholder="MM/YY" maxlength="5">
+                            </div>
+                            <div class="pm-field">
+                                <label>CVV</label>
+                                <input class="pm-input" id="pmCardCvv" type="password" placeholder="•••" maxlength="4">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div class="pm-timer" id="pmTimer">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    Thời gian thanh toán: <strong id="pmCountdown">15:00</strong>
+                </div>
+
+                <!-- Actions -->
+                <div class="pm-actions">
+                    <button class="pm-btn pm-btn--secondary" onclick="closePaymentModal()" type="button">Hủy</button>
+                    <button class="pm-btn pm-btn--primary" onclick="confirmPayment()" type="button">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                        Đã thanh toán
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            const originalSubtotal = /*[[${subtotal}]]*/ 0;
+            let currentDiscount = 0;
+            let appliedCouponCode = '';
+            let countdownInterval = null;
+
+            function selectPayment(el) {
+                document.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
+                el.classList.add('active');
+                const method = el.dataset.method;
+                document.getElementById('paymentMethod').value = method;
+            }
+            function selectPayment(el) {
+                document.querySelectorAll('payment-tab').forEach(t => t.classList.remove('active'));
+                el.classList.add('active');
+                const method = el.dataset.method;
+                document.getElementById('paymentMethod').value = method;
+            }
+
+            // === Payment Modal ===
+            function openPaymentModal() {
+                const method = document.getElementById('paymentMethod').value;
+                const total = originalSubtotal - currentDiscount;
+
+                // Update amount
+                document.getElementById('pmAmount').textContent = formatPrice(total);
+                if (currentDiscount > 0) {
+                    const discEl = document.getElementById('pmDiscount');
+                    discEl.textContent = 'Đã giảm' + formatPrice(currentDiscount);
+                    discEl.style.display = 'inline';
+                }
+
+                // Update method label
+                const labels = { 'BANK_TRANSFER': 'Chuyển khoản ngân hàng', 'MOMO': 'Ví MoMo', 'VISA': 'Thẻ Visa/Mastercard' };
+                document.getElementById('pmMethodLabel').textContent = labels[method] || method;
+
+                // Show correct content
+                document.getElementById('pmBank').style.display = method === 'BANK_TRANSFER' ? '' : 'none';
+                document.getElementById('pmMomo').style.display = method === 'MOMO' ? '' : 'none';
+                document.getElementById('pmVisa').style.display = method === 'VISA' ? '' : 'none';
+
+                // Transfer note
+                const orderCode = 'AS' + Date.now().toString().slice(-8);
+                const noteEl = document.getElementById('pmTransferNote');
+                if (noteEl) noteEl.childNodes[0].textContent = orderCode + ' ';
+                const momoNote = document.getElementById('pmMomoNote');
+                if (momoNote) momoNote.textContent = orderCode;
+
+                // Start countdown (15 minutes)
+                startCountdown(15 * 60);
+
+                // Show modal
+                document.getElementById('paymentModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closePaymentModal() {
+                document.getElementById('paymentModal').classList.remove('active');
+                document.body.style.overflow = '';
+                if (countdownInterval) clearInterval(countdownInterval);
+            }
+
+            function confirmPayment() {
+                closePaymentModal();
+                // Submit the actual form
+                document.getElementById('checkoutForm').submit();
+            }
+
+            function startCountdown(seconds) {
+                if (countdownInterval) clearInterval(countdownInterval);
+                let remaining = seconds;
+                const el = document.getElementById('pmCountdown');
+                function tick() {
+                    const m = Math.floor(remaining / 60);
+                    const s = remaining % 60;
+                    el.textContent = m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+                    if (remaining <= 60) el.style.color = '#ef4444';
+                    if (remaining <= 0) {
+                        clearInterval(countdownInterval);
+                        closePaymentModal();
+                        showToast('Hết thời gian thanh toán', 'error');
+                    }
+                    remaining--;
+                }
+                tick();
+                countdownInterval = setInterval(tick, 1000);
+            }
+
+            function copyText(el, text) {
+                navigator.clipboard.writeText(text.trim());
+                showToast('Đã sao chép!', 'success');
+            }
+
+            function formatCardNumber(input) {
+                let v = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                let formatted = v.match(/.{1,4}/g);
+                input.value = formatted ? formatted.join(' ') : '';
+            }
+
+            document.getElementById('checkoutForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                openPaymentModal();
+            })
+            // === Coupon ===
+            async function applyCoupon() {
+                const input = document.querySelector('.coupon-input');
+                const code = input ? input.value.trim() : '';
+                if (!code) {
+                    showToast('Vui lòng nhập mã giảm giá', 'warning');
+                    return;
+                }
+                try {
+                    const result = await fetchApi('/api/coupon/validate', {
+                        method: 'POST',
+                        body: JSON.stringify({ code: code, subtotal: originalSubtotal })
+                    });
+                    if (result.valid) {
+                        currentDiscount = result.discountAmount;
+                        appliedCouponCode = code;
+                        showToast(result.message, 'success');
+                        updateSummary();
+                    } else {
+                        currentDiscount = 0;
+                        appliedCouponCode = '';
+                        showToast(result.message, 'error');
+                        updateSummary();
+                    }
+                } catch (e) { }
+            }
+
+            function updateSummary() {
+                const total = originalSubtotal - currentDiscount;
+                const totalEl = document.querySelector('.total-value');
+                const btnEl = document.querySelector('.place-order-btn span');
+                if (totalEl) totalEl.textContent = formatPrice(total);
+                if (btnEl) btnEl.textContent = 'Đặt hàng — ' + formatPrice(total);
+
+                let discountRow = document.getElementById('discountRow');
+                if (currentDiscount > 0) {
+                    if (!discountRow) {
+                        const summaryRows = document.querySelector('.summary-rows');
+                        const divider = document.querySelector('.summary-divider');
+                        const row = document.createElement('div');
+                        row.id = 'discountRow';
+                        row.className = 'summary-row';
+                        row.innerHTML = `
+                            <span class="summary-label">Giảm giá (<span id="couponCodeDisplay">${appliedCouponCode}</span>)</span>
+                            <span class="summary-value" id="discountValue" style="color:var(--primary);font-weight:600">-${formatPrice(currentDiscount)}</span>`;
+                        summaryRows.insertBefore(row, divider);
+                    } else {
+                        document.getElementById('couponCodeDisplay').textContent = appliedCouponCode;
+                        document.getElementById('discountValue').textContent = '-' + formatPrice(currentDiscount);
+                    }
+                } else if (discountRow) {
+                    discountRow.remove();
+                }
+            }
+        </script>
+    </th:block>
+</body>
+
+</html>

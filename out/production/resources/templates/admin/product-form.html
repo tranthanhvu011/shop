@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout}">
+
+<head>
+    <title th:text="${product.id != null ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}">Thêm sản phẩm</title>
+    <th:block layout:fragment="styles">
+        <style>
+            .form-page {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 0 24px 40px;
+            }
+
+            .form-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 28px;
+            }
+
+            .form-header h2 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin: 0;
+                color: #e2e8f0;
+            }
+
+            .back-link {
+                color: #818cf8;
+                text-decoration: none;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .back-link:hover {
+                color: #a5b4fc;
+            }
+
+            .form-section {
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 14px;
+                padding: 24px;
+                margin-bottom: 20px;
+            }
+
+            .form-section h3 {
+                font-size: 1rem;
+                font-weight: 600;
+                color: #94a3b8;
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+
+            .form-group label {
+                display: block;
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: #94a3b8;
+                margin-bottom: 6px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                width: 100%;
+                padding: 10px 14px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                color: #e2e8f0;
+                font-size: 0.9rem;
+                transition: all 0.2s;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus,
+            .form-group textarea:focus {
+                outline: none;
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            }
+
+            .form-group textarea {
+                min-height: 100px;
+                resize: vertical;
+            }
+
+            .form-group select option {
+                background: #1e293b;
+                color: #e2e8f0;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+
+            .form-row-3 {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 16px;
+            }
+
+            .form-check {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .form-check input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                accent-color: #6366f1;
+            }
+
+            .form-check label {
+                margin-bottom: 0;
+                color: #e2e8f0;
+            }
+
+            /* Variant section */
+            .variant-card {
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 16px;
+                position: relative;
+            }
+
+            .variant-card .variant-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 14px;
+            }
+
+            .variant-card .variant-header h4 {
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: #a5b4fc;
+                margin: 0;
+            }
+
+            .remove-btn {
+                background: rgba(239, 68, 68, 0.1);
+                color: #f87171;
+                border: 1px solid rgba(239, 68, 68, 0.2);
+                padding: 4px 12px;
+                border-radius: 8px;
+                font-size: 0.8rem;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .remove-btn:hover {
+                background: rgba(239, 68, 68, 0.2);
+            }
+
+            /* Pricing row */
+            .pricing-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr 1fr 40px;
+                gap: 10px;
+                align-items: end;
+                margin-bottom: 10px;
+            }
+
+            .pricing-row input {
+                width: 100%;
+                padding: 8px 12px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                color: #e2e8f0;
+                font-size: 0.85rem;
+            }
+
+            .pricing-row label {
+                font-size: 0.75rem;
+                color: #64748b;
+                margin-bottom: 4px;
+                display: block;
+            }
+
+            .remove-pricing {
+                background: transparent;
+                border: none;
+                color: #f87171;
+                cursor: pointer;
+                font-size: 1.2rem;
+                padding: 8px 0;
+            }
+
+            .add-btn {
+                background: rgba(99, 102, 241, 0.1);
+                color: #818cf8;
+                border: 1px dashed rgba(99, 102, 241, 0.3);
+                padding: 10px 20px;
+                border-radius: 10px;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: all 0.2s;
+                width: 100%;
+                margin-top: 8px;
+            }
+
+            .add-btn:hover {
+                background: rgba(99, 102, 241, 0.2);
+                border-color: rgba(99, 102, 241, 0.5);
+            }
+
+            /* Submit */
+            .form-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+                margin-top: 24px;
+            }
+
+            .btn-cancel {
+                padding: 12px 28px;
+                border-radius: 10px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                background: transparent;
+                color: #94a3b8;
+                font-size: 0.9rem;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .btn-submit {
+                padding: 12px 32px;
+                border-radius: 10px;
+                border: none;
+                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                color: white;
+                font-size: 0.9rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .btn-submit:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+            }
+
+            @media (max-width: 768px) {
+
+                .form-row,
+                .form-row-3 {
+                    grid-template-columns: 1fr;
+                }
+
+                .pricing-row {
+                    grid-template-columns: 1fr 1fr;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="form-page">
+            <div class="form-header">
+                <h2 th:text="${product.id != null ? 'Sửa sản phẩm' : '+ Thêm sản phẩm mới'}">+ Thêm sản phẩm mới</h2>
+                <a th:href="@{/admin/products}" class="back-link">
+                    ← Quay lại danh sách
+                </a>
+            </div>
+
+            <form th:action="@{/admin/products/save}" method="post" id="productForm">
+                <input type="hidden" name="id" th:value="${product.id}">
+
+                <!-- Basic Info -->
+                <div class="form-section">
+                    <h3>📦 Thông tin cơ bản</h3>
+                    <div class="form-group">
+                        <label>Tên sản phẩm *</label>
+                        <input type="text" name="name" th:value="${product.name}" required
+                            placeholder="VD: Netflix Premium 4K">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Slug (URL)</label>
+                            <input type="text" name="slug" th:value="${product.slug}"
+                                placeholder="Tự động tạo nếu để trống">
+                        </div>
+                        <div class="form-group">
+                            <label>Danh mục</label>
+                            <select name="categoryId">
+                                <option value="">-- Chọn danh mục --</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
+                                    th:selected="${product.category != null && product.category.id == cat.id}">
+                                    Category</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả ngắn</label>
+                        <textarea name="shortDescription" rows="2" th:text="${product.shortDescription}"
+                            placeholder="Mô tả ngắn gọn..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả chi tiết</label>
+                        <textarea name="detailDescription" rows="5" th:text="${product.detailDescription}"
+                            placeholder="Mô tả chi tiết sản phẩm..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Link ảnh sản phẩm</label>
+                        <input type="text" name="imageUrl"
+                            th:value="${product.images != null && !product.images.isEmpty() ? product.images[0].imageUrl : ''}"
+                            placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="active"
+                            th:checked="${product.active != null ? product.active : true}" value="true">
+                        <label>Đang bán (Active)</label>
+                    </div>
+                </div>
+
+                <!-- Variants -->
+                <div class="form-section">
+                    <h3>🎯 Gói & Giá</h3>
+                    <div id="variantsContainer">
+                        <!-- Existing variants -->
+                        <th:block th:if="${product.variants != null && !product.variants.isEmpty()}"
+                            th:each="variant, vIter : ${product.variants}">
+                            <div class="variant-card" th:data-index="${vIter.index}">
+                                <div class="variant-header">
+                                    <h4>Gói <span th:text="${vIter.index + 1}">1</span></h4>
+                                    <button type="button" class="remove-btn"
+                                        onclick="this.closest('.variant-card').remove()">Xóa gói</button>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Tên gói *</label>
+                                        <input type="text" th:name="'variants[' + ${vIter.index} + '].name'"
+                                            th:value="${variant.name}" required placeholder="VD: Premium">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Mô tả gói</label>
+                                        <input type="text" th:name="'variants[' + ${vIter.index} + '].description'"
+                                            th:value="${variant.description}" placeholder="Mô tả ngắn">
+                                    </div>
+                                </div>
+                                <!-- Pricing rows -->
+                                <div class="pricing-list" th:data-variant="${vIter.index}">
+                                    <th:block th:each="pricing, pIter : ${variant.pricingList}">
+                                        <div class="pricing-row">
+                                            <div>
+                                                <label>Thời hạn (tháng)</label>
+                                                <input type="number"
+                                                    th:name="'variants[' + ${vIter.index} + '].pricings[' + ${pIter.index} + '].durationMonths'"
+                                                    th:value="${pricing.durationMonths}" placeholder="1">
+                                            </div>
+                                            <div>
+                                                <label>Giá (₫) *</label>
+                                                <input type="number"
+                                                    th:name="'variants[' + ${vIter.index} + '].pricings[' + ${pIter.index} + '].price'"
+                                                    th:value="${pricing.price}" required placeholder="50000">
+                                            </div>
+                                            <div>
+                                                <label>Giá gốc</label>
+                                                <input type="number"
+                                                    th:name="'variants[' + ${vIter.index} + '].pricings[' + ${pIter.index} + '].originalPrice'"
+                                                    th:value="${pricing.originalPrice}" placeholder="100000">
+                                            </div>
+                                            <div>
+                                                <label>Tồn kho</label>
+                                                <input type="number"
+                                                    th:name="'variants[' + ${vIter.index} + '].pricings[' + ${pIter.index} + '].availableStock'"
+                                                    th:value="${pricing.availableStock}" placeholder="10">
+                                            </div>
+                                            <button type="button" class="remove-pricing"
+                                                onclick="this.closest('.pricing-row').remove()">×</button>
+                                        </div>
+                                    </th:block>
+                                </div>
+                                <button type="button" class="add-btn"
+                                    th:onclick="'addPricing(' + ${vIter.index} + ')'">+ Thêm mức giá</button>
+                            </div>
+                        </th:block>
+
+                        <!-- JS adds new variants here -->
+                    </div>
+                    <button type="button" class="add-btn" onclick="addVariant()" style="margin-top:12px">
+                        + Thêm gói sản phẩm
+                    </button>
+                </div>
+
+                <!-- Submit -->
+                <div class="form-actions">
+                    <a th:href="@{/admin/products}" class="btn-cancel">Hủy</a>
+                    <button type="submit" class="btn-submit">
+                        <span th:text="${product.id != null ? 'Cập nhật' : 'Tạo sản phẩm'}">Tạo sản phẩm</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <th:block layout:fragment="scripts">
+        <script>
+            let variantIndex = document.querySelectorAll('.variant-card').length;
+
+            function addVariant() {
+                const container = document.getElementById('variantsContainer');
+                const idx = variantIndex++;
+                const html = `
+                <div class="variant-card" data-index="${idx}">
+                    <div class="variant-header">
+                        <h4>Gói ${idx + 1}</h4>
+                        <button type="button" class="remove-btn" onclick="this.closest('.variant-card').remove()">Xóa gói</button>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tên gói *</label>
+                            <input type="text" name="variants[${idx}].name" required placeholder="VD: Premium">
+                        </div>
+                        <div class="form-group">
+                            <label>Mô tả gói</label>
+                            <input type="text" name="variants[${idx}].description" placeholder="Mô tả ngắn">
+                        </div>
+                    </div>
+                    <div class="pricing-list" data-variant="${idx}">
+                        <div class="pricing-row">
+                            <div>
+                                <label>Thời hạn (tháng)</label>
+                                <input type="number" name="variants[${idx}].pricings[0].durationMonths" placeholder="1">
+                            </div>
+                            <div>
+                                <label>Giá (₫) *</label>
+                                <input type="number" name="variants[${idx}].pricings[0].price" required placeholder="50000">
+                            </div>
+                            <div>
+                                <label>Giá gốc</label>
+                                <input type="number" name="variants[${idx}].pricings[0].originalPrice" placeholder="100000">
+                            </div>
+                            <div>
+                                <label>Tồn kho</label>
+                                <input type="number" name="variants[${idx}].pricings[0].availableStock" placeholder="10">
+                            </div>
+                            <button type="button" class="remove-pricing" onclick="this.closest('.pricing-row').remove()">×</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addPricing(${idx})">+ Thêm mức giá</button>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            }
+
+            function addPricing(variantIdx) {
+                const list = document.querySelector(`.pricing-list[data-variant="${variantIdx}"]`);
+                const pIdx = list.querySelectorAll('.pricing-row').length;
+                const html = `
+                <div class="pricing-row">
+                    <div>
+                        <label>Thời hạn (tháng)</label>
+                        <input type="number" name="variants[${variantIdx}].pricings[${pIdx}].durationMonths" placeholder="1">
+                    </div>
+                    <div>
+                        <label>Giá (₫) *</label>
+                        <input type="number" name="variants[${variantIdx}].pricings[${pIdx}].price" required placeholder="50000">
+                    </div>
+                    <div>
+                        <label>Giá gốc</label>
+                        <input type="number" name="variants[${variantIdx}].pricings[${pIdx}].originalPrice" placeholder="100000">
+                    </div>
+                    <div>
+                        <label>Tồn kho</label>
+                        <input type="number" name="variants[${variantIdx}].pricings[${pIdx}].availableStock" placeholder="10">
+                    </div>
+                    <button type="button" class="remove-pricing" onclick="this.closest('.pricing-row').remove()">×</button>
+                </div>`;
+                list.insertAdjacentHTML('beforeend', html);
+            }
+
+            // Auto-generate slug from name
+            const nameInput = document.querySelector('input[name="name"]');
+            const slugInput = document.querySelector('input[name="slug"]');
+            if (nameInput && slugInput) {
+                nameInput.addEventListener('input', function () {
+                    if (!slugInput.dataset.manual) {
+                        slugInput.value = this.value
+                            .toLowerCase()
+                            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                            .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-|-$/g, '');
+                    }
+                });
+                slugInput.addEventListener('input', function () {
+                    this.dataset.manual = 'true';
+                });
+            }
+        </script>
+    </th:block>
+</body>
+
+</html>

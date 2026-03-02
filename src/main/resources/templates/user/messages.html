@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/default}">
+
+<head>
+    <title>Tin nhắn</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/messages.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="msg-page">
+            <div class="msg-container">
+                <!-- Chat Header -->
+                <div class="msg-header" th:if="${selectedConv != null}">
+                    <div class="msg-header__user">
+                        <div class="msg-header__avatar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="msg-header__name">Admin</div>
+                            <div class="msg-header__status">
+                                <span class="msg-header__dot"></span>
+                                Trực tuyến
+                            </div>
+                        </div>
+                    </div>
+                    <div class="msg-header__actions">
+                        <button class="msg-header__btn" type="button" title="Thông tin">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="16" x2="12" y2="12" />
+                                <line x1="12" y1="8" x2="12.01" y2="8" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Area -->
+                <div class="msg-body" id="chatMessages" th:if="${selectedConv != null}">
+                    <!-- Date separator -->
+                    <div class="msg-date-sep">
+                        <span>Hôm nay</span>
+                    </div>
+
+                    <th:block th:each="msg : ${messages}">
+                        <div class="msg-bubble"
+                            th:classappend="${msg.senderType.name() == 'USER'} ? 'msg-bubble--sent' : 'msg-bubble--received'">
+                            <div class="msg-bubble__avatar" th:if="${msg.senderType.name() != 'USER'}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
+                            </div>
+                            <div class="msg-bubble__content">
+                                <div class="msg-bubble__text" th:text="${msg.content}">Message</div>
+                                <div class="msg-bubble__time" th:text="${#temporals.format(msg.createdAt, 'HH:mm')}">
+                                    12:00</div>
+                            </div>
+                        </div>
+                    </th:block>
+
+                    <!-- Empty state -->
+                    <div th:if="${messages == null || messages.isEmpty()}" class="msg-welcome">
+                        <div class="msg-welcome__icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                        </div>
+                        <h3>Xin chào!</h3>
+                        <p>Bạn có thể nhắn tin trực tiếp với Admin tại đây.<br>Hãy gửi tin nhắn đầu tiên!</p>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="msg-input" th:if="${selectedConv != null}">
+                    <form th:action="@{/messages/{id}/send(id=${selectedConv.id})}" method="post"
+                        class="msg-input__form">
+                        <div class="msg-input__wrapper">
+                            <input type="text" name="content" class="msg-input__field" placeholder="Nhập tin nhắn..."
+                                autocomplete="off" required>
+                        </div>
+                        <button type="submit" class="msg-input__send" aria-label="Gửi">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <th:block layout:fragment="scripts">
+        <script>
+            // Auto scroll to bottom
+            var chatArea = document.getElementById('chatMessages');
+            if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+
+            // Auto fill reference message from URL if present
+            document.addEventListener('DOMContentLoaded', function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                const refMsg = urlParams.get('ref');
+                if (refMsg) {
+                    const inputField = document.querySelector('.msg-input__field');
+                    if (inputField) {
+                        inputField.value = refMsg;
+                        inputField.focus();
+
+                        // Clean up URL without reloading
+                        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                        window.history.replaceState({ path: newUrl }, '', newUrl);
+                    }
+                }
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>

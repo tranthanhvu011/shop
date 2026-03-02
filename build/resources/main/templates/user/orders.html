@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/default}">
+
+<head>
+    <title>Đơn hàng</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/orders.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="ordersPage">
+            <!-- Page Header -->
+            <div class="pageHeader">
+                <h1 class="pageTitle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                    </svg>
+                    Đơn hàng của tôi
+                </h1>
+                <p class="pageSubtitle">Theo dõi và quản lý các đơn hàng</p>
+            </div>
+
+            <!-- Status Filter Tabs -->
+            <div class="filterTabs">
+                <a th:href="@{/orders}" class="filterTab"
+                    th:classappend="${selectedStatus == null} ? 'filterTabActive'">
+                    Tất cả
+                </a>
+                <a th:href="@{/orders(status='PENDING')}" class="filterTab"
+                    th:classappend="${selectedStatus == 'PENDING'} ? 'filterTabActive'">
+                    <span class="statusDot" style="background:var(--warning)"></span> Chờ xử lý
+                </a>
+                <a th:href="@{/orders(status='PAID')}" class="filterTab"
+                    th:classappend="${selectedStatus == 'PAID'} ? 'filterTabActive'">
+                    <span class="statusDot" style="background:var(--primary)"></span> Đã thanh toán
+                </a>
+                <a th:href="@{/orders(status='COMPLETED')}" class="filterTab"
+                    th:classappend="${selectedStatus == 'COMPLETED'} ? 'filterTabActive'">
+                    <span class="statusDot" style="background:var(--info)"></span> Hoàn thành
+                </a>
+                <a th:href="@{/orders(status='CANCELLED')}" class="filterTab"
+                    th:classappend="${selectedStatus == 'CANCELLED'} ? 'filterTabActive'">
+                    <span class="statusDot" style="background:var(--danger)"></span> Đã hủy
+                </a>
+            </div>
+
+            <!-- Order List -->
+            <div class="orderList" th:if="${orders != null && !orders.isEmpty()}">
+                <th:block th:each="order : ${orders}">
+                    <a th:href="@{/orders/{num}(num=${order.orderNumber})}" class="orderCard">
+                        <!-- Top Bar -->
+                        <div class="cardTopBar">
+                            <span class="orderNumber">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                                </svg>
+                                <span th:text="${order.orderNumber}">ORD-0001</span>
+                            </span>
+                            <span class="statusBadge" th:classappend="${order.status.name() == 'PENDING' ? 'statusPending' : ''} +
+                                                  ${order.status.name() == 'PAID' ? 'statusPaid' : ''} +
+                                                  ${order.status.name() == 'COMPLETED' ? 'statusCompleted' : ''} +
+                                                  ${order.status.name() == 'CANCELLED' ? 'statusCancelled' : ''}">
+                                <span class="statusDot"></span>
+                                <span th:text="${order.status}">PENDING</span>
+                            </span>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="cardBody">
+                            <div class="productPreview">
+                                <div class="productThumb">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                        <circle cx="8.5" cy="8.5" r="1.5" />
+                                        <polyline points="21 15 16 10 5 21" />
+                                    </svg>
+                                </div>
+                                <div class="productInfo">
+                                    <div class="productName"
+                                        th:text="${order.items != null && !order.items.isEmpty() ? order.items[0].productName : 'Sản phẩm'}">
+                                        Sản phẩm</div>
+                                    <div class="productMeta">
+                                        <span th:if="${order.items != null && !order.items.isEmpty()}"
+                                            th:text="${order.items[0].variantName}">Variant</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="cardFooter">
+                            <div class="footerLeft">
+                                <span class="orderDate">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                    </svg>
+                                    <span
+                                        th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy')}">01/01/2026</span>
+                                </span>
+                                <span class="itemCount">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                                        <line x1="3" y1="6" x2="21" y2="6" />
+                                    </svg>
+                                    <span th:text="${order.items != null ? order.items.size() : 0} + ' sản phẩm'">0 sản
+                                        phẩm</span>
+                                </span>
+                            </div>
+                            <div class="footerRight">
+                                <span class="orderTotal"
+                                    th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</span>
+                                <span class="viewArrow">→</span>
+                            </div>
+                        </div>
+                    </a>
+                </th:block>
+            </div>
+
+            <!-- Empty State -->
+            <div class="emptyState" th:if="${orders == null || orders.isEmpty()}">
+                <div class="emptyIcon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                    </svg>
+                </div>
+                <h2>Chưa có đơn hàng nào</h2>
+                <p>Hãy khám phá và mua sản phẩm đầu tiên!</p>
+                <a th:href="@{/products}" class="shopLink">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                    Khám phá ngay
+                </a>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" th:if="${orders != null && totalPages > 1}">
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/orders(page=${i}, status=${selectedStatus})}" class="pageBtn"
+                        th:classappend="${i == currentPage} ? 'active'" th:text="${i + 1}">1</a>
+                </th:block>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

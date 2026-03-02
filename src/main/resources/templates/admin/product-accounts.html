@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout}">
+
+<head>
+    <title th:text="'Tài khoản — ' + ${product.name}">Tài khoản sản phẩm</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="page-content">
+            <!-- Header -->
+            <div class="page-header">
+                <div>
+                    <a th:href="@{/admin/products}" class="back-link">← Quay lại sản phẩm</a>
+                    <h1>
+                        📦 Quản lý tài khoản — <span th:text="${product.name}">Product</span>
+                    </h1>
+                    <p>Thêm và quản lý tài khoản số cho từng gói giá</p>
+                </div>
+            </div>
+
+            <!-- Success alert -->
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+            <!-- Empty state -->
+            <div th:if="${sections == null || sections.isEmpty()}" class="empty-state">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+                <h3>Chưa có gói giá nào</h3>
+                <p>Hãy tạo variant và pricing cho sản phẩm trước</p>
+                <a th:href="@{/admin/products/{id}/edit(id=${product.id})}" class="btn-back">Sửa sản phẩm</a>
+            </div>
+
+            <!-- Sections: each variant-pricing pair -->
+            <div th:each="sec, iterStat : ${sections}" class="acc-section"
+                th:style="'animation-delay:' + ${iterStat.index * 0.06} + 's'">
+                <div class="acc-section-header">
+                    <div class="acc-title-group">
+                        <h3 class="acc-section-title">
+                            <span class="variant-name" th:text="${sec.variant.name}">Variant</span>
+                            <span class="pricing-badge"
+                                th:text="${sec.pricing.durationLabel ?: (sec.pricing.durationMonths + ' tháng')}">1
+                                tháng</span>
+                            <span class="price-tag"
+                                th:text="${#numbers.formatDecimal(sec.pricing.price, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                        </h3>
+                    </div>
+                    <div class="acc-stats">
+                        <div class="acc-stat available">
+                            <span class="acc-stat-value" th:text="${sec.availableCount}">0</span>
+                            <span class="acc-stat-label">Sẵn sàng</span>
+                        </div>
+                        <div class="acc-stat allocated">
+                            <span class="acc-stat-value" th:text="${sec.allocatedCount}">0</span>
+                            <span class="acc-stat-label">Đã phân</span>
+                        </div>
+                        <div class="acc-stat sold">
+                            <span class="acc-stat-value" th:text="${sec.soldCount}">0</span>
+                            <span class="acc-stat-label">Đã bán</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ Shared Account Description (HTML) ═══ -->
+                <div class="desc-section">
+                    <details
+                        th:open="${sec.pricing.accountDescription != null && !sec.pricing.accountDescription.isEmpty()}">
+                        <summary class="desc-summary">
+                            📝 Mô tả cho người mua (HTML) — dùng chung cho tất cả TK trong gói này
+                            <span
+                                th:if="${sec.pricing.accountDescription != null && !sec.pricing.accountDescription.isEmpty()}"
+                                class="desc-saved-badge">✓ Đã có</span>
+                        </summary>
+                        <form th:action="@{/admin/pricing/{id}/update-description(id=${sec.pricing.id})}" method="post"
+                            class="desc-form">
+                            <input type="hidden" name="productId" th:value="${product.id}">
+
+                            <!-- Template buttons -->
+                            <div class="template-bar">
+                                <span class="template-label">Chọn mẫu:</span>
+                                <button type="button" class="tpl-btn" onclick="insertTemplate(this, 'netflix')">🎬
+                                    Netflix/Streaming</button>
+                                <button type="button" class="tpl-btn" onclick="insertTemplate(this, 'game')">🎮 Game
+                                    Account</button>
+                                <button type="button" class="tpl-btn" onclick="insertTemplate(this, 'email')">📧
+                                    Email/Cloud</button>
+                                <button type="button" class="tpl-btn" onclick="insertTemplate(this, 'vpn')">🔐
+                                    VPN/Spotify</button>
+                                <button type="button" class="tpl-btn" onclick="insertTemplate(this, 'basic')">📝 Cơ
+                                    bản</button>
+                            </div>
+
+                            <textarea name="accountDescription" rows="10" class="desc-textarea"
+                                th:id="'descArea_' + ${sec.pricing.id}"
+                                placeholder="Chọn mẫu phía trên hoặc nhập HTML tùy chỉnh..."
+                                th:text="${sec.pricing.accountDescription}" oninput="updatePreview(this)"></textarea>
+
+                            <!-- Live Preview -->
+                            <div class="desc-preview">
+                                <div class="desc-preview-label">👁️ Xem trước (người mua sẽ thấy thế này):</div>
+                                <div class="desc-preview-content" th:id="'descPreview_' + ${sec.pricing.id}"
+                                    th:utext="${sec.pricing.accountDescription ?: '&lt;em style=color:#888&gt;Chưa có mô tả — chọn mẫu phía trên&lt;/em&gt;'}">
+                                </div>
+                            </div>
+
+                            <div style="display:flex;gap:10px;justify-content:flex-end">
+                                <button type="submit" class="desc-save-btn">💾 Lưu mô tả</button>
+                            </div>
+                        </form>
+                    </details>
+                </div>
+
+                <!-- Account table -->
+                <div th:if="${sec.accounts != null && !sec.accounts.isEmpty()}" class="acc-table-wrap">
+                    <table class="acc-table">
+                        <thead>
+                            <tr>
+                                <th style="width:50px">ID</th>
+                                <th>Thông tin tài khoản</th>
+                                <th style="width:100px">Trạng thái</th>
+                                <th style="width:80px">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="da : ${sec.accounts}"
+                                th:classappend="${da.status.name() != 'AVAILABLE'} ? 'row-disabled'">
+                                <td class="td-id" th:text="'#' + ${da.id}">#1</td>
+                                <td class="td-info">
+                                    <code th:text="${#strings.abbreviate(da.accountInfo, 60)}">account info</code>
+                                    <button class="copy-btn-sm" th:data-text="${da.accountInfo}"
+                                        onclick="copyText(this)">📋</button>
+                                </td>
+                                <td>
+                                    <span class="status-chip"
+                                        th:classappend="${da.status.name() == 'AVAILABLE'} ? 'chip-available' : (${da.status.name() == 'SOLD'} ? 'chip-sold' : 'chip-allocated')"
+                                        th:text="${da.status}">AVAILABLE</span>
+                                </td>
+                                <td>
+                                    <form th:if="${da.status.name() == 'AVAILABLE'}"
+                                        th:action="@{/admin/accounts/{id}/delete(id=${da.id})}" method="post"
+                                        onsubmit="return false" style="margin:0">
+                                        <input type="hidden" name="productId" th:value="${product.id}">
+                                        <button type="button" class="del-btn"
+                                            onclick="(async()=>{if(await showConfirm('Xóa tài khoản này?',{title:'Xóa tài khoản',type:'danger',danger:true,confirmText:'Xóa'})){const f=this.closest('form');f.removeAttribute('onsubmit');f.submit()}})()">🗑️</button>
+                                    </form>
+                                    <span th:if="${da.status.name() != 'AVAILABLE'}"
+                                        style="color:var(--text-muted);font-size:12px">—</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:unless="${sec.accounts != null && !sec.accounts.isEmpty()}" class="no-accounts">
+                    Chưa có tài khoản nào
+                </div>
+
+                <!-- Add forms -->
+                <div class="acc-add-forms">
+                    <!-- Single add -->
+                    <form th:action="@{/admin/accounts/save}" method="post" class="acc-add-single">
+                        <input type="hidden" name="variantPricingId" th:value="${sec.pricing.id}">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <div class="add-row">
+                            <input type="text" name="accountInfo" placeholder="email:password hoặc JSON..." required
+                                class="add-input">
+                            <button type="submit" class="add-btn">+ Thêm</button>
+                        </div>
+                    </form>
+                    <!-- Bulk add -->
+                    <details class="bulk-details">
+                        <summary class="bulk-summary">📋 Thêm hàng loạt</summary>
+                        <form th:action="@{/admin/accounts/bulk-add}" method="post" class="bulk-form">
+                            <input type="hidden" name="variantPricingId" th:value="${sec.pricing.id}">
+                            <input type="hidden" name="productId" th:value="${product.id}">
+                            <textarea name="bulkData" rows="5"
+                                placeholder="Mỗi dòng = 1 tài khoản&#10;VD: user1@mail.com:pass123&#10;user2@mail.com:pass456"
+                                required class="bulk-textarea"></textarea>
+                            <button type="submit" class="add-btn bulk-btn">+ Thêm tất cả</button>
+                        </form>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .back-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                color: var(--primary);
+                text-decoration: none;
+                font-size: .85rem;
+                font-weight: 500;
+                margin-bottom: 10px;
+                transition: all .2s
+            }
+
+            .back-link:hover {
+                color: var(--text-color);
+                transform: translateX(-3px)
+            }
+
+            .btn-back {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 10px 20px;
+                background: var(--primary);
+                color: #fff;
+                border-radius: 10px;
+                text-decoration: none;
+                font-weight: 500;
+                margin-top: 12px;
+                transition: all .2s
+            }
+
+            .alert-success {
+                padding: 14px 20px;
+                background: color-mix(in srgb, #10b981 12%, transparent);
+                border: 1px solid color-mix(in srgb, #10b981 25%, transparent);
+                color: #10b981;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                font-weight: 500;
+                font-size: .9rem;
+                animation: fadeIn .3s
+            }
+
+            /* Section */
+            .acc-section {
+                background: var(--card-bg, #1a1a2e);
+                border: 1px solid var(--border-color);
+                border-radius: 18px;
+                padding: 24px;
+                margin-bottom: 20px;
+                animation: fadeInUp .4s ease both;
+                transition: border-color .3s, box-shadow .3s
+            }
+
+            .acc-section:hover {
+                box-shadow: var(--shadow-md);
+                border-color: color-mix(in srgb, var(--primary) 20%, var(--border-color))
+            }
+
+            .acc-section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 16px;
+                margin-bottom: 20px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid var(--border-color)
+            }
+
+            .acc-section-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: var(--text-color);
+                margin: 0;
+                flex-wrap: wrap
+            }
+
+            .variant-name {
+                color: var(--text-color)
+            }
+
+            .pricing-badge {
+                background: color-mix(in srgb, var(--primary) 12%, transparent);
+                color: var(--primary);
+                padding: 3px 10px;
+                border-radius: 6px;
+                font-size: .78rem;
+                font-weight: 500
+            }
+
+            .price-tag {
+                color: var(--primary);
+                font-weight: 700;
+                font-size: 1rem
+            }
+
+            .acc-stats {
+                display: flex;
+                gap: 10px
+            }
+
+            .acc-stat {
+                padding: 8px 14px;
+                border-radius: 10px;
+                text-align: center;
+                min-width: 65px
+            }
+
+            .acc-stat-value {
+                display: block;
+                font-size: 1.1rem;
+                font-weight: 700
+            }
+
+            .acc-stat-label {
+                font-size: .68rem;
+                font-weight: 500;
+                opacity: .8
+            }
+
+            .acc-stat.available {
+                background: color-mix(in srgb, #10b981 10%, transparent);
+                color: #10b981
+            }
+
+            .acc-stat.allocated {
+                background: color-mix(in srgb, #f59e0b 10%, transparent);
+                color: #f59e0b
+            }
+
+            .acc-stat.sold {
+                background: color-mix(in srgb, #8b5cf6 10%, transparent);
+                color: #8b5cf6
+            }
+
+            /* Description Section */
+            .desc-section {
+                margin-bottom: 20px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid var(--border-color)
+            }
+
+            .desc-summary {
+                cursor: pointer;
+                color: var(--text-color);
+                font-size: .88rem;
+                font-weight: 500;
+                padding: 10px 0;
+                user-select: none;
+                display: flex;
+                align-items: center;
+                gap: 10px
+            }
+
+            .desc-summary:hover {
+                color: var(--primary)
+            }
+
+            .desc-saved-badge {
+                background: color-mix(in srgb, #10b981 12%, transparent);
+                color: #10b981;
+                padding: 2px 8px;
+                border-radius: 6px;
+                font-size: .7rem;
+                font-weight: 600
+            }
+
+            .desc-form {
+                margin-top: 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px
+            }
+
+            .desc-textarea {
+                width: 100%;
+                padding: 14px 16px;
+                background: var(--bg-darker, rgba(0, 0, 0, .15));
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                color: var(--text-color);
+                font-size: .85rem;
+                font-family: 'Fira Code', monospace;
+                resize: vertical;
+                outline: none;
+                box-sizing: border-box;
+                transition: border-color .2s;
+                min-height: 120px
+            }
+
+            .desc-textarea:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent)
+            }
+
+            .desc-preview {
+                background: var(--bg-darker, rgba(0, 0, 0, .1));
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                padding: 16px;
+                overflow: auto;
+                max-height: 300px
+            }
+
+            .desc-preview-label {
+                font-size: .72rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                margin-bottom: 10px
+            }
+
+            .desc-preview-content {
+                font-size: .88rem;
+                color: var(--text-color);
+                line-height: 1.6
+            }
+
+            .desc-save-btn {
+                align-self: flex-end;
+                padding: 10px 24px;
+                background: linear-gradient(135deg, var(--primary), var(--primary-dark, #4f46e5));
+                border: none;
+                border-radius: 10px;
+                color: #fff;
+                font-weight: 600;
+                font-size: .85rem;
+                cursor: pointer;
+                transition: all .2s
+            }
+
+            .desc-save-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 30%, transparent)
+            }
+
+            /* Template bar */
+            .template-bar {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+                padding: 10px 14px;
+                background: var(--bg-darker, rgba(0, 0, 0, .12));
+                border-radius: 10px;
+                border: 1px dashed var(--border-color)
+            }
+
+            .template-label {
+                font-size: .78rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                white-space: nowrap
+            }
+
+            .tpl-btn {
+                padding: 6px 12px;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+                background: var(--card-bg, #1a1a2e);
+                color: var(--text-color);
+                font-size: .78rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all .2s;
+                white-space: nowrap
+            }
+
+            .tpl-btn:hover {
+                border-color: var(--primary);
+                background: color-mix(in srgb, var(--primary) 8%, transparent);
+                transform: translateY(-1px)
+            }
+
+            .tpl-btn:active {
+                transform: scale(.97)
+            }
+
+            /* Table */
+            .acc-table-wrap {
+                overflow-x: auto;
+                margin-bottom: 16px
+            }
+
+            .acc-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: .85rem
+            }
+
+            .acc-table thead th {
+                text-align: left;
+                padding: 10px 12px;
+                color: var(--text-muted);
+                font-weight: 600;
+                font-size: .75rem;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                border-bottom: 1px solid var(--border-color)
+            }
+
+            .acc-table tbody td {
+                padding: 10px 12px;
+                border-bottom: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent);
+                vertical-align: middle
+            }
+
+            .acc-table tbody tr:hover {
+                background: rgba(255, 255, 255, .02)
+            }
+
+            .td-id {
+                color: var(--text-muted);
+                font-size: .78rem
+            }
+
+            .td-info {
+                display: flex;
+                align-items: center;
+                gap: 8px
+            }
+
+            .td-info code {
+                background: var(--bg-darker, rgba(0, 0, 0, .15));
+                padding: 4px 10px;
+                border-radius: 6px;
+                font-size: .8rem;
+                color: var(--text-color);
+                font-family: 'Fira Code', monospace;
+                max-width: 360px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                display: inline-block
+            }
+
+            .row-disabled {
+                opacity: .55
+            }
+
+            .copy-btn-sm {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 14px;
+                padding: 2px 4px;
+                border-radius: 4px;
+                transition: all .2s
+            }
+
+            .copy-btn-sm:hover {
+                background: rgba(255, 255, 255, .08)
+            }
+
+            .status-chip {
+                padding: 3px 10px;
+                border-radius: 6px;
+                font-size: .72rem;
+                font-weight: 600;
+                display: inline-block
+            }
+
+            .chip-available {
+                background: color-mix(in srgb, #10b981 12%, transparent);
+                color: #10b981
+            }
+
+            .chip-allocated {
+                background: color-mix(in srgb, #f59e0b 12%, transparent);
+                color: #f59e0b
+            }
+
+            .chip-sold {
+                background: color-mix(in srgb, #8b5cf6 12%, transparent);
+                color: #8b5cf6
+            }
+
+            .del-btn {
+                background: none;
+                border: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+                color: #ef4444;
+                cursor: pointer;
+                padding: 4px 10px;
+                border-radius: 6px;
+                font-size: 14px;
+                transition: all .2s
+            }
+
+            .del-btn:hover {
+                background: color-mix(in srgb, #ef4444 12%, transparent)
+            }
+
+            .no-accounts {
+                text-align: center;
+                padding: 32px 0;
+                color: var(--text-muted);
+                font-size: .85rem;
+                font-style: italic
+            }
+
+            /* Add Forms */
+            .acc-add-forms {
+                border-top: 1px solid var(--border-color);
+                padding-top: 16px
+            }
+
+            .add-row {
+                display: flex;
+                gap: 8px
+            }
+
+            .add-input {
+                flex: 1;
+                padding: 10px 14px;
+                background: var(--bg-darker, rgba(0, 0, 0, .15));
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                color: var(--text-color);
+                font-size: .85rem;
+                outline: none;
+                transition: border-color .2s
+            }
+
+            .add-input:focus {
+                border-color: var(--primary)
+            }
+
+            .add-btn {
+                padding: 10px 20px;
+                background: linear-gradient(135deg, var(--primary), var(--primary-dark, #4f46e5));
+                border: none;
+                border-radius: 10px;
+                color: #fff;
+                font-weight: 600;
+                font-size: .85rem;
+                cursor: pointer;
+                transition: all .2s;
+                white-space: nowrap
+            }
+
+            .add-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 30%, transparent)
+            }
+
+            .bulk-details {
+                margin-top: 12px
+            }
+
+            .bulk-summary {
+                cursor: pointer;
+                color: var(--primary);
+                font-size: .85rem;
+                font-weight: 500;
+                padding: 8px 0;
+                user-select: none
+            }
+
+            .bulk-summary:hover {
+                text-decoration: underline
+            }
+
+            .bulk-form {
+                margin-top: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px
+            }
+
+            .bulk-textarea {
+                width: 100%;
+                padding: 12px 14px;
+                background: var(--bg-darker, rgba(0, 0, 0, .15));
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                color: var(--text-color);
+                font-size: .85rem;
+                font-family: 'Fira Code', monospace;
+                resize: vertical;
+                outline: none;
+                box-sizing: border-box;
+                transition: border-color .2s
+            }
+
+            .bulk-textarea:focus {
+                border-color: var(--primary)
+            }
+
+            .bulk-btn {
+                align-self: flex-end
+            }
+
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(18px)
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0)
+                }
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0
+                }
+
+                to {
+                    opacity: 1
+                }
+            }
+        </style>
+
+        <script>
+            function copyText(btn) {
+                const text = btn.dataset.text;
+                navigator.clipboard.writeText(text).then(() => {
+                    btn.textContent = '✅';
+                    setTimeout(() => btn.textContent = '📋', 1500);
+                });
+            }
+
+            function updatePreview(textarea) {
+                const id = textarea.id.replace('descArea_', 'descPreview_');
+                const preview = document.getElementById(id);
+                if (preview) preview.innerHTML = textarea.value || '<em style="color:#888">Chưa có mô tả</em>';
+            }
+
+            const templates = {
+                netflix: `<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:24px;font-family:system-ui;color:#e2e8f0">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <div style="width:48px;height:48px;background:linear-gradient(135deg,#e50914,#b20710);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">🎬</div>
+    <div>
+      <h3 style="margin:0;font-size:1.1rem;color:#fff">Thông tin tài khoản Premium</h3>
+      <p style="margin:4px 0 0;font-size:.82rem;color:#94a3b8">Sử dụng ngay sau khi nhận</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+    <div style="background:rgba(255,255,255,.06);padding:14px;border-radius:10px">
+      <div style="font-size:.72rem;color:#64748b;font-weight:600;text-transform:uppercase;margin-bottom:6px">📧 Email đăng nhập</div>
+      <div style="font-size:.9rem;color:#fff;font-weight:500">Xem trong phần thông tin tài khoản</div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);padding:14px;border-radius:10px">
+      <div style="font-size:.72rem;color:#64748b;font-weight:600;text-transform:uppercase;margin-bottom:6px">🔑 Mật khẩu</div>
+      <div style="font-size:.9rem;color:#fff;font-weight:500">Xem trong phần thông tin tài khoản</div>
+    </div>
+  </div>
+  <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:14px;margin-bottom:12px">
+    <div style="font-size:.82rem;color:#10b981;font-weight:600;margin-bottom:8px">📋 Hướng dẫn sử dụng:</div>
+    <ol style="margin:0;padding-left:18px;font-size:.82rem;color:#94a3b8;line-height:1.8">
+      <li>Truy cập website và đăng nhập bằng email/mật khẩu</li>
+      <li>Tạo profile riêng cho bạn, không sử dụng profile người khác</li>
+      <li>Không đổi mật khẩu hoặc email tài khoản</li>
+      <li>Không chia sẻ tài khoản cho người khác</li>
+    </ol>
+  </div>
+  <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px;font-size:.8rem;color:#fbbf24">
+    ⚠️ <strong>Lưu ý:</strong> Vi phạm quy định sẽ bị thu hồi tài khoản mà không hoàn tiền.
+  </div>
+</div>`,
+
+                game: `<div style="background:linear-gradient(135deg,#0f172a,#1e1b4b);border-radius:16px;padding:24px;font-family:system-ui;color:#e2e8f0">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <div style="width:48px;height:48px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">🎮</div>
+    <div>
+      <h3 style="margin:0;font-size:1.1rem;color:#fff">Thông tin tài khoản Game</h3>
+      <p style="margin:4px 0 0;font-size:.82rem;color:#94a3b8">Full quyền truy cập</p>
+    </div>
+  </div>
+  <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:16px;margin-bottom:16px">
+    <div style="font-size:.82rem;color:#a78bfa;font-weight:600;margin-bottom:10px">🎯 Thông tin bao gồm:</div>
+    <ul style="margin:0;padding-left:16px;font-size:.85rem;color:#cbd5e1;line-height:2">
+      <li>Tài khoản đăng nhập (email/username + password)</li>
+      <li>Đã kích hoạt đầy đủ DLC/Season Pass</li>
+      <li>Level/Rank hiện tại: <strong style="color:#fbbf24">Thay thế ở đây</strong></li>
+      <li>Nền tảng: <strong style="color:#fbbf24">PC / PlayStation / Xbox</strong></li>
+    </ul>
+  </div>
+  <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:14px;margin-bottom:12px">
+    <div style="font-size:.82rem;color:#10b981;font-weight:600;margin-bottom:6px">✅ Cam kết:</div>
+    <p style="margin:0;font-size:.82rem;color:#94a3b8;line-height:1.7">Bảo hành thay đổi thông tin. Hỗ trợ cài đặt 2FA theo yêu cầu. Liên hệ shop nếu gặp vấn đề.</p>
+  </div>
+  <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:12px;font-size:.8rem;color:#f87171">
+    🚫 <strong>Không được:</strong> Đổi email/mật khẩu, chuyển nhượng, hoặc sử dụng tool/cheat.
+  </div>
+</div>`,
+
+                email: `<div style="background:linear-gradient(135deg,#1a1a2e,#0f2027);border-radius:16px;padding:24px;font-family:system-ui;color:#e2e8f0">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <div style="width:48px;height:48px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">📧</div>
+    <div>
+      <h3 style="margin:0;font-size:1.1rem;color:#fff">Tài khoản Email / Cloud</h3>
+      <p style="margin:4px 0 0;font-size:.82rem;color:#94a3b8">Dung lượng không giới hạn</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+    <div style="background:rgba(59,130,246,.08);padding:14px;border-radius:10px;text-align:center">
+      <div style="font-size:1.3rem;font-weight:700;color:#3b82f6">♾️</div>
+      <div style="font-size:.78rem;color:#94a3b8;margin-top:4px">Dung lượng</div>
+    </div>
+    <div style="background:rgba(16,185,129,.08);padding:14px;border-radius:10px;text-align:center">
+      <div style="font-size:1.3rem;font-weight:700;color:#10b981">✓</div>
+      <div style="font-size:.78rem;color:#94a3b8;margin-top:4px">Full tính năng</div>
+    </div>
+  </div>
+  <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:14px;font-size:.85rem;color:#cbd5e1;line-height:1.8">
+    <strong style="color:#fff">Hướng dẫn:</strong><br>
+    1. Đăng nhập bằng email và mật khẩu được cung cấp<br>
+    2. Đổi mật khẩu ngay sau khi nhận (nếu được phép)<br>
+    3. Thiết lập 2FA để bảo vệ tài khoản
+  </div>
+</div>`,
+
+                vpn: `<div style="background:linear-gradient(135deg,#0f172a,#064e3b);border-radius:16px;padding:24px;font-family:system-ui;color:#e2e8f0">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <div style="width:48px;height:48px;background:linear-gradient(135deg,#10b981,#059669);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">🔐</div>
+    <div>
+      <h3 style="margin:0;font-size:1.1rem;color:#fff">Tài khoản Premium</h3>
+      <p style="margin:4px 0 0;font-size:.82rem;color:#94a3b8">Subscription đã kích hoạt</p>
+    </div>
+  </div>
+  <div style="background:rgba(16,185,129,.08);border-radius:12px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-size:.82rem;color:#10b981;font-weight:600">📅 Thời hạn</span>
+      <span style="font-size:.9rem;color:#fff;font-weight:700">Thay thế ở đây</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:.82rem;color:#10b981;font-weight:600">🌍 Khu vực</span>
+      <span style="font-size:.9rem;color:#fff;font-weight:700">Toàn cầu</span>
+    </div>
+  </div>
+  <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:14px;font-size:.85rem;color:#cbd5e1;line-height:1.8">
+    <strong style="color:#fff">Kèm theo:</strong> Tài khoản + mật khẩu đăng nhập. Sử dụng trên mọi thiết bị. Hỗ trợ đổi region.
+  </div>
+  <div style="margin-top:12px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px;font-size:.8rem;color:#fbbf24">
+    ⚠️ Không đổi mật khẩu, không đăng xuất thiết bị khác.
+  </div>
+</div>`,
+
+                basic: `<div style="background:linear-gradient(135deg,#1a1a2e,#2d2d44);border-radius:16px;padding:24px;font-family:system-ui;color:#e2e8f0">
+  <h3 style="margin:0 0 16px;font-size:1.1rem;color:#fff">📋 Thông tin tài khoản</h3>
+  <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:16px;margin-bottom:16px;font-size:.88rem;color:#cbd5e1;line-height:1.8">
+    <p style="margin:0 0 8px"><strong style="color:#fff">Loại tài khoản:</strong> Thay thế ở đây</p>
+    <p style="margin:0 0 8px"><strong style="color:#fff">Thời hạn:</strong> Thay thế ở đây</p>
+    <p style="margin:0"><strong style="color:#fff">Ghi chú:</strong> Thay thế ở đây</p>
+  </div>
+  <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px;font-size:.82rem;color:#10b981">
+    ✅ Bảo hành theo chính sách shop. Liên hệ nếu gặp vấn đề.
+  </div>
+</div>`
+            };
+
+            async function insertTemplate(btn, type) {
+                const form = btn.closest('form');
+                const textarea = form.querySelector('.desc-textarea');
+                if (textarea.value.trim()) {
+                    const confirmed = await showConfirm('Thay thế nội dung hiện tại bằng mẫu mới?', {
+                        title: 'Thay thế mẫu', type: 'warning', confirmText: 'Thay thế'
+                    });
+                    if (!confirmed) return;
+                }
+                textarea.value = templates[type];
+                updatePreview(textarea);
+                textarea.focus();
+            }
+        </script>
+    </div>
+</body>
+
+</html>

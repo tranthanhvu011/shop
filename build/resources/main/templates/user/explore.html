@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/default}">
+
+<head>
+    <title>Khám phá</title>
+    <th:block layout:fragment="styles">
+        <style>
+            .exploreWrapper {
+                display: grid;
+                grid-template-columns: 280px 1fr;
+                gap: 32px;
+                padding: 32px;
+                min-height: 100vh;
+                position: relative;
+            }
+
+            /* Filter Sidebar */
+            .filterSidebar {
+                background: var(--card-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 24px;
+                height: fit-content;
+                position: sticky;
+                top: 100px;
+            }
+
+            .filterHeader {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+            }
+
+            .filterHeader h3 {
+                font-size: 1.125rem;
+                font-weight: 700;
+                margin: 0;
+            }
+
+            .filterGroup {
+                margin-bottom: 28px;
+            }
+
+            .filterGroup h4 {
+                font-size: 0.875rem;
+                font-weight: 600;
+                margin-bottom: 16px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .filterList {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .filterLabel {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 14px;
+                border-radius: 10px;
+                font-size: 0.9rem;
+                color: var(--text-color);
+                cursor: pointer;
+                transition: all 0.2s ease;
+                background: transparent;
+                text-decoration: none;
+            }
+
+            .filterLabel:hover {
+                background: var(--nav-btn-bg);
+            }
+
+            .filterLabel.active {
+                background: var(--primary);
+                color: white;
+            }
+
+            .filterLabel.active .count {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+            }
+
+            .labelText {
+                flex: 1;
+            }
+
+            .count {
+                background: var(--nav-btn-bg);
+                padding: 2px 8px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--text-muted);
+            }
+
+            /* Product Card */
+            .productGrid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                gap: 24px;
+            }
+
+            .productCard {
+                border-radius: 16px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                color: inherit;
+                padding: 0;
+                position: relative;
+                cursor: pointer;
+            }
+
+            .productCard:hover {
+                transform: translateY(-4px);
+                border-color: var(--primary);
+                box-shadow: var(--shadow-lg);
+            }
+
+            /* Hover Overlay */
+            .productImgWrap {
+                position: relative;
+                width: 100%;
+                height: 200px;
+                overflow: hidden;
+            }
+
+            .productImgWrap img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.4s ease;
+            }
+
+            .productCard:hover .productImgWrap img {
+                transform: scale(1.05);
+            }
+
+            .productImgPlaceholder {
+                width: 100%;
+                height: 100%;
+                background: var(--bg-darker);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-muted);
+                font-size: 2.5rem;
+            }
+
+            .hoverOverlay {
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                gap: 10px;
+                padding-bottom: 16px;
+                opacity: 0;
+                transition: opacity 0.25s ease;
+            }
+
+            .productCard:hover .hoverOverlay {
+                opacity: 1;
+            }
+
+            .hoverBtn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 9px 18px;
+                border-radius: 10px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                cursor: pointer;
+                border: none;
+                transition: all 0.2s ease;
+                text-decoration: none;
+                font-family: inherit;
+                backdrop-filter: blur(8px);
+                transform: translateY(8px);
+                opacity: 0;
+            }
+
+            .productCard:hover .hoverBtn {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            .productCard:hover .hoverBtn:nth-child(1) {
+                transition-delay: 0.05s;
+            }
+
+            .productCard:hover .hoverBtn:nth-child(2) {
+                transition-delay: 0.1s;
+            }
+
+            .btnPreview {
+                background: rgba(255, 255, 255, 0.95);
+                color: #111827;
+            }
+
+            .btnPreview:hover {
+                background: #ffffff;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            }
+
+            .btnDetail {
+                background: var(--primary);
+                color: white;
+            }
+
+            .btnDetail:hover {
+                background: var(--primary-dark);
+                box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+            }
+
+            .productInfo {
+                padding: 16px;
+            }
+
+            .productInfo h3 {
+                font-size: 0.95rem;
+                margin-bottom: 8px;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                min-height: 40px;
+            }
+
+            .productPrice {
+                color: #10b981;
+                font-weight: 700;
+                font-size: 1.125rem;
+            }
+
+            .productMeta {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 8px;
+                font-size: 0.8rem;
+                color: var(--text-muted);
+            }
+
+            /* ===== Preview Modal ===== */
+            .previewBackdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(8px);
+                z-index: 1000;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+                animation: pvFadeIn 0.2s ease;
+            }
+
+            .previewBackdrop.show {
+                display: flex;
+            }
+
+            @keyframes pvFadeIn {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            @keyframes pvSlideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px) scale(0.97);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            .previewModal {
+                background: var(--card-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                max-width: 960px;
+                width: 100%;
+                max-height: 90vh;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+                animation: pvSlideUp 0.3s ease;
+                position: relative;
+            }
+
+            /* ── Header ── */
+            .pvHeader {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 16px 24px;
+                border-bottom: 1px solid var(--border-color);
+                flex-shrink: 0;
+            }
+
+            .pvHeaderTitle {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: var(--text-color);
+                flex: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .pvHeaderSeller {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 0.82rem;
+                color: var(--text-muted);
+            }
+
+            .pvSellerAvatar {
+                width: 26px;
+                height: 26px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, var(--primary), #10b981);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.7rem;
+                font-weight: 700;
+            }
+
+            .pvClose {
+                width: 34px;
+                height: 34px;
+                border-radius: 10px;
+                background: transparent;
+                border: 1px solid var(--border-color);
+                color: var(--text-muted);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+                flex-shrink: 0;
+                margin-left: 8px;
+            }
+
+            .pvClose:hover {
+                background: rgba(239, 68, 68, 0.1);
+                border-color: #ef4444;
+                color: #ef4444;
+            }
+
+            /* ── Body: Two Column ── */
+            .pvBody {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                flex: 1;
+                min-height: 0;
+                overflow-y: auto;
+            }
+
+            /* Left: Gallery */
+            .pvGallery {
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                background: rgba(0, 0, 0, 0.08);
+                border-right: 1px solid var(--border-color);
+            }
+
+            .pvMainImage {
+                position: relative;
+                border-radius: 14px;
+                overflow: hidden;
+                background: var(--bg-darker);
+                aspect-ratio: 16/10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .pvMainImage img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .pvImgPlaceholder {
+                color: var(--text-muted);
+                opacity: 0.4;
+            }
+
+            .pvGalleryArrow {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(4px);
+                color: white;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+                z-index: 5;
+            }
+
+            .pvGalleryArrow:hover {
+                background: rgba(0, 0, 0, 0.75);
+            }
+
+            .pvGalleryArrow.prev {
+                left: 10px;
+            }
+
+            .pvGalleryArrow.next {
+                right: 10px;
+            }
+
+            .pvThumbs {
+                display: flex;
+                gap: 8px;
+                overflow-x: auto;
+                scrollbar-width: none;
+                padding-bottom: 4px;
+            }
+
+            .pvThumbs::-webkit-scrollbar {
+                display: none;
+            }
+
+            .pvThumb {
+                width: 72px;
+                height: 50px;
+                border-radius: 8px;
+                overflow: hidden;
+                flex-shrink: 0;
+                cursor: pointer;
+                border: 2px solid transparent;
+                transition: all 0.2s;
+                background: var(--bg-darker);
+                opacity: 0.6;
+            }
+
+            .pvThumb.active {
+                border-color: var(--primary);
+                opacity: 1;
+            }
+
+            .pvThumb:hover {
+                opacity: 1;
+            }
+
+            .pvThumb img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            /* Right: Info */
+            .pvInfo {
+                padding: 20px 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                overflow-y: auto;
+            }
+
+            .pvDesc {
+                font-size: 0.88rem;
+                color: var(--text-muted);
+                line-height: 1.65;
+                display: -webkit-box;
+                -webkit-line-clamp: 4;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            /* Stats row */
+            .pvStatsRow {
+                display: flex;
+                gap: 24px;
+                flex-wrap: wrap;
+            }
+
+            .pvStatItem {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                font-size: 0.88rem;
+                color: var(--text-muted);
+            }
+
+            .pvStatItem svg {
+                color: var(--primary);
+                flex-shrink: 0;
+            }
+
+            .pvStatValue {
+                font-weight: 700;
+                color: var(--text-color);
+            }
+
+            /* Info rows */
+            .pvInfoRows {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                overflow: hidden;
+            }
+
+            .pvInfoRow {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 16px;
+                font-size: 0.85rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .pvInfoRow:last-child {
+                border-bottom: none;
+            }
+
+            .pvInfoRow svg {
+                color: var(--text-muted);
+                flex-shrink: 0;
+            }
+
+            .pvInfoLabel {
+                color: var(--text-muted);
+                min-width: 100px;
+            }
+
+            .pvInfoValue {
+                color: var(--text-color);
+                font-weight: 600;
+                flex: 1;
+            }
+
+            /* Tags */
+            .pvTags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .pvTag {
+                padding: 4px 12px;
+                border-radius: 6px;
+                border: 1px solid var(--border-color);
+                font-size: 0.78rem;
+                color: var(--text-muted);
+                font-weight: 500;
+                background: transparent;
+                transition: all 0.2s;
+            }
+
+            .pvTag:hover {
+                border-color: var(--primary);
+                color: var(--primary);
+                background: color-mix(in srgb, var(--primary) 8%, transparent);
+            }
+
+            /* Variants */
+            .pvSection {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .pvSectionLabel {
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                font-weight: 600;
+            }
+
+            .pvBtnGroup {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .pvVariantBtn,
+            .pvPricingBtn {
+                padding: 7px 16px;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+                background: var(--card-bg);
+                color: var(--text-color);
+                font-size: 0.82rem;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-family: inherit;
+            }
+
+            .pvVariantBtn:hover,
+            .pvPricingBtn:hover {
+                border-color: var(--primary);
+                color: var(--primary);
+            }
+
+            .pvVariantBtn.active,
+            .pvPricingBtn.active {
+                border-color: var(--primary);
+                background: color-mix(in srgb, var(--primary) 10%, transparent);
+                color: var(--primary);
+            }
+
+            .pvPricingBtn {
+                text-align: left;
+            }
+
+            .pvPricingPrice {
+                font-size: 0.78rem;
+                color: var(--primary);
+                font-weight: 600;
+            }
+
+            /* Stock + Qty */
+            .pvStockInfo {
+                font-size: 0.82rem;
+                color: var(--text-muted);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .pvStockCount {
+                color: var(--primary);
+                font-weight: 700;
+            }
+
+            .pvQtyRow {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .pvQtyBtn {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+                background: var(--card-bg);
+                color: var(--text-color);
+                cursor: pointer;
+                font-size: 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }
+
+            .pvQtyBtn:hover {
+                border-color: var(--primary);
+                color: var(--primary);
+            }
+
+            .pvQtyInput {
+                width: 48px;
+                text-align: center;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 5px;
+                font-size: 0.88rem;
+                background: var(--card-bg);
+                color: var(--text-color);
+                font-family: inherit;
+            }
+
+            /* ── Footer Actions ── */
+            .pvFooter {
+                display: flex;
+                gap: 12px;
+                padding: 16px 24px;
+                border-top: 1px solid var(--border-color);
+                flex-shrink: 0;
+            }
+
+            .pvBtnAddCart {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 14px 20px;
+                background: linear-gradient(135deg, var(--primary), #10b981);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 0.95rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.25s;
+                text-decoration: none;
+                font-family: inherit;
+                box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+            }
+
+            .pvBtnAddCart:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 24px rgba(16, 185, 129, 0.35);
+            }
+
+            .pvBtnDetail {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 14px 20px;
+                background: var(--bg-darker);
+                color: var(--text-color);
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                font-size: 0.95rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.25s;
+                text-decoration: none;
+                font-family: inherit;
+            }
+
+            .pvBtnDetail:hover {
+                border-color: var(--text-muted);
+                transform: translateY(-1px);
+            }
+
+            /* Price in footer */
+            .pvPrice {
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: #10b981;
+                white-space: nowrap;
+            }
+
+            @media (max-width: 768px) {
+                .previewModal {
+                    max-width: 100%;
+                    max-height: 95vh;
+                    border-radius: 14px;
+                }
+
+                .pvBody {
+                    grid-template-columns: 1fr;
+                }
+
+                .pvGallery {
+                    border-right: none;
+                    border-bottom: 1px solid var(--border-color);
+                }
+
+                .pvMainImage {
+                    aspect-ratio: 16/9;
+                }
+
+                .pvFooter {
+                    flex-direction: column;
+                }
+            }
+
+            /* Empty */
+            .emptyState {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 40vh;
+                gap: 16px;
+                animation: fadeInUp 0.5s ease both;
+                text-align: center;
+            }
+
+            .emptyIcon {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(16, 185, 129, 0.06);
+                border: 1px solid rgba(16, 185, 129, 0.15);
+                font-size: 2rem;
+            }
+
+            .emptyState h2 {
+                font-size: 1.2rem;
+                opacity: 0.7;
+                margin: 0;
+            }
+
+            .emptyState p {
+                font-size: 0.88rem;
+                color: var(--text-muted);
+                margin: 0;
+            }
+
+            /* Pagination */
+            .pagination {
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                margin-top: 36px;
+            }
+
+            .pageBtn {
+                padding: 9px 17px;
+                border-radius: 10px;
+                border: 1px solid var(--border-color);
+                background: var(--card-bg);
+                color: var(--text-muted);
+                cursor: pointer;
+                font-size: 0.82rem;
+                font-weight: 500;
+                transition: all 0.25s;
+                text-decoration: none;
+            }
+
+            .pageBtn:hover {
+                border-color: var(--primary);
+                color: var(--primary);
+            }
+
+            .pageBtn.active {
+                background: rgba(16, 185, 129, 0.15);
+                border-color: rgba(16, 185, 129, 0.3);
+                color: var(--primary);
+                font-weight: 600;
+            }
+
+            /* Sort */
+            .exploreHeader {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 24px;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            .exploreHeader h2 {
+                font-size: 1.75rem;
+                font-weight: 700;
+                margin: 0 0 4px 0;
+            }
+
+            .resultCount {
+                color: var(--text-muted);
+                font-size: 0.875rem;
+                margin: 0;
+            }
+
+            /* Mobile */
+            .mobileFilterBtn {
+                display: none;
+                position: fixed;
+                bottom: 24px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--primary);
+                color: white;
+                padding: 14px 28px;
+                border-radius: 30px;
+                font-size: 1rem;
+                font-weight: 600;
+                z-index: 100;
+                box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+                border: none;
+                cursor: pointer;
+                gap: 8px;
+                align-items: center;
+            }
+
+            @media (max-width: 1024px) {
+                .exploreWrapper {
+                    grid-template-columns: 1fr;
+                    padding: 20px;
+                }
+
+                .filterSidebar {
+                    display: none;
+                    position: fixed;
+                    left: 0;
+                    top: 0;
+                    bottom: 0;
+                    width: 300px;
+                    z-index: 200;
+                    border-radius: 0 16px 16px 0;
+                    overflow-y: auto;
+                    transform: translateX(-100%);
+                    transition: transform 0.3s ease;
+                    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.3);
+                }
+
+                .filterSidebar.show {
+                    display: block;
+                    transform: translateX(0);
+                }
+
+                .mobileFilterBtn {
+                    display: flex;
+                }
+
+                /* Backdrop for mobile filter */
+                .filterBackdrop {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    backdrop-filter: blur(4px);
+                    z-index: 199;
+                    display: none;
+                }
+
+                .filterBackdrop.show {
+                    display: block;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .exploreWrapper {
+                    padding: 16px;
+                    gap: 16px;
+                }
+
+                .productGrid {
+                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                    gap: 16px;
+                }
+
+                .productImgWrap {
+                    height: 160px;
+                }
+
+                .productInfo {
+                    padding: 12px;
+                }
+
+                .productInfo h3 {
+                    font-size: 0.88rem;
+                    min-height: 36px;
+                }
+
+                .productPrice {
+                    font-size: 1rem;
+                }
+
+                .previewBackdrop {
+                    padding: 12px;
+                }
+
+                .previewModal {
+                    max-height: 95vh;
+                    border-radius: 14px;
+                }
+
+                .pvBody {
+                    grid-template-columns: 1fr;
+                }
+
+                .pvGallery {
+                    border-right: none;
+                    border-bottom: 1px solid var(--border-color);
+                    padding: 16px;
+                }
+
+                .pvMainImage {
+                    aspect-ratio: 16/9;
+                }
+
+                .pvInfo {
+                    padding: 16px;
+                    gap: 12px;
+                }
+
+                .pvFooter {
+                    flex-direction: column;
+                    padding: 14px 16px;
+                }
+
+                .pvHeader {
+                    padding: 14px 16px;
+                }
+
+                .pvHeaderTitle {
+                    font-size: 0.95rem;
+                }
+            }
+
+            @media (max-width: 640px) {
+                .exploreHeader {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+
+                .exploreHeader h2 {
+                    font-size: 1.4rem;
+                }
+
+                .productGrid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 12px;
+                }
+
+                .hoverOverlay {
+                    opacity: 1;
+                    background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
+                }
+
+                .hoverBtn {
+                    transform: translateY(0);
+                    opacity: 1;
+                    padding: 7px 12px;
+                    font-size: 0.72rem;
+                }
+
+                .productImgWrap {
+                    height: 140px;
+                }
+
+                .pvInfoRows {
+                    border-radius: 10px;
+                }
+
+                .pvInfoRow {
+                    padding: 10px 12px;
+                    font-size: 0.82rem;
+                }
+
+                .pvStatsRow {
+                    gap: 16px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .exploreWrapper {
+                    padding: 12px;
+                }
+
+                .productGrid {
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                }
+
+                .productImgWrap {
+                    height: 120px;
+                }
+
+                .productInfo {
+                    padding: 10px;
+                }
+
+                .productInfo h3 {
+                    font-size: 0.82rem;
+                    min-height: auto;
+                    -webkit-line-clamp: 1;
+                }
+
+                .productPrice {
+                    font-size: 0.9rem;
+                }
+
+                .productMeta {
+                    font-size: 0.72rem;
+                }
+
+                .hoverBtn {
+                    padding: 6px 10px;
+                    font-size: 0.68rem;
+                }
+
+                .pagination {
+                    gap: 4px;
+                    flex-wrap: wrap;
+                }
+
+                .pageBtn {
+                    padding: 7px 12px;
+                    font-size: 0.75rem;
+                }
+
+                .pvBtnGroup {
+                    gap: 6px;
+                }
+
+                .pvVariantBtn,
+                .pvPricingBtn {
+                    padding: 6px 12px;
+                    font-size: 0.78rem;
+                }
+
+                .pvPrice {
+                    font-size: 1.1rem;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="exploreWrapper">
+            <!-- Filter Sidebar -->
+            <aside class="filterSidebar" id="filterSidebar">
+                <div class="filterHeader">
+                    <h3>Bộ lọc</h3>
+                </div>
+                <div class="filterGroup">
+                    <h4>Danh mục</h4>
+                    <div class="filterList">
+                        <a th:href="@{/products}" class="filterLabel"
+                            th:classappend="${selectedCategoryId == null} ? 'active'">
+                            <span class="labelText">Tất cả</span>
+                        </a>
+                        <th:block th:each="cat : ${categories}">
+                            <a th:href="@{/products(categoryId=${cat.id})}" class="filterLabel"
+                                th:classappend="${selectedCategoryId != null && selectedCategoryId == cat.id} ? 'active'">
+                                <span th:text="${cat.icon != null ? cat.icon : '📁'}" style="font-size:1.1rem">📁</span>
+                                <span class="labelText" th:text="${cat.name}">Category</span>
+                            </a>
+                        </th:block>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div>
+                <div class="exploreHeader">
+                    <div>
+                        <h2>Khám phá</h2>
+                        <p class="resultCount" th:text="${products.totalElements} + ' sản phẩm'">0 sản phẩm</p>
+                    </div>
+                </div>
+
+                <div class="productGrid" th:if="${!products.isEmpty()}">
+                    <th:block th:each="product : ${products}">
+                        <div class="card productCard">
+                            <!-- Image + Hover Overlay -->
+                            <div class="productImgWrap">
+                                <img th:if="${product.images != null && !product.images.isEmpty()}"
+                                    th:src="${product.images[0].imageUrl}" th:alt="${product.name}">
+                                <div th:unless="${product.images != null && !product.images.isEmpty()}"
+                                    class="productImgPlaceholder">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.5">
+                                        <path
+                                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                        <line x1="12" y1="22.08" x2="12" y2="12" />
+                                    </svg>
+                                </div>
+                                <div class="hoverOverlay">
+                                    <button class="hoverBtn btnPreview" type="button" th:data-id="${product.id}"
+                                        th:data-name="${product.name}" th:data-price="${product.minPrice}"
+                                        th:data-rating="${product.ratingAvg}" th:data-sold="${product.totalSold}"
+                                        th:data-rating-count="${product.ratingCount}"
+                                        th:data-desc="${product.shortDescription}"
+                                        th:data-category="${product.category != null ? product.category.name : ''}"
+                                        th:data-img="${product.images != null && !product.images.isEmpty() ? product.images[0].imageUrl : ''}"
+                                        onclick="openPreview(this); event.stopPropagation();">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.5">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                        Preview
+                                    </button>
+                                    <a th:href="@{/products/{slug}(slug=${product.slug})}" class="hoverBtn btnDetail"
+                                        onclick="event.stopPropagation();">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.5">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                        Chi tiết
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- Product Info -->
+                            <div class="productInfo">
+                                <h3 th:text="${product.name}">Product Name</h3>
+                                <div class="productPrice"
+                                    th:text="${#numbers.formatDecimal(product.minPrice != null ? product.minPrice : 0, 0, 'COMMA', 0, 'POINT') + '₫'}">
+                                    0₫</div>
+                                <div class="productMeta">
+                                    <span style="display:inline-flex;align-items:center;gap:4px">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"
+                                            stroke-width="1">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                        </svg>
+                                        <span
+                                            th:text="${product.ratingAvg != null ? #numbers.formatDecimal(product.ratingAvg, 1, 1) : '0.0'}">0.0</span>
+                                    </span>
+                                    <span th:text="'Đã bán ' + ${product.totalSold != null ? product.totalSold : 0}">Đã
+                                        bán 0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </th:block>
+                </div>
+
+                <div class="emptyState" th:if="${products.isEmpty()}">
+                    <div class="emptyIcon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path
+                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                        </svg>
+                    </div>
+                    <h2>Chưa có sản phẩm nào</h2>
+                    <p>Sản phẩm sẽ được cập nhật sớm.</p>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" th:if="${products.totalPages > 1}">
+                    <a th:if="${products.hasPrevious()}"
+                        th:href="@{/products(page=${products.number - 1}, categoryId=${selectedCategoryId})}"
+                        class="pageBtn">← Trước</a>
+                    <th:block th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}">
+                        <span th:if="${i == products.number}" class="pageBtn active" th:text="${i + 1}">1</span>
+                        <a th:unless="${i == products.number}"
+                            th:href="@{/products(page=${i}, categoryId=${selectedCategoryId})}" class="pageBtn"
+                            th:text="${i + 1}">1</a>
+                    </th:block>
+                    <a th:if="${products.hasNext()}"
+                        th:href="@{/products(page=${products.number + 1}, categoryId=${selectedCategoryId})}"
+                        class="pageBtn">Sau →</a>
+                </div>
+            </div>
+
+            <!-- Mobile Filter Button -->
+            <button class="mobileFilterBtn" onclick="document.getElementById('filterSidebar').classList.toggle('show')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                </svg>
+                Bộ lọc
+            </button>
+        </div>
+
+        <!-- ===== Preview Modal ===== -->
+        <div class="previewBackdrop" id="previewBackdrop" onclick="closePreview(event)">
+            <div class="previewModal" onclick="event.stopPropagation()">
+                <!-- Header -->
+                <div class="pvHeader">
+                    <h2 class="pvHeaderTitle" id="previewTitle">Product Name</h2>
+                    <div class="pvHeaderSeller">
+                        <div class="pvSellerAvatar" id="pvSellerInitial">S</div>
+                        <span id="pvSellerName">Shop</span>
+                    </div>
+                    <button class="pvClose" onclick="closePreview()" aria-label="Đóng">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Two-column body -->
+                <div class="pvBody">
+                    <!-- Left: Gallery -->
+                    <div class="pvGallery">
+                        <div class="pvMainImage">
+                            <img id="previewImg" src="" alt="Preview">
+                            <div id="previewImgPlaceholder" class="pvImgPlaceholder" style="display:none">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path
+                                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                                </svg>
+                            </div>
+                            <button class="pvGalleryArrow prev" id="pvGalleryPrev" onclick="pvGalleryNav(-1)"
+                                style="display:none">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polyline points="15 18 9 12 15 6" />
+                                </svg>
+                            </button>
+                            <button class="pvGalleryArrow next" id="pvGalleryNext" onclick="pvGalleryNav(1)"
+                                style="display:none">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polyline points="9 6 15 12 9 18" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="pvThumbs" id="pvThumbs"></div>
+                    </div>
+
+                    <!-- Right: Info -->
+                    <div class="pvInfo">
+                        <p class="pvDesc" id="previewDesc">Chưa có mô tả.</p>
+
+                        <!-- Stats -->
+                        <div class="pvStatsRow">
+                            <div class="pvStatItem">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="9" cy="21" r="1" />
+                                    <circle cx="20" cy="21" r="1" />
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                                </svg>
+                                <span class="pvStatValue" id="previewSold">0</span> Sales
+                            </div>
+                            <div class="pvStatItem">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"
+                                    stroke-width="1">
+                                    <polygon
+                                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                                <span class="pvStatValue" id="previewRating">0.0</span>
+                                <span style="color:var(--text-muted)">(<span id="previewRatingCount">0</span>)</span>
+                            </div>
+                        </div>
+
+                        <!-- Info rows -->
+                        <div class="pvInfoRows">
+                            <div class="pvInfoRow">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.75">
+                                    <path
+                                        d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                                </svg>
+                                <span class="pvInfoLabel">Danh mục:</span>
+                                <span class="pvInfoValue" id="previewCategory">—</span>
+                            </div>
+                            <div class="pvInfoRow">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.75">
+                                    <path
+                                        d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                                </svg>
+                                <span class="pvInfoLabel">Giá: </span>
+                                <span class="pvInfoValue pvPrice" id="previewPrice">0₫</span>
+                            </div>
+                        </div>
+
+                        <!-- Variants -->
+                        <div class="pvSection" id="previewVariants">
+                            <span class="pvSectionLabel">Gói sản phẩm</span>
+                            <div class="pvBtnGroup" id="previewVariantBtns"></div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <div class="pvSection" id="previewPricings" style="display:none">
+                            <span class="pvSectionLabel">Thời hạn</span>
+                            <div class="pvBtnGroup" id="previewPricingBtns"></div>
+                        </div>
+
+                        <!-- Stock -->
+                        <div class="pvStockInfo" id="previewStock" style="display:none">
+                            Tồn kho: <span class="pvStockCount" id="previewStockCount">0</span>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="pvQtyRow" id="previewQtyRow" style="display:none">
+                            <span style="font-size:.85rem;color:var(--text-muted)">Số lượng:</span>
+                            <button type="button" class="pvQtyBtn" onclick="previewChangeQty(-1)">−</button>
+                            <input id="previewQtyInput" type="number" value="1" min="1" max="99" class="pvQtyInput">
+                            <button type="button" class="pvQtyBtn" onclick="previewChangeQty(1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="pvFooter">
+                    <button id="previewAddCartBtn" class="pvBtnAddCart" onclick="previewAddToCart()"
+                        style="display:none">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="9" cy="21" r="1" />
+                            <circle cx="20" cy="21" r="1" />
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                        </svg>
+                        <span id="pvAddCartLabel">Thêm giỏ hàng</span>
+                    </button>
+                    <a id="previewDetailLink" href="#" class="pvBtnDetail">
+                        Xem chi tiết
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            let previewData = { productId: null, variantId: null, pricingId: null, stock: 0, slug: '', images: [], currentImgIndex: 0 };
+
+            function formatPrice(price) {
+                if (!price || price == 0) return 'Liên hệ';
+                return Number(price).toLocaleString('vi-VN') + '₫';
+            }
+
+            // === Gallery ===
+            function pvSetMainImage(index) {
+                if (!previewData.images.length) return;
+                previewData.currentImgIndex = index;
+                const img = document.getElementById('previewImg');
+                img.src = previewData.images[index].imageUrl;
+                img.style.display = 'block';
+                document.getElementById('previewImgPlaceholder').style.display = 'none';
+                // Update thumbs
+                document.querySelectorAll('.pvThumb').forEach((t, i) => {
+                    t.classList.toggle('active', i === index);
+                });
+                // Arrow visibility
+                document.getElementById('pvGalleryPrev').style.display = index > 0 ? 'flex' : 'none';
+                document.getElementById('pvGalleryNext').style.display = index < previewData.images.length - 1 ? 'flex' : 'none';
+            }
+
+            function pvGalleryNav(dir) {
+                const newIdx = previewData.currentImgIndex + dir;
+                if (newIdx >= 0 && newIdx < previewData.images.length) pvSetMainImage(newIdx);
+            }
+
+            function pvRenderThumbs() {
+                const container = document.getElementById('pvThumbs');
+                container.innerHTML = '';
+                if (previewData.images.length <= 1) return;
+                previewData.images.forEach((img, i) => {
+                    const t = document.createElement('div');
+                    t.className = 'pvThumb' + (i === 0 ? ' active' : '');
+                    t.innerHTML = `<img src="${img.imageUrl}" alt="Thumb ${i + 1}">`;
+                    t.onclick = () => pvSetMainImage(i);
+                    container.appendChild(t);
+                });
+            }
+
+            async function openPreview(btn) {
+                const data = btn.dataset;
+                const backdrop = document.getElementById('previewBackdrop');
+                const img = document.getElementById('previewImg');
+                const placeholder = document.getElementById('previewImgPlaceholder');
+
+                // Set title in header
+                document.getElementById('previewTitle').textContent = data.name || '';
+
+                // Seller info
+                const sellerName = data.seller || 'Shop';
+                document.getElementById('pvSellerName').textContent = sellerName;
+                document.getElementById('pvSellerInitial').textContent = sellerName.charAt(0).toUpperCase();
+
+                // Image
+                if (data.img) {
+                    img.src = data.img;
+                    img.style.display = 'block';
+                    placeholder.style.display = 'none';
+                } else {
+                    img.style.display = 'none';
+                    placeholder.style.display = 'flex';
+                }
+
+                // Info
+                document.getElementById('previewCategory').textContent = data.category || '—';
+                document.getElementById('previewRating').textContent = data.rating ? parseFloat(data.rating).toFixed(1) : '0.0';
+                document.getElementById('previewRatingCount').textContent = data.ratingCount || '0';
+                document.getElementById('previewSold').textContent = data.sold || '0';
+                document.getElementById('previewPrice').textContent = formatPrice(data.price);
+                document.getElementById('previewDesc').textContent = data.desc || 'Chưa có mô tả.';
+                document.getElementById('previewDetailLink').href = '/products/' + data.slug;
+
+                previewData.productId = data.id;
+                previewData.slug = data.slug;
+                previewData.images = [];
+                previewData.currentImgIndex = 0;
+
+                // Reset gallery
+                document.getElementById('pvThumbs').innerHTML = '';
+                document.getElementById('pvGalleryPrev').style.display = 'none';
+                document.getElementById('pvGalleryNext').style.display = 'none';
+
+                // Reset selectors
+                document.getElementById('previewVariantBtns').innerHTML = '<span style="font-size:.8rem;color:var(--text-muted)">Đang tải...</span>';
+                document.getElementById('previewPricings').style.display = 'none';
+                document.getElementById('previewStock').style.display = 'none';
+                document.getElementById('previewQtyRow').style.display = 'none';
+                document.getElementById('previewAddCartBtn').style.display = 'none';
+
+                backdrop.classList.add('show');
+                document.body.style.overflow = 'hidden';
+
+                // Load product data via AJAX
+                try {
+                    const res = await fetch('/api/products/' + data.id + '/variants');
+                    if (res.ok) {
+                        const result = await res.json();
+                        // Load gallery images
+                        if (result.images && result.images.length) {
+                            previewData.images = result.images;
+                            pvSetMainImage(0);
+                            pvRenderThumbs();
+                        }
+                        renderPreviewVariants(result.variants || []);
+                    }
+                } catch (e) {
+                    document.getElementById('previewVariantBtns').innerHTML = '<span style="font-size:.8rem;color:var(--text-muted)">Không thể tải</span>';
+                }
+            }
+
+            function renderPreviewVariants(variants) {
+                const container = document.getElementById('previewVariantBtns');
+                if (!variants.length) {
+                    container.innerHTML = '<span style="font-size:.8rem;color:var(--text-muted)">Không có gói nào</span>';
+                    return;
+                }
+                container.innerHTML = '';
+                variants.forEach((v, i) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'pvVariantBtn';
+                    btn.textContent = v.name;
+                    btn.onclick = () => selectPreviewVariant(v, btn);
+                    container.appendChild(btn);
+                    if (i === 0) btn.click();
+                });
+            }
+
+            function selectPreviewVariant(variant, btn) {
+                btn.parentElement.querySelectorAll('.pvVariantBtn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                previewData.variantId = variant.id;
+
+                const pricingsDiv = document.getElementById('previewPricings');
+                const pricingBtns = document.getElementById('previewPricingBtns');
+                if (variant.pricings && variant.pricings.length) {
+                    pricingsDiv.style.display = 'flex';
+                    pricingBtns.innerHTML = '';
+                    variant.pricings.forEach((p, i) => {
+                        const pb = document.createElement('button');
+                        pb.type = 'button';
+                        pb.className = 'pvPricingBtn';
+                        pb.innerHTML = `<div>${p.durationLabel || 'Mặc định'}</div><div class="pvPricingPrice">${formatPrice(p.price)}</div>`;
+                        pb.onclick = () => selectPreviewPricing(p, pb);
+                        pricingBtns.appendChild(pb);
+                        if (i === 0) pb.click();
+                    });
+                } else {
+                    pricingsDiv.style.display = 'none';
+                }
+            }
+
+            function selectPreviewPricing(pricing, btn) {
+                btn.parentElement.querySelectorAll('.pvPricingBtn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                previewData.pricingId = pricing.id;
+                previewData.stock = pricing.stock || 0;
+                document.getElementById('previewPrice').textContent = formatPrice(pricing.price);
+                document.getElementById('previewStockCount').textContent = previewData.stock;
+                document.getElementById('previewStock').style.display = 'flex';
+
+                // Quantity
+                const qtyRow = document.getElementById('previewQtyRow');
+                const qtyInput = document.getElementById('previewQtyInput');
+                qtyRow.style.display = previewData.stock > 0 ? 'flex' : 'none';
+                qtyInput.value = 1;
+                qtyInput.max = previewData.stock;
+
+                // Add-to-cart button with price
+                const addBtn = document.getElementById('previewAddCartBtn');
+                addBtn.style.display = previewData.stock > 0 ? 'flex' : 'none';
+                document.getElementById('pvAddCartLabel').textContent = 'Thêm giỏ hàng · ' + formatPrice(pricing.price);
+            }
+
+            function previewChangeQty(delta) {
+                const inp = document.getElementById('previewQtyInput');
+                let v = parseInt(inp.value) + delta;
+                if (v < 1) v = 1;
+                if (v > previewData.stock) v = previewData.stock;
+                inp.value = v;
+            }
+
+            async function previewAddToCart() {
+                if (!previewData.pricingId) { showToast('Vui lòng chọn gói sản phẩm', 'warning'); return; }
+                const qty = parseInt(document.getElementById('previewQtyInput').value) || 1;
+                try {
+                    await fetchApi('/api/cart/add', {
+                        method: 'POST',
+                        body: JSON.stringify({ productId: previewData.productId, variantId: previewData.variantId, pricingId: previewData.pricingId, quantity: qty })
+                    });
+                    showToast('Đã thêm vào giỏ hàng!', 'success');
+                } catch (e) { }
+            }
+
+            function closePreview(e) {
+                if (e && e.target !== e.currentTarget && !e.target.closest('.pvClose')) return;
+                document.getElementById('previewBackdrop').classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            // Close on Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closePreview();
+            });
+
+            // Click on card info area navigates to detail
+            document.querySelectorAll('.productCard .productInfo').forEach(function (info) {
+                info.style.cursor = 'pointer';
+                info.addEventListener('click', function () {
+                    const card = this.closest('.productCard');
+                    const detailLink = card.querySelector('.btnDetail');
+                    if (detailLink) window.location.href = detailLink.href;
+                });
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>

@@ -1,0 +1,96 @@
+:root {
+    /* Theme Colors (Light Mode) */
+    --bg-color: #f9fafb;
+    --bg-darker: #f3f4f6;
+    --text-color: #111827;
+    --text-muted: #6b7280;
+    --card-bg: #ffffff;
+    --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --border-color: #e5e7eb;
+    --nav-bg: rgba(255, 255, 255, 0.8);
+    --nav-btn-bg: rgba(0, 0, 0, 0.05);
+    --nav-btn-text: #111827;
+
+    --sidebar-bg: #ffffff;
+    --footer-bg: #f9fafb;
+    --footer-text: #111827;
+
+    /* Primary Colors */
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --secondary: #8b5cf6;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #06b6d4;
+
+    /* Grayscale */
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --black: #000000;
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+    /* Transitions */
+    --transition: all 0.3s ease;
+
+    /* Fonts */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    --font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Dark Mode Overrides */
+body.dark-mode {
+    --bg-color: #0f172a;
+    --bg-darker: #0c1222;
+    --text-color: #f1f5f9;
+    --text-muted: #94a3b8;
+    --card-bg: #1e293b;
+    --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    --border-color: #334155;
+    --nav-bg: rgba(30, 41, 59, 0.8);
+    --nav-btn-bg: rgba(255, 255, 255, 0.1);
+    --nav-btn-text: #f1f5f9;
+
+    --sidebar-bg: #1e293b;
+    --footer-bg: #0c1222;
+    --footer-text: #f1f5f9;
+
+    --gray-50: #1e293b;
+    --gray-100: #0f172a;
+    --gray-900: #f1f5f9;
+
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.2);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.35);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4);
+}

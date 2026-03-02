@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout}">
+
+<head>
+    <title>Quản lý Orders</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="page-content">
+            <div class="page-header">
+                <div>
+                    <h1>Quản lý Orders</h1>
+                    <p th:text="${orders.totalElements} + ' đơn hàng'">0 đơn hàng</p>
+                </div>
+            </div>
+
+            <!-- Stat Cards -->
+            <div class="stat-cards">
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <div class="stat-icon indigo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1" />
+                                <circle cx="20" cy="21" r="1" />
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                            </svg></div>
+                    </div>
+                    <div class="stat-value" th:text="${orders.totalElements}">0</div>
+                    <div class="stat-label">Tổng đơn</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <div class="stat-icon amber"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg></div>
+                    </div>
+                    <div class="stat-value" th:text="${pendingCount}">0</div>
+                    <div class="stat-label">Chờ xử lý</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <div class="stat-icon emerald"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg></div>
+                    </div>
+                    <div class="stat-value" th:text="${completedCount}">0</div>
+                    <div class="stat-label">Hoàn thành</div>
+                </div>
+            </div>
+
+            <div class="data-table-wrapper">
+                <div class="table-header">
+                    <div class="table-actions">
+                        <div class="filter-tabs">
+                            <a th:href="@{/admin/orders}" class="filter-tab"
+                                th:classappend="${statusFilter == null} ? 'active'">Tất cả</a>
+                            <a th:href="@{/admin/orders(status=PENDING)}" class="filter-tab"
+                                th:classappend="${statusFilter == 'PENDING'} ? 'active'">Pending</a>
+                            <a th:href="@{/admin/orders(status=PAID)}" class="filter-tab"
+                                th:classappend="${statusFilter == 'PAID'} ? 'active'">Paid</a>
+                            <a th:href="@{/admin/orders(status=COMPLETED)}" class="filter-tab"
+                                th:classappend="${statusFilter == 'COMPLETED'} ? 'active'">Completed</a>
+                            <a th:href="@{/admin/orders(status=CANCELLED)}" class="filter-tab"
+                                th:classappend="${statusFilter == 'CANCELLED'} ? 'active'">Cancelled</a>
+                        </div>
+                    </div>
+                    <div class="search-box">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <form th:action="@{/admin/orders}" method="get" style="display:contents">
+                            <input type="text" name="search" placeholder="Tìm đơn hàng..." th:value="${searchTerm}">
+                        </form>
+                    </div>
+                </div>
+
+                <div th:if="${orders.hasContent()}">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thanh toán</th>
+                                    <th>Ngày tạo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="o : ${orders}">
+                                    <td style="font-weight:600;color:var(--primary)" th:text="${o.orderNumber}">ORD-001
+                                    </td>
+                                    <td>
+                                        <div style="font-weight:500" th:text="${o.user.username}">user</div>
+                                        <div style="font-size:12px;color:var(--text-muted)" th:text="${o.user.email}">
+                                            email</div>
+                                    </td>
+                                    <td style="font-weight:600"
+                                        th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT') + '₫'}">
+                                        0₫</td>
+                                    <td>
+                                        <span class="badge"
+                                            th:classappend="${o.status.name() == 'PENDING'} ? 'pending' : (${o.status.name() == 'COMPLETED'} ? 'delivered' : (${o.status.name() == 'CANCELLED'} ? 'cancelled' : 'processing'))"
+                                            th:text="${o.status}">PENDING</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge"
+                                            th:classappend="${o.paymentStatus.name() == 'PAID'} ? 'active' : 'pending'"
+                                            th:text="${o.paymentStatus}">UNPAID</span>
+                                    </td>
+                                    <td style="font-size:13px;color:var(--text-muted)"
+                                        th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination" th:if="${orders.totalPages > 1}">
+                        <div class="pagination-info"
+                            th:text="'Trang ' + ${orders.number + 1} + ' / ' + ${orders.totalPages}">Trang 1</div>
+                        <div class="pagination-buttons">
+                            <a th:href="@{/admin/orders(page=${orders.number - 1}, status=${statusFilter})}"
+                                class="pagination-btn" th:classappend="${orders.number == 0} ? 'disabled'">‹</a>
+                            <th:block th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}">
+                                <a th:href="@{/admin/orders(page=${i}, status=${statusFilter})}" class="pagination-btn"
+                                    th:classappend="${i == orders.number} ? 'active'" th:text="${i + 1}">1</a>
+                            </th:block>
+                            <a th:href="@{/admin/orders(page=${orders.number + 1}, status=${statusFilter})}"
+                                class="pagination-btn"
+                                th:classappend="${orders.number >= orders.totalPages - 1} ? 'disabled'">›</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:unless="${orders.hasContent()}" class="empty-state">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <circle cx="9" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                    </svg>
+                    <h3>Không tìm thấy đơn hàng</h3>
+                    <p>Thử thay đổi bộ lọc</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
