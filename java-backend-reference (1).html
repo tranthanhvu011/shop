@@ -1,0 +1,2948 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Backend Reference — Spring Boot</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Raleway:wght@400;600;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c0e14;
+      --surface: #141720;
+      --surface2: #1c2030;
+      --border: #252a3a;
+      --border2: #2e3550;
+      --orange: #f97316;
+      --blue: #60a5fa;
+      --green: #4ade80;
+      --yellow: #fbbf24;
+      --pink: #f472b6;
+      --purple: #a78bfa;
+      --red: #f87171;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --muted2: #475569;
+      --font-code: 'JetBrains Mono', monospace;
+      --font-ui: 'Raleway', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-code);
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(12,14,20,0.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 52px;
+    }
+    .logo {
+      font-family: var(--font-ui);
+      font-weight: 900; font-size: 1rem;
+      color: var(--orange);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .logo-badge {
+      background: rgba(249,115,22,0.15);
+      border: 1px solid rgba(249,115,22,0.3);
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      font-size: 10px; color: var(--orange);
+    }
+    nav { display: flex; gap: 1.5rem; }
+    nav a {
+      color: var(--muted); text-decoration: none;
+      font-size: 11px; letter-spacing: 0.5px;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--orange); }
+
+    /* ── LAYOUT ── */
+    .wrapper { display: flex; max-width: 1200px; margin: 0 auto; }
+
+    /* sidebar */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      position: sticky; top: 52px;
+      height: calc(100vh - 52px);
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+    }
+    .sidebar-title {
+      font-size: 9px; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--muted2);
+      margin-bottom: 0.75rem; padding-left: 0.5rem;
+    }
+    .sidebar-item {
+      display: block; padding: 0.35rem 0.5rem;
+      color: var(--muted); text-decoration: none;
+      border-radius: 5px; font-size: 11px;
+      transition: all 0.15s; margin-bottom: 2px;
+    }
+    .sidebar-item:hover, .sidebar-item.active {
+      background: rgba(249,115,22,0.1);
+      color: var(--orange);
+    }
+    .sidebar-item .num {
+      font-size: 9px; color: var(--muted2);
+      margin-right: 0.4rem;
+    }
+    .sidebar-group { margin-bottom: 1.5rem; }
+
+    /* main */
+    main { flex: 1; min-width: 0; padding: 3rem 2.5rem 6rem; }
+
+    /* ── SECTIONS ── */
+    section {
+      margin-bottom: 4rem;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    section.visible { opacity: 1; transform: none; }
+
+    .chapter-label {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted2); margin-bottom: 0.5rem;
+    }
+    .chapter-num {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 3px;
+      padding: 0.1rem 0.4rem;
+      font-size: 9px; color: var(--orange);
+    }
+    h2 {
+      font-family: var(--font-ui);
+      font-size: 1.7rem; font-weight: 900;
+      margin-bottom: 0.5rem; line-height: 1.2;
+    }
+    h2 span { color: var(--orange); }
+    .section-desc {
+      color: var(--muted); font-size: 12px;
+      margin-bottom: 1.75rem; max-width: 600px;
+    }
+    h3 {
+      font-family: var(--font-ui);
+      font-size: 0.85rem; font-weight: 700;
+      color: var(--blue); margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    h3::before {
+      content: ''; width: 3px; height: 14px;
+      background: var(--blue); border-radius: 2px; flex-shrink: 0;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--border2); }
+    .card-orange { border-left: 3px solid var(--orange); }
+    .card-blue { border-left: 3px solid var(--blue); }
+    .card-green { border-left: 3px solid var(--green); }
+    .card-yellow { border-left: 3px solid var(--yellow); }
+    .card-purple { border-left: 3px solid var(--purple); }
+    .card-pink { border-left: 3px solid var(--pink); }
+    .card-red { border-left: 3px solid var(--red); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+    /* ── CODE BLOCKS ── */
+    .code-wrap {
+      background: #080a10;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0.75rem 0;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .code-filename {
+      font-size: 11px; color: var(--muted);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .code-filename .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--orange);
+    }
+    .copy-btn {
+      background: none; border: 1px solid var(--border2);
+      color: var(--muted); border-radius: 4px;
+      padding: 0.15rem 0.5rem; font-size: 10px;
+      cursor: pointer; font-family: var(--font-code);
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+    pre {
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-size: 12px;
+      line-height: 1.85;
+      font-family: var(--font-code);
+    }
+
+    /* syntax highlight */
+    .kw { color: #c678dd; font-weight: 600; }   /* keyword */
+    .type { color: #e5c07b; }                    /* type/class */
+    .fn { color: #61afef; }                      /* function/method */
+    .str { color: #98c379; }                     /* string */
+    .cm { color: #5c6370; font-style: italic; }  /* comment */
+    .an { color: #e06c75; }                      /* annotation */
+    .num { color: #d19a66; }                     /* number */
+    .var { color: #abb2bf; }                     /* variable */
+    .iface { color: #56b6c2; }                   /* interface */
+    .pkg { color: #7f848e; }                     /* package/import */
+
+    /* ── FLOW DIAGRAM ── */
+    .flow {
+      display: flex; align-items: center;
+      gap: 0; flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+    .flow-step {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      font-size: 11px; text-align: center;
+      min-width: 100px;
+    }
+    .flow-step .f-title { color: var(--text); font-weight: 600; }
+    .flow-step .f-sub { color: var(--muted); font-size: 10px; margin-top: 2px; }
+    .flow-arrow {
+      color: var(--muted2); font-size: 18px;
+      padding: 0 0.3rem; flex-shrink: 0;
+    }
+    .flow-step.highlight { border-color: var(--orange); background: rgba(249,115,22,0.08); }
+    .flow-step.highlight .f-title { color: var(--orange); }
+
+    /* ── LAYER STACK ── */
+    .layer-stack { display: flex; flex-direction: column; gap: 6px; }
+    .layer {
+      display: flex; align-items: center;
+      padding: 0.8rem 1.25rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      gap: 1rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .layer:hover { transform: translateX(4px); }
+    .layer-num {
+      font-family: var(--font-ui); font-weight: 900;
+      font-size: 1.2rem; min-width: 30px;
+      opacity: 0.5;
+    }
+    .layer-info .l-name { font-family: var(--font-ui); font-weight: 700; font-size: 0.85rem; }
+    .layer-info .l-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .layer-badge {
+      margin-left: auto; font-size: 10px;
+      padding: 0.2rem 0.5rem; border-radius: 4px;
+      font-weight: 700; letter-spacing: 0.5px;
+    }
+
+    .l1 { background: rgba(249,115,22,0.06); border-color: rgba(249,115,22,0.2); }
+    .l1 .layer-num { color: var(--orange); }
+    .l1 .layer-badge { background: rgba(249,115,22,0.15); color: var(--orange); }
+
+    .l2 { background: rgba(96,165,250,0.06); border-color: rgba(96,165,250,0.2); }
+    .l2 .layer-num { color: var(--blue); }
+    .l2 .layer-badge { background: rgba(96,165,250,0.15); color: var(--blue); }
+
+    .l3 { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.2); }
+    .l3 .layer-num { color: var(--green); }
+    .l3 .layer-badge { background: rgba(74,222,128,0.15); color: var(--green); }
+
+    .l4 { background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.2); }
+    .l4 .layer-num { color: var(--yellow); }
+    .l4 .layer-badge { background: rgba(251,191,36,0.15); color: var(--yellow); }
+
+    .l5 { background: rgba(167,139,250,0.06); border-color: rgba(167,139,250,0.2); }
+    .l5 .layer-num { color: var(--purple); }
+    .l5 .layer-badge { background: rgba(167,139,250,0.15); color: var(--purple); }
+
+    .l6 { background: rgba(244,114,182,0.06); border-color: rgba(244,114,182,0.2); }
+    .l6 .layer-num { color: var(--pink); }
+    .l6 .layer-badge { background: rgba(244,114,182,0.15); color: var(--pink); }
+
+    /* ── HTTP DEMO ── */
+    .http-demo {
+      background: #080a10;
+      border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .http-tab-bar {
+      display: flex; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .http-tab {
+      padding: 0.5rem 1rem; font-size: 11px;
+      color: var(--muted); cursor: pointer;
+      border-right: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .http-tab.active { color: var(--orange); background: rgba(249,115,22,0.08); }
+    .http-tab:hover:not(.active) { color: var(--text); }
+    .http-content { padding: 1.25rem; font-size: 12px; }
+    .http-content.hidden { display: none; }
+    .method-badge {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      border-radius: 4px; font-size: 10px; font-weight: 700;
+      margin-right: 0.5rem;
+    }
+    .get { background: rgba(74,222,128,0.15); color: var(--green); }
+    .post { background: rgba(96,165,250,0.15); color: var(--blue); }
+    .put { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .delete { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    .status-row {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.75rem 0;
+    }
+    .status-chip {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.75rem; border-radius: 20px;
+      font-size: 11px; background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+    .status-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* ── SIMULATOR ── */
+    .sim-panel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem;
+      margin-top: 1rem;
+    }
+    .sim-title { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.75rem; }
+    .sim-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+    input, select, textarea {
+      background: #080a10; border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.5rem 0.75rem;
+      color: var(--text); font-family: var(--font-code);
+      font-size: 12px; outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--orange); }
+    input { flex: 1; }
+    button {
+      cursor: pointer; font-family: var(--font-code);
+      font-size: 12px; border: none; border-radius: 6px;
+      padding: 0.5rem 1rem; transition: all 0.2s;
+    }
+    .btn-o { background: var(--orange); color: #0c0e14; font-weight: 700; }
+    .btn-o:hover { background: #fb923c; transform: translateY(-1px); }
+    .btn-g { background: transparent; border: 1px solid var(--border2); color: var(--text); }
+    .btn-g:hover { border-color: var(--green); color: var(--green); }
+    .sim-output {
+      background: #080a10; border: 1px solid var(--border);
+      border-radius: 6px; padding: 1rem;
+      min-height: 80px; font-size: 12px;
+      color: var(--muted); margin-top: 0.5rem;
+    }
+
+    /* ── JWT DECODER ── */
+    .jwt-part {
+      padding: 0.4rem 0.75rem; border-radius: 4px;
+      font-size: 11px; word-break: break-all;
+      margin-bottom: 4px;
+    }
+    .jwt-header { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+    .jwt-payload { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+    .jwt-sig { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
+
+    /* ── QUIZ ── */
+    .quiz-q { color: var(--text); margin-bottom: 0.75rem; font-size: 13px; }
+    .quiz-opts { display: flex; flex-direction: column; gap: 0.4rem; }
+    .quiz-opt {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 1rem; border-radius: 6px;
+      border: 1px solid var(--border); cursor: pointer;
+      font-size: 12px; color: var(--muted);
+      transition: all 0.2s; user-select: none;
+    }
+    .quiz-opt:hover { border-color: var(--border2); color: var(--text); }
+    .quiz-opt.correct { border-color: var(--green); color: var(--green); background: rgba(74,222,128,0.08); }
+    .quiz-opt.wrong { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.08); }
+    .quiz-opt .opt-key {
+      width: 20px; height: 20px; border-radius: 4px;
+      background: var(--surface2); display: flex; align-items: center;
+      justify-content: center; font-size: 10px; flex-shrink: 0;
+    }
+    .quiz-feedback { font-size: 11px; margin-top: 0.5rem; height: 18px; }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-block; font-size: 9px;
+      padding: 0.2rem 0.5rem; border-radius: 4px;
+      font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .b-orange { background: rgba(249,115,22,0.15); color: var(--orange); }
+    .b-blue { background: rgba(96,165,250,0.15); color: var(--blue); }
+    .b-green { background: rgba(74,222,128,0.15); color: var(--green); }
+    .b-purple { background: rgba(167,139,250,0.15); color: var(--purple); }
+    .b-red { background: rgba(248,113,113,0.15); color: var(--red); }
+    .b-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; padding-left: 1.5rem; }
+    .timeline::before {
+      content: ''; position: absolute; left: 0; top: 8px; bottom: 0;
+      width: 1px; background: var(--border2);
+    }
+    .tl-item {
+      position: relative; margin-bottom: 1.25rem;
+    }
+    .tl-item::before {
+      content: ''; position: absolute;
+      left: -1.5rem; top: 6px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--orange); border: 2px solid var(--bg);
+    }
+    .tl-item.done::before { background: var(--green); }
+    .tl-label { font-size: 11px; color: var(--muted2); margin-bottom: 2px; }
+    .tl-content { font-size: 12px; color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 3.5rem 0 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+    .hero-tag {
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 4px; padding: 0.2rem 0.6rem;
+      font-size: 10px; color: var(--muted);
+    }
+    .hero h1 {
+      font-family: var(--font-ui); font-weight: 900;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.1; margin-bottom: 0.75rem;
+    }
+    .hero h1 em { color: var(--orange); font-style: normal; }
+    .hero p { color: var(--muted); font-size: 12px; max-width: 560px; margin-bottom: 1.5rem; }
+    .toc-links { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .toc-link {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 0.3rem 0.75rem;
+      font-size: 11px; color: var(--muted);
+      text-decoration: none; transition: all 0.2s;
+    }
+    .toc-link:hover { border-color: var(--orange); color: var(--orange); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      main { padding: 2rem 1.25rem 4rem; }
+      nav { display: none; }
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center; padding: 2rem;
+      color: var(--muted2); font-size: 11px;
+    }
+
+    /* ── ANNOTATION ── */
+    .anno {
+      display: flex; gap: 0.5rem; align-items: flex-start;
+      padding: 0.75rem 1rem;
+      background: rgba(249,115,22,0.06);
+      border: 1px solid rgba(249,115,22,0.15);
+      border-radius: 6px; margin: 0.75rem 0;
+      font-size: 12px;
+    }
+    .anno .ico { flex-shrink: 0; color: var(--orange); }
+    .anno-blue {
+      background: rgba(96,165,250,0.06);
+      border-color: rgba(96,165,250,0.15);
+    }
+    .anno-blue .ico { color: var(--blue); }
+    .anno-green {
+      background: rgba(74,222,128,0.06);
+      border-color: rgba(74,222,128,0.15);
+    }
+    .anno-green .ico { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      ☕ java.backend
+      <span class="logo-badge">Spring Boot</span>
+    </div>
+    <nav>
+      <a href="#oop">OOP</a>
+      <a href="#spring">Spring Boot</a>
+      <a href="#layers">Layers</a>
+      <a href="#database">Database</a>
+      <a href="#auth">Auth JWT</a>
+      <a href="#exception">Exception</a>
+      <a href="#websocket">WebSocket</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-group">
+      <div class="sidebar-title">Nền tảng</div>
+      <a href="#oop" class="sidebar-item"><span class="num">01</span>OOP Java</a>
+      <a href="#spring" class="sidebar-item"><span class="num">02</span>Spring Boot Setup</a>
+      <a href="#http" class="sidebar-item"><span class="num">03</span>HTTP & REST API</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-title">Kiến trúc</div>
+      <a href="#layers" class="sidebar-item"><span class="num">04</span>3-Layer Architecture</a>
+      <a href="#controller" class="sidebar-item"><span class="num">05</span>Controller Layer</a>
+      <a href="#service" class="sidebar-item"><span class="num">06</span>Service Layer</a>
+      <a href="#repository" class="sidebar-item"><span class="num">07</span>Repository Layer</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-title">Database</div>
+      <a href="#database" class="sidebar-item"><span class="num">08</span>JPA & Entity</a>
+      <a href="#sql" class="sidebar-item"><span class="num">09</span>SQL Cơ Bản</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-title">Security</div>
+      <a href="#auth" class="sidebar-item"><span class="num">10</span>Auth & JWT</a>
+      <a href="#middleware" class="sidebar-item"><span class="num">11</span>Filter/Middleware</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-title">Nâng cao</div>
+      <a href="#exception" class="sidebar-item"><span class="num">12</span>Exception Handling</a>
+      <a href="#validation" class="sidebar-item"><span class="num">13</span>Validation</a>
+      <a href="#websocket" class="sidebar-item"><span class="num">14</span>WebSocket</a>
+      <a href="#flow" class="sidebar-item"><span class="num">15</span>Request Flow</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-title">Production</div>
+      <a href="#testing" class="sidebar-item"><span class="num">16</span>Testing</a>
+      <a href="#logging" class="sidebar-item"><span class="num">17</span>Logging</a>
+      <a href="#swagger" class="sidebar-item"><span class="num">18</span>Swagger/OpenAPI</a>
+      <a href="#pagination" class="sidebar-item"><span class="num">19</span>Pagination</a>
+      <a href="#flyway" class="sidebar-item"><span class="num">20</span>DB Migration</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-title">Hạ tầng</div>
+      <a href="#redis" class="sidebar-item"><span class="num">21</span>Redis Cache</a>
+      <a href="#rabbitmq" class="sidebar-item"><span class="num">22</span>RabbitMQ Queue</a>
+      <a href="#docker" class="sidebar-item"><span class="num">23</span>Docker</a>
+      <a href="#cicd" class="sidebar-item"><span class="num">24</span>CI/CD</a>
+      <a href="#microservices" class="sidebar-item"><span class="num">25</span>Microservices</a>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- HERO -->
+    <div class="hero" id="top">
+      <div class="hero-tags">
+        <span class="hero-tag">Java 17+</span>
+        <span class="hero-tag">Spring Boot 3</span>
+        <span class="hero-tag">JPA / Hibernate</span>
+        <span class="hero-tag">JWT Security</span>
+        <span class="hero-tag">WebSocket</span>
+        <span class="hero-tag">Redis · RabbitMQ</span>
+        <span class="hero-tag">Docker · CI/CD</span>
+        <span class="hero-tag">Microservices</span>
+        <span class="hero-tag">25 Chương</span>
+      </div>
+      <h1>Java Backend<br><em>từ nền tảng đến production</em></h1>
+      <p>Toàn bộ kiến thức Java backend: OOP, Spring Boot, 3-layer, JPA, JWT, Testing, Logging, Swagger, Pagination, Flyway, Redis, RabbitMQ, Docker, CI/CD, Microservices. 25 chương, đầy đủ code thực tế.</p>
+      <div class="toc-links">
+        <a href="#oop" class="toc-link">OOP</a>
+        <a href="#spring" class="toc-link">Spring Setup</a>
+        <a href="#http" class="toc-link">HTTP REST</a>
+        <a href="#layers" class="toc-link">3 Layers</a>
+        <a href="#database" class="toc-link">JPA Entity</a>
+        <a href="#auth" class="toc-link">JWT Auth</a>
+        <a href="#exception" class="toc-link">Exception</a>
+        <a href="#validation" class="toc-link">Validation</a>
+        <a href="#websocket" class="toc-link">WebSocket</a>
+        <a href="#flow" class="toc-link">Request Flow</a>
+        <a href="#testing" class="toc-link">Testing</a>
+        <a href="#logging" class="toc-link">Logging</a>
+        <a href="#swagger" class="toc-link">Swagger</a>
+        <a href="#pagination" class="toc-link">Pagination</a>
+        <a href="#flyway" class="toc-link">Flyway</a>
+        <a href="#redis" class="toc-link">Redis</a>
+        <a href="#rabbitmq" class="toc-link">RabbitMQ</a>
+        <a href="#docker" class="toc-link">Docker</a>
+        <a href="#cicd" class="toc-link">CI/CD</a>
+        <a href="#microservices" class="toc-link">Microservices</a>
+      </div>
+    </div>
+
+    <!-- =============================================
+         01. OOP JAVA
+    ============================================= -->
+    <section id="oop">
+      <div class="chapter-label"><span class="chapter-num">01</span> Nền tảng</div>
+      <h2>OOP — <span>4 trụ cột Java</span></h2>
+      <p class="section-desc">Java là ngôn ngữ hướng đối tượng. Hiểu OOP là hiểu cách Java tư duy. Spring Boot xây dựng toàn bộ trên nền này.</p>
+
+      <div class="grid-2">
+        <div class="card card-orange">
+          <h3>Class & Object</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>User.java</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// CLASS = bản thiết kế (blueprint)</span>
+<span class="kw">public class</span> <span class="type">User</span> {
+
+    <span class="cm">// Fields (thuộc tính)</span>
+    <span class="kw">private</span> <span class="type">Long</span> <span class="var">id</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">name</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">email</span>;
+
+    <span class="cm">// Constructor (tạo object)</span>
+    <span class="kw">public</span> <span class="fn">User</span>(<span class="type">String</span> <span class="var">name</span>, <span class="type">String</span> <span class="var">email</span>) {
+        <span class="kw">this</span>.<span class="var">name</span> = <span class="var">name</span>;
+        <span class="kw">this</span>.<span class="var">email</span> = <span class="var">email</span>;
+    }
+
+    <span class="cm">// Getter / Setter</span>
+    <span class="kw">public</span> <span class="type">String</span> <span class="fn">getName</span>() { <span class="kw">return</span> <span class="var">name</span>; }
+    <span class="kw">public void</span> <span class="fn">setName</span>(<span class="type">String</span> <span class="var">name</span>) {
+        <span class="kw">this</span>.<span class="var">name</span> = <span class="var">name</span>;
+    }
+}
+
+<span class="cm">// OBJECT = thực thể từ class</span>
+<span class="type">User</span> <span class="var">user1</span> = <span class="kw">new</span> <span class="fn">User</span>(<span class="str">"Minh"</span>, <span class="str">"minh@gmail.com"</span>);
+<span class="type">String</span> <span class="var">name</span> = <span class="var">user1</span>.<span class="fn">getName</span>(); <span class="cm">// "Minh"</span></pre>
+          </div>
+        </div>
+
+        <div class="card card-blue">
+          <h3>Inheritance & Interface</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>Kế thừa</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// INTERFACE = hợp đồng (contract)</span>
+<span class="kw">public interface</span> <span class="iface">Sendable</span> {
+    <span class="kw">void</span> <span class="fn">send</span>(<span class="type">String</span> <span class="var">message</span>); <span class="cm">// phải implement</span>
+}
+
+<span class="cm">// ABSTRACT CLASS = class không tạo object được</span>
+<span class="kw">public abstract class</span> <span class="type">Notification</span> {
+    <span class="kw">protected</span> <span class="type">String</span> <span class="var">recipient</span>;
+
+    <span class="kw">public abstract void</span> <span class="fn">deliver</span>(); <span class="cm">// con phải override</span>
+
+    <span class="kw">public void</span> <span class="fn">log</span>() {
+        <span class="fn">System</span>.<span class="var">out</span>.<span class="fn">println</span>(<span class="str">"Sending to: "</span> + <span class="var">recipient</span>);
+    }
+}
+
+<span class="cm">// EXTENDS + IMPLEMENTS</span>
+<span class="kw">public class</span> <span class="type">EmailNotification</span>
+    <span class="kw">extends</span> <span class="type">Notification</span>
+    <span class="kw">implements</span> <span class="iface">Sendable</span> {
+
+    <span class="an">@Override</span>
+    <span class="kw">public void</span> <span class="fn">deliver</span>() { <span class="cm">/* gửi email */</span> }
+
+    <span class="an">@Override</span>
+    <span class="kw">public void</span> <span class="fn">send</span>(<span class="type">String</span> <span class="var">msg</span>) { <span class="cm">/* logic */</span> }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-green">
+          <h3>Encapsulation — private + getter/setter</h3>
+          <div class="anno anno-green">
+            <span class="ico">💡</span>
+            <span>Dùng <code>private</code> để ẩn data, <code>public</code> getter/setter để kiểm soát truy cập. Spring dùng cơ chế này ở khắp nơi.</span>
+          </div>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--green)"></span>Lombok shortcut</span>
+            </div>
+            <pre><span class="cm">// Thay vì viết getter/setter thủ công,</span>
+<span class="cm">// dùng Lombok (thư viện phổ biến trong Spring)</span>
+
+<span class="an">@Data</span>           <span class="cm">← tự tạo getter, setter, toString</span>
+<span class="an">@NoArgsConstructor</span> <span class="cm">← constructor rỗng</span>
+<span class="an">@AllArgsConstructor</span> <span class="cm">← constructor đủ field</span>
+<span class="an">@Builder</span>        <span class="cm">← dùng builder pattern</span>
+<span class="kw">public class</span> <span class="type">User</span> {
+    <span class="kw">private</span> <span class="type">Long</span> <span class="var">id</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">name</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">email</span>;
+}
+
+<span class="cm">// Sử dụng với Builder</span>
+<span class="type">User</span> <span class="var">u</span> = <span class="type">User</span>.<span class="fn">builder</span>()
+    .<span class="fn">name</span>(<span class="str">"Minh"</span>)
+    .<span class="fn">email</span>(<span class="str">"minh@gmail.com"</span>)
+    .<span class="fn">build</span>();</pre>
+          </div>
+        </div>
+
+        <div class="card card-yellow">
+          <h3>Generics & Collections</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--yellow)"></span>Collections</span>
+            </div>
+            <pre><span class="cm">// List — danh sách có thứ tự</span>
+<span class="type">List</span>&lt;<span class="type">String</span>&gt; <span class="var">names</span> = <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+<span class="var">names</span>.<span class="fn">add</span>(<span class="str">"Minh"</span>);
+<span class="var">names</span>.<span class="fn">get</span>(<span class="num">0</span>);          <span class="cm">// "Minh"</span>
+<span class="var">names</span>.<span class="fn">size</span>();          <span class="cm">// 1</span>
+
+<span class="cm">// Map — key-value (như object trong JS)</span>
+<span class="type">Map</span>&lt;<span class="type">String</span>, <span class="type">Integer</span>&gt; <span class="var">scores</span> = <span class="kw">new</span> <span class="type">HashMap</span>&lt;&gt;();
+<span class="var">scores</span>.<span class="fn">put</span>(<span class="str">"Minh"</span>, <span class="num">95</span>);
+<span class="var">scores</span>.<span class="fn">get</span>(<span class="str">"Minh"</span>);     <span class="cm">// 95</span>
+
+<span class="cm">// Optional — tránh NullPointerException</span>
+<span class="type">Optional</span>&lt;<span class="type">User</span>&gt; <span class="var">user</span> = <span class="var">repository</span>.<span class="fn">findById</span>(<span class="num">1L</span>);
+<span class="var">user</span>.<span class="fn">ifPresent</span>(<span class="var">u</span> -> <span class="fn">System</span>.<span class="var">out</span>.<span class="fn">println</span>(<span class="var">u</span>.<span class="fn">getName</span>()));
+<span class="var">user</span>.<span class="fn">orElseThrow</span>(() -> <span class="kw">new</span> <span class="type">RuntimeException</span>(<span class="str">"Not found"</span>));</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         02. SPRING BOOT SETUP
+    ============================================= -->
+    <section id="spring">
+      <div class="chapter-label"><span class="chapter-num">02</span> Framework</div>
+      <h2>Spring Boot <span>Setup & Cấu trúc</span></h2>
+      <p class="section-desc">Spring Boot = framework giúp build REST API nhanh chóng. Nó tự cấu hình hầu hết mọi thứ, bạn chỉ cần focus vào logic.</p>
+
+      <div class="grid-2">
+        <div class="card card-orange">
+          <h3>Cấu trúc thư mục chuẩn</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>Project Structure</span>
+            </div>
+            <pre><span class="str">src/main/java/com/myapp/</span>
+├── <span class="type">MyApplication.java</span>     <span class="cm">← entry point</span>
+├── <span class="var">controller/</span>            <span class="cm">← nhận HTTP request</span>
+│   └── <span class="type">UserController.java</span>
+├── <span class="var">service/</span>               <span class="cm">← xử lý business logic</span>
+│   ├── <span class="iface">UserService.java</span>   <span class="cm">← interface</span>
+│   └── <span class="type">UserServiceImpl.java</span> <span class="cm">← implement</span>
+├── <span class="var">repository/</span>            <span class="cm">← tương tác database</span>
+│   └── <span class="type">UserRepository.java</span>
+├── <span class="var">model/</span>                 <span class="cm">← entity (bảng DB)</span>
+│   └── <span class="type">User.java</span>
+├── <span class="var">dto/</span>                   <span class="cm">← data transfer object</span>
+│   ├── <span class="type">UserRequest.java</span>
+│   └── <span class="type">UserResponse.java</span>
+├── <span class="var">security/</span>             <span class="cm">← JWT, filter, config</span>
+├── <span class="var">exception/</span>            <span class="cm">← custom exception</span>
+└── <span class="var">config/</span>               <span class="cm">← cấu hình chung</span>
+
+<span class="str">src/main/resources/</span>
+├── <span class="str">application.yml</span>        <span class="cm">← config database, port...</span>
+└── <span class="str">application-dev.yml</span>   <span class="cm">← config môi trường dev</span></pre>
+          </div>
+        </div>
+
+        <div class="card card-blue">
+          <h3>pom.xml — Dependencies quan trọng</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>pom.xml</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">&lt;!-- WEB - REST API --&gt;</span>
+<span class="kw">&lt;dependency&gt;</span>
+  <span class="kw">&lt;groupId&gt;</span>org.springframework.boot<span class="kw">&lt;/groupId&gt;</span>
+  <span class="kw">&lt;artifactId&gt;</span>spring-boot-starter-web<span class="kw">&lt;/artifactId&gt;</span>
+<span class="kw">&lt;/dependency&gt;</span>
+
+<span class="cm">&lt;!-- DATABASE - JPA + Hibernate --&gt;</span>
+<span class="kw">&lt;dependency&gt;</span>
+  <span class="kw">&lt;artifactId&gt;</span>spring-boot-starter-data-jpa<span class="kw">&lt;/artifactId&gt;</span>
+<span class="kw">&lt;/dependency&gt;</span>
+
+<span class="cm">&lt;!-- SECURITY - JWT auth --&gt;</span>
+<span class="kw">&lt;dependency&gt;</span>
+  <span class="kw">&lt;artifactId&gt;</span>spring-boot-starter-security<span class="kw">&lt;/artifactId&gt;</span>
+<span class="kw">&lt;/dependency&gt;</span>
+
+<span class="cm">&lt;!-- VALIDATION - @Valid --&gt;</span>
+<span class="kw">&lt;dependency&gt;</span>
+  <span class="kw">&lt;artifactId&gt;</span>spring-boot-starter-validation<span class="kw">&lt;/artifactId&gt;</span>
+<span class="kw">&lt;/dependency&gt;</span>
+
+<span class="cm">&lt;!-- LOMBOK - @Data, @Builder ... --&gt;</span>
+<span class="kw">&lt;dependency&gt;</span>
+  <span class="kw">&lt;artifactId&gt;</span>lombok<span class="kw">&lt;/artifactId&gt;</span>
+  <span class="kw">&lt;optional&gt;</span>true<span class="kw">&lt;/optional&gt;</span>
+<span class="kw">&lt;/dependency&gt;</span>
+
+<span class="cm">&lt;!-- POSTGRESQL driver --&gt;</span>
+<span class="kw">&lt;dependency&gt;</span>
+  <span class="kw">&lt;artifactId&gt;</span>postgresql<span class="kw">&lt;/artifactId&gt;</span>
+<span class="kw">&lt;/dependency&gt;</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-green">
+        <h3>application.yml — Cấu hình chính</h3>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-filename"><span class="dot" style="background:var(--green)"></span>application.yml</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="var">server</span>:
+  <span class="var">port</span>: <span class="num">8080</span>             <span class="cm"># port chạy server</span>
+
+<span class="var">spring</span>:
+  <span class="var">datasource</span>:
+    <span class="var">url</span>: <span class="str">jdbc:postgresql://localhost:5432/mydb</span>
+    <span class="var">username</span>: <span class="str">${DB_USERNAME}</span>  <span class="cm"># đọc từ env variable</span>
+    <span class="var">password</span>: <span class="str">${DB_PASSWORD}</span>  <span class="cm"># KHÔNG hardcode password!</span>
+
+  <span class="var">jpa</span>:
+    <span class="var">hibernate</span>:
+      <span class="var">ddl-auto</span>: <span class="str">update</span>   <span class="cm"># tự tạo/update bảng theo Entity</span>
+    <span class="var">show-sql</span>: <span class="kw">true</span>       <span class="cm"># in SQL ra console khi dev</span>
+
+<span class="var">jwt</span>:
+  <span class="var">secret</span>: <span class="str">${JWT_SECRET}</span>
+  <span class="var">expiration</span>: <span class="num">86400000</span>  <span class="cm"># 24 giờ (milliseconds)</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         03. HTTP & REST API
+    ============================================= -->
+    <section id="http">
+      <div class="chapter-label"><span class="chapter-num">03</span> Protocol</div>
+      <h2>HTTP & <span>REST API</span></h2>
+      <p class="section-desc">REST API = cách frontend và backend nói chuyện với nhau qua HTTP. Hiểu HTTP = hiểu nền tảng của mọi API.</p>
+
+      <div class="card card-orange">
+        <h3>HTTP Methods & Status Codes</h3>
+        <div class="http-demo">
+          <div class="http-tab-bar">
+            <div class="http-tab active" onclick="switchTab('methods')">HTTP Methods</div>
+            <div class="http-tab" onclick="switchTab('status')">Status Codes</div>
+            <div class="http-tab" onclick="switchTab('anatomy')">Cấu trúc Request</div>
+          </div>
+          <div class="http-content" id="tab-methods">
+            <div style="display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1rem;">
+              <div><span class="method-badge get">GET</span> <span style="color:var(--text)">/api/users</span> — <span style="color:var(--muted)">Lấy danh sách users (đọc, không thay đổi data)</span></div>
+              <div><span class="method-badge get">GET</span> <span style="color:var(--text)">/api/users/1</span> — <span style="color:var(--muted)">Lấy user có id=1</span></div>
+              <div><span class="method-badge post">POST</span> <span style="color:var(--text)">/api/users</span> — <span style="color:var(--muted)">Tạo user mới (body chứa data)</span></div>
+              <div><span class="method-badge put">PUT</span> <span style="color:var(--text)">/api/users/1</span> — <span style="color:var(--muted)">Cập nhật toàn bộ user id=1</span></div>
+              <div><span class="method-badge" style="background:rgba(167,139,250,0.15);color:var(--purple)">PATCH</span> <span style="color:var(--text)">/api/users/1</span> — <span style="color:var(--muted)">Cập nhật 1 phần (chỉ email chẳng hạn)</span></div>
+              <div><span class="method-badge delete">DELETE</span> <span style="color:var(--text)">/api/users/1</span> — <span style="color:var(--muted)">Xóa user id=1</span></div>
+            </div>
+          </div>
+          <div class="http-content hidden" id="tab-status">
+            <div class="status-row">
+              <div class="status-chip"><span class="dot" style="background:var(--green)"></span> <strong style="color:var(--green)">200</strong> OK — thành công</div>
+              <div class="status-chip"><span class="dot" style="background:var(--green)"></span> <strong style="color:var(--green)">201</strong> Created — tạo thành công</div>
+              <div class="status-chip"><span class="dot" style="background:var(--green)"></span> <strong style="color:var(--green)">204</strong> No Content — xóa thành công</div>
+              <div class="status-chip"><span class="dot" style="background:var(--yellow)"></span> <strong style="color:var(--yellow)">400</strong> Bad Request — sai input</div>
+              <div class="status-chip"><span class="dot" style="background:var(--yellow)"></span> <strong style="color:var(--yellow)">401</strong> Unauthorized — chưa đăng nhập</div>
+              <div class="status-chip"><span class="dot" style="background:var(--yellow)"></span> <strong style="color:var(--yellow)">403</strong> Forbidden — không có quyền</div>
+              <div class="status-chip"><span class="dot" style="background:var(--yellow)"></span> <strong style="color:var(--yellow)">404</strong> Not Found — không tìm thấy</div>
+              <div class="status-chip"><span class="dot" style="background:var(--yellow)"></span> <strong style="color:var(--yellow)">409</strong> Conflict — bị trùng (email đã tồn tại)</div>
+              <div class="status-chip"><span class="dot" style="background:var(--red)"></span> <strong style="color:var(--red)">500</strong> Server Error — lỗi code phía server</div>
+            </div>
+          </div>
+          <div class="http-content hidden" id="tab-anatomy">
+            <pre style="font-size:11px;"><span class="cm">// REQUEST từ Client → Server</span>
+<span class="kw">POST</span> /api/auth/login HTTP/1.1
+Host: api.myapp.com
+
+<span class="cm">// HEADERS</span>
+Content-Type: application/json
+Authorization: Bearer eyJhbGci...  <span class="cm">← JWT token</span>
+Accept-Language: vi
+
+<span class="cm">// BODY (với POST, PUT, PATCH)</span>
+{
+  <span class="str">"email"</span>: <span class="str">"minh@gmail.com"</span>,
+  <span class="str">"password"</span>: <span class="str">"securePass123"</span>
+}
+
+<span class="cm">// RESPONSE từ Server → Client</span>
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  <span class="str">"token"</span>: <span class="str">"eyJhbGci..."</span>,
+  <span class="str">"user"</span>: { <span class="str">"id"</span>: 1, <span class="str">"name"</span>: <span class="str">"Minh"</span> }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         04-07. 3-LAYER ARCHITECTURE
+    ============================================= -->
+    <section id="layers">
+      <div class="chapter-label"><span class="chapter-num">04</span> Architecture</div>
+      <h2><span>3-Layer</span> Architecture</h2>
+      <p class="section-desc">Kiến trúc 3 tầng là chuẩn của mọi Spring Boot project. Mỗi tầng chỉ làm 1 việc — tách rõ trách nhiệm.</p>
+
+      <div class="layer-stack">
+        <div class="layer l1" onclick="scrollTo('#controller')">
+          <div class="layer-num">1</div>
+          <div class="layer-info">
+            <div class="l-name">Controller Layer</div>
+            <div class="l-desc">Nhận HTTP Request → Gọi Service → Trả Response. Không chứa logic.</div>
+          </div>
+          <span class="layer-badge">@RestController</span>
+        </div>
+        <div class="layer l2" onclick="scrollTo('#service')">
+          <div class="layer-num">2</div>
+          <div class="layer-info">
+            <div class="l-name">Service Layer</div>
+            <div class="l-desc">Toàn bộ business logic nằm đây: validate, tính toán, gọi repository.</div>
+          </div>
+          <span class="layer-badge">@Service</span>
+        </div>
+        <div class="layer l3" onclick="scrollTo('#repository')">
+          <div class="layer-num">3</div>
+          <div class="layer-info">
+            <div class="l-name">Repository Layer</div>
+            <div class="l-desc">Tương tác database: CRUD, query, không biết gì về HTTP hay business logic.</div>
+          </div>
+          <span class="layer-badge">@Repository</span>
+        </div>
+      </div>
+
+      <div class="anno" style="margin-top:1rem;">
+        <span class="ico">⚡</span>
+        <span>Request đi từ trên xuống: <strong>Client → Controller → Service → Repository → Database</strong>. Response đi ngược lại. Đây là luồng quan trọng nhất bạn phải nắm chắc.</span>
+      </div>
+    </section>
+
+    <!-- CONTROLLER -->
+    <section id="controller">
+      <div class="chapter-label"><span class="chapter-num">05</span> Tầng 1</div>
+      <h2>Controller <span>Layer</span></h2>
+      <p class="section-desc">Cửa ngõ vào ứng dụng. Nhận request, gọi service, trả response. Không được chứa logic nghiệp vụ.</p>
+
+      <div class="card card-orange">
+        <h3>UserController.java — CRUD đầy đủ</h3>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-filename"><span class="dot"></span>UserController.java</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="an">@RestController</span>                    <span class="cm">← = @Controller + @ResponseBody</span>
+<span class="an">@RequestMapping</span>(<span class="str">"/api/users"</span>)       <span class="cm">← base URL</span>
+<span class="an">@RequiredArgsConstructor</span>           <span class="cm">← Lombok inject constructor</span>
+<span class="kw">public class</span> <span class="type">UserController</span> {
+
+    <span class="kw">private final</span> <span class="iface">UserService</span> <span class="var">userService</span>; <span class="cm">← inject Service</span>
+
+    <span class="cm">// GET /api/users → lấy tất cả users</span>
+    <span class="an">@GetMapping</span>
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">List</span>&lt;<span class="type">UserResponse</span>&gt;&gt; <span class="fn">getAllUsers</span>() {
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">ok</span>(<span class="var">userService</span>.<span class="fn">findAll</span>());
+    }
+
+    <span class="cm">// GET /api/users/{id} → lấy 1 user</span>
+    <span class="an">@GetMapping</span>(<span class="str">"/{id}"</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">UserResponse</span>&gt; <span class="fn">getUserById</span>(
+            <span class="an">@PathVariable</span> <span class="type">Long</span> <span class="var">id</span>) {  <span class="cm">← lấy {id} từ URL</span>
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">ok</span>(<span class="var">userService</span>.<span class="fn">findById</span>(<span class="var">id</span>));
+    }
+
+    <span class="cm">// POST /api/users → tạo user mới</span>
+    <span class="an">@PostMapping</span>
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">UserResponse</span>&gt; <span class="fn">createUser</span>(
+            <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="type">UserRequest</span> <span class="var">request</span>) {
+        <span class="cm">//  @Valid = validate input, @RequestBody = parse JSON từ body</span>
+        <span class="type">UserResponse</span> <span class="var">created</span> = <span class="var">userService</span>.<span class="fn">create</span>(<span class="var">request</span>);
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">body</span>(<span class="var">created</span>);
+    }
+
+    <span class="cm">// PUT /api/users/{id} → cập nhật user</span>
+    <span class="an">@PutMapping</span>(<span class="str">"/{id}"</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">UserResponse</span>&gt; <span class="fn">updateUser</span>(
+            <span class="an">@PathVariable</span> <span class="type">Long</span> <span class="var">id</span>,
+            <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="type">UserRequest</span> <span class="var">request</span>) {
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">ok</span>(<span class="var">userService</span>.<span class="fn">update</span>(<span class="var">id</span>, <span class="var">request</span>));
+    }
+
+    <span class="cm">// DELETE /api/users/{id} → xóa user</span>
+    <span class="an">@DeleteMapping</span>(<span class="str">"/{id}"</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">Void</span>&gt; <span class="fn">deleteUser</span>(
+            <span class="an">@PathVariable</span> <span class="type">Long</span> <span class="var">id</span>) {
+        <span class="var">userService</span>.<span class="fn">delete</span>(<span class="var">id</span>);
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">noContent</span>().<span class="fn">build</span>(); <span class="cm">// 204</span>
+    }
+
+    <span class="cm">// GET /api/users?name=Minh → query param</span>
+    <span class="an">@GetMapping</span>(<span class="str">"/search"</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">List</span>&lt;<span class="type">UserResponse</span>&gt;&gt; <span class="fn">search</span>(
+            <span class="an">@RequestParam</span> <span class="type">String</span> <span class="var">name</span>) { <span class="cm">← ?name=xxx</span>
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">ok</span>(<span class="var">userService</span>.<span class="fn">searchByName</span>(<span class="var">name</span>));
+    }
+}</pre>
+        </div>
+      </div>
+
+      <div class="card card-yellow">
+        <h3>DTO — Data Transfer Object</h3>
+        <div class="anno">
+          <span class="ico">💡</span>
+          <span>Không bao giờ trả thẳng Entity ra ngoài. Dùng DTO để kiểm soát dữ liệu gửi/nhận — ẩn password, chọn field cần thiết.</span>
+        </div>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-filename"><span class="dot" style="background:var(--yellow)"></span>UserRequest.java & UserResponse.java</span>
+          </div>
+          <pre><span class="cm">// REQUEST — nhận từ client (input)</span>
+<span class="an">@Data</span>
+<span class="kw">public class</span> <span class="type">UserRequest</span> {
+    <span class="an">@NotBlank</span>(message = <span class="str">"Tên không được rỗng"</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">name</span>;
+
+    <span class="an">@Email</span>(message = <span class="str">"Email không hợp lệ"</span>)
+    <span class="an">@NotBlank</span>
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">email</span>;
+
+    <span class="an">@Size</span>(min = <span class="num">8</span>, message = <span class="str">"Mật khẩu tối thiểu 8 ký tự"</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">password</span>;
+}
+
+<span class="cm">// RESPONSE — trả về client (output)</span>
+<span class="an">@Data</span> <span class="an">@Builder</span>
+<span class="kw">public class</span> <span class="type">UserResponse</span> {
+    <span class="kw">private</span> <span class="type">Long</span> <span class="var">id</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">name</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">email</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">role</span>;
+    <span class="kw">private</span> <span class="type">LocalDateTime</span> <span class="var">createdAt</span>;
+    <span class="cm">// KHÔNG có password ← bảo mật!</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICE -->
+    <section id="service">
+      <div class="chapter-label"><span class="chapter-num">06</span> Tầng 2</div>
+      <h2>Service <span>Layer</span></h2>
+      <p class="section-desc">Não của ứng dụng. Toàn bộ logic nghiệp vụ nằm đây. Không biết HTTP tồn tại, chỉ nhận input và trả output.</p>
+
+      <div class="card card-blue">
+        <h3>UserService — Interface + Implement</h3>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>UserService.java (interface)</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="cm">// Interface — định nghĩa contract</span>
+<span class="kw">public interface</span> <span class="iface">UserService</span> {
+    <span class="type">List</span>&lt;<span class="type">UserResponse</span>&gt; <span class="fn">findAll</span>();
+    <span class="type">UserResponse</span> <span class="fn">findById</span>(<span class="type">Long</span> <span class="var">id</span>);
+    <span class="type">UserResponse</span> <span class="fn">create</span>(<span class="type">UserRequest</span> <span class="var">request</span>);
+    <span class="type">UserResponse</span> <span class="fn">update</span>(<span class="type">Long</span> <span class="var">id</span>, <span class="type">UserRequest</span> <span class="var">request</span>);
+    <span class="kw">void</span> <span class="fn">delete</span>(<span class="type">Long</span> <span class="var">id</span>);
+    <span class="type">List</span>&lt;<span class="type">UserResponse</span>&gt; <span class="fn">searchByName</span>(<span class="type">String</span> <span class="var">name</span>);
+}</pre>
+        </div>
+        <div class="code-wrap" style="margin-top:0.5rem;">
+          <div class="code-header">
+            <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>UserServiceImpl.java</span>
+          </div>
+          <pre><span class="an">@Service</span>                          <span class="cm">← đăng ký với Spring IoC</span>
+<span class="an">@RequiredArgsConstructor</span>
+<span class="an">@Transactional</span>                    <span class="cm">← tự rollback nếu có lỗi</span>
+<span class="kw">public class</span> <span class="type">UserServiceImpl</span> <span class="kw">implements</span> <span class="iface">UserService</span> {
+
+    <span class="kw">private final</span> <span class="type">UserRepository</span> <span class="var">userRepository</span>;
+    <span class="kw">private final</span> <span class="type">PasswordEncoder</span> <span class="var">passwordEncoder</span>;
+
+    <span class="an">@Override</span>
+    <span class="an">@Transactional</span>(<span class="var">readOnly</span> = <span class="kw">true</span>) <span class="cm">← chỉ đọc, tối ưu</span>
+    <span class="kw">public</span> <span class="type">List</span>&lt;<span class="type">UserResponse</span>&gt; <span class="fn">findAll</span>() {
+        <span class="kw">return</span> <span class="var">userRepository</span>.<span class="fn">findAll</span>()
+            .<span class="fn">stream</span>()
+            .<span class="fn">map</span>(<span class="kw">this</span>::<span class="fn">toResponse</span>)  <span class="cm">← Entity → DTO</span>
+            .<span class="fn">toList</span>();
+    }
+
+    <span class="an">@Override</span>
+    <span class="kw">public</span> <span class="type">UserResponse</span> <span class="fn">create</span>(<span class="type">UserRequest</span> <span class="var">request</span>) {
+        <span class="cm">// 1. Validate business rule</span>
+        <span class="kw">if</span> (<span class="var">userRepository</span>.<span class="fn">existsByEmail</span>(<span class="var">request</span>.<span class="fn">getEmail</span>())) {
+            <span class="kw">throw new</span> <span class="type">ConflictException</span>(<span class="str">"Email đã tồn tại"</span>);
+        }
+
+        <span class="cm">// 2. Tạo Entity</span>
+        <span class="type">User</span> <span class="var">user</span> = <span class="type">User</span>.<span class="fn">builder</span>()
+            .<span class="fn">name</span>(<span class="var">request</span>.<span class="fn">getName</span>())
+            .<span class="fn">email</span>(<span class="var">request</span>.<span class="fn">getEmail</span>())
+            .<span class="fn">password</span>(<span class="var">passwordEncoder</span>.<span class="fn">encode</span>(<span class="var">request</span>.<span class="fn">getPassword</span>()))
+            .<span class="fn">role</span>(<span class="type">Role</span>.<span class="var">USER</span>)
+            .<span class="fn">build</span>();
+
+        <span class="cm">// 3. Lưu vào DB</span>
+        <span class="type">User</span> <span class="var">saved</span> = <span class="var">userRepository</span>.<span class="fn">save</span>(<span class="var">user</span>);
+
+        <span class="cm">// 4. Trả về DTO</span>
+        <span class="kw">return</span> <span class="fn">toResponse</span>(<span class="var">saved</span>);
+    }
+
+    <span class="kw">private</span> <span class="type">UserResponse</span> <span class="fn">toResponse</span>(<span class="type">User</span> <span class="var">user</span>) {
+        <span class="kw">return</span> <span class="type">UserResponse</span>.<span class="fn">builder</span>()
+            .<span class="fn">id</span>(<span class="var">user</span>.<span class="fn">getId</span>())
+            .<span class="fn">name</span>(<span class="var">user</span>.<span class="fn">getName</span>())
+            .<span class="fn">email</span>(<span class="var">user</span>.<span class="fn">getEmail</span>())
+            .<span class="fn">build</span>();
+    }
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPOSITORY -->
+    <section id="repository">
+      <div class="chapter-label"><span class="chapter-num">07</span> Tầng 3</div>
+      <h2>Repository <span>Layer</span></h2>
+      <p class="section-desc">Lớp duy nhất nói chuyện với database. Spring Data JPA tự generate SQL — bạn chỉ cần đặt tên method đúng cú pháp.</p>
+
+      <div class="card card-green">
+        <h3>UserRepository.java</h3>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-filename"><span class="dot" style="background:var(--green)"></span>UserRepository.java</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="an">@Repository</span>
+<span class="kw">public interface</span> <span class="type">UserRepository</span>
+    <span class="kw">extends</span> <span class="iface">JpaRepository</span>&lt;<span class="type">User</span>, <span class="type">Long</span>&gt; {
+    <span class="cm">//                          ↑Entity  ↑ID type</span>
+    <span class="cm">// JpaRepository cho bạn miễn phí:</span>
+    <span class="cm">// save(), findById(), findAll(), delete(), count(), exists()...</span>
+
+    <span class="cm">// TỰ SINH SQL bằng tên method (Method Query)</span>
+    <span class="type">Optional</span>&lt;<span class="type">User</span>&gt; <span class="fn">findByEmail</span>(<span class="type">String</span> <span class="var">email</span>);
+    <span class="cm">// → SELECT * FROM users WHERE email = ?</span>
+
+    <span class="type">List</span>&lt;<span class="type">User</span>&gt; <span class="fn">findByNameContainingIgnoreCase</span>(<span class="type">String</span> <span class="var">name</span>);
+    <span class="cm">// → SELECT * FROM users WHERE LOWER(name) LIKE %?%</span>
+
+    <span class="type">boolean</span> <span class="fn">existsByEmail</span>(<span class="type">String</span> <span class="var">email</span>);
+    <span class="cm">// → SELECT COUNT(*) > 0 FROM users WHERE email = ?</span>
+
+    <span class="type">List</span>&lt;<span class="type">User</span>&gt; <span class="fn">findByRoleOrderByCreatedAtDesc</span>(<span class="type">Role</span> <span class="var">role</span>);
+    <span class="cm">// → SELECT * FROM users WHERE role = ? ORDER BY created_at DESC</span>
+
+    <span class="cm">// JPQL — khi method query không đủ</span>
+    <span class="an">@Query</span>(<span class="str">"SELECT u FROM User u WHERE u.email = :email AND u.active = true"</span>)
+    <span class="type">Optional</span>&lt;<span class="type">User</span>&gt; <span class="fn">findActiveByEmail</span>(<span class="an">@Param</span>(<span class="str">"email"</span>) <span class="type">String</span> <span class="var">email</span>);
+
+    <span class="cm">// Native SQL query khi cần hiệu năng tối đa</span>
+    <span class="an">@Query</span>(value = <span class="str">"SELECT * FROM users WHERE created_at > NOW() - INTERVAL '7 days'"</span>,
+           nativeQuery = <span class="kw">true</span>)
+    <span class="type">List</span>&lt;<span class="type">User</span>&gt; <span class="fn">findRecentUsers</span>();
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         08-09. DATABASE
+    ============================================= -->
+    <section id="database">
+      <div class="chapter-label"><span class="chapter-num">08</span> Database</div>
+      <h2>JPA Entity & <span>Quan hệ bảng</span></h2>
+      <p class="section-desc">Entity = class Java ánh xạ với bảng database. JPA/Hibernate tự tạo SQL từ annotation.</p>
+
+      <div class="card card-purple">
+        <h3>User Entity — đầy đủ annotations</h3>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-filename"><span class="dot" style="background:var(--purple)"></span>User.java (Entity)</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="an">@Entity</span>                            <span class="cm">← đánh dấu là Entity JPA</span>
+<span class="an">@Table</span>(name = <span class="str">"users"</span>)            <span class="cm">← tên bảng trong DB</span>
+<span class="an">@Data</span> <span class="an">@Builder</span>
+<span class="an">@NoArgsConstructor</span> <span class="an">@AllArgsConstructor</span>
+<span class="an">@EntityListeners</span>(<span class="type">AuditingEntityListener</span>.class)
+<span class="kw">public class</span> <span class="type">User</span> {
+
+    <span class="an">@Id</span>
+    <span class="an">@GeneratedValue</span>(strategy = <span class="type">GenerationType</span>.<span class="var">IDENTITY</span>)
+    <span class="kw">private</span> <span class="type">Long</span> <span class="var">id</span>;       <span class="cm">← AUTO INCREMENT</span>
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, length = <span class="num">100</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">name</span>;
+
+    <span class="an">@Column</span>(unique = <span class="kw">true</span>, nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">email</span>;    <span class="cm">← phải unique</span>
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">password</span>; <span class="cm">← đã được hash</span>
+
+    <span class="an">@Enumerated</span>(<span class="type">EnumType</span>.<span class="var">STRING</span>)
+    <span class="kw">private</span> <span class="type">Role</span> <span class="var">role</span> = <span class="type">Role</span>.<span class="var">USER</span>;
+
+    <span class="an">@CreatedDate</span>
+    <span class="kw">private</span> <span class="type">LocalDateTime</span> <span class="var">createdAt</span>; <span class="cm">← tự điền khi tạo</span>
+
+    <span class="an">@LastModifiedDate</span>
+    <span class="kw">private</span> <span class="type">LocalDateTime</span> <span class="var">updatedAt</span>; <span class="cm">← tự cập nhật khi sửa</span>
+
+    <span class="cm">// QUAN HỆ: 1 User có nhiều Post</span>
+    <span class="an">@OneToMany</span>(mappedBy = <span class="str">"author"</span>, cascade = <span class="type">CascadeType</span>.<span class="var">ALL</span>)
+    <span class="kw">private</span> <span class="type">List</span>&lt;<span class="type">Post</span>&gt; <span class="var">posts</span> = <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+}
+
+<span class="cm">// ENUM cho Role</span>
+<span class="kw">public enum</span> <span class="type">Role</span> { <span class="var">USER</span>, <span class="var">ADMIN</span>, <span class="var">MODERATOR</span> }</pre>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-blue">
+          <h3>Quan hệ bảng</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>Relationships</span>
+            </div>
+            <pre><span class="cm">// 1-NHIỀU: 1 User → nhiều Post</span>
+<span class="cm">// Phía User (1):</span>
+<span class="an">@OneToMany</span>(mappedBy = <span class="str">"author"</span>)
+<span class="type">List</span>&lt;<span class="type">Post</span>&gt; <span class="var">posts</span>;
+
+<span class="cm">// Phía Post (nhiều):</span>
+<span class="an">@ManyToOne</span>
+<span class="an">@JoinColumn</span>(name = <span class="str">"user_id"</span>)
+<span class="type">User</span> <span class="var">author</span>;          <span class="cm">← foreign key</span>
+
+<span class="cm">// NHIỀU-NHIỀU: User ↔ Role</span>
+<span class="an">@ManyToMany</span>
+<span class="an">@JoinTable</span>(name = <span class="str">"user_roles"</span>,
+    joinColumns = <span class="an">@JoinColumn</span>(name = <span class="str">"user_id"</span>),
+    inverseJoinColumns = <span class="an">@JoinColumn</span>(name = <span class="str">"role_id"</span>))
+<span class="type">Set</span>&lt;<span class="type">Role</span>&gt; <span class="var">roles</span>;
+
+<span class="cm">// 1-1: User ↔ Profile</span>
+<span class="an">@OneToOne</span>
+<span class="an">@JoinColumn</span>(name = <span class="str">"profile_id"</span>)
+<span class="type">UserProfile</span> <span class="var">profile</span>;</pre>
+          </div>
+        </div>
+
+        <div class="card card-green" id="sql">
+          <h3>SQL cơ bản cần biết</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--green)"></span>SQL Essentials</span>
+            </div>
+            <pre><span class="cm">-- TẠO BẢNG</span>
+<span class="kw">CREATE TABLE</span> users (
+    id <span class="type">BIGSERIAL PRIMARY KEY</span>,
+    name <span class="type">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+    email <span class="type">VARCHAR</span>(<span class="num">255</span>) <span class="kw">UNIQUE NOT NULL</span>
+);
+
+<span class="cm">-- CRUD</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users;
+<span class="kw">SELECT</span> id, name <span class="kw">FROM</span> users <span class="kw">WHERE</span> role = <span class="str">'ADMIN'</span>;
+<span class="kw">INSERT INTO</span> users (name, email) <span class="kw">VALUES</span> (<span class="str">'Minh'</span>, <span class="str">'m@g.com'</span>);
+<span class="kw">UPDATE</span> users <span class="kw">SET</span> name = <span class="str">'Nam'</span> <span class="kw">WHERE</span> id = <span class="num">1</span>;
+<span class="kw">DELETE FROM</span> users <span class="kw">WHERE</span> id = <span class="num">1</span>;
+
+<span class="cm">-- JOIN: lấy user kèm posts</span>
+<span class="kw">SELECT</span> u.name, p.title
+<span class="kw">FROM</span> users u
+<span class="kw">INNER JOIN</span> posts p <span class="kw">ON</span> p.user_id = u.id
+<span class="kw">WHERE</span> u.id = <span class="num">1</span>;
+
+<span class="cm">-- AGGREGATE</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">FROM</span> users;
+<span class="kw">SELECT</span> role, <span class="fn">COUNT</span>(*) <span class="kw">FROM</span> users <span class="kw">GROUP BY</span> role;</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         10. AUTH & JWT
+    ============================================= -->
+    <section id="auth">
+      <div class="chapter-label"><span class="chapter-num">10</span> Security</div>
+      <h2>Authentication & <span>JWT</span></h2>
+      <p class="section-desc">JWT = JSON Web Token. Cơ chế xác thực stateless phổ biến nhất cho REST API hiện đại.</p>
+
+      <div class="card card-orange">
+        <h3>JWT hoạt động như thế nào?</h3>
+        <div class="flow" style="margin-bottom:1.25rem; flex-wrap:wrap; gap:4px;">
+          <div class="flow-step"><div class="f-title">Client</div><div class="f-sub">login(email, pass)</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step highlight"><div class="f-title">Server verify</div><div class="f-sub">check password hash</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step highlight"><div class="f-title">Tạo JWT</div><div class="f-sub">ký bằng secret key</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="f-title">Client lưu</div><div class="f-sub">localStorage / cookie</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="f-title">Mọi request</div><div class="f-sub">gửi kèm token</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="f-title">Filter verify</div><div class="f-sub">valid? → cho vào</div></div>
+        </div>
+
+        <div style="margin-bottom:0.75rem; font-size:11px; color:var(--muted);">JWT gồm 3 phần ngăn cách bởi dấu chấm:</div>
+        <div class="jwt-part jwt-header">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9 <span style="opacity:0.6">← HEADER (thuật toán)</span></div>
+        <div class="jwt-part jwt-payload">eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ik1pbmgiLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MTUxNjMyNTQyMn0 <span style="opacity:0.6">← PAYLOAD (data: userId, role, exp)</span></div>
+        <div class="jwt-part jwt-sig">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c <span style="opacity:0.6">← SIGNATURE (chữ ký bảo mật)</span></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-blue">
+          <h3>JwtService.java</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>JwtService.java</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="an">@Service</span>
+<span class="kw">public class</span> <span class="type">JwtService</span> {
+
+    <span class="an">@Value</span>(<span class="str">"${jwt.secret}"</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">secretKey</span>;
+
+    <span class="an">@Value</span>(<span class="str">"${jwt.expiration}"</span>)
+    <span class="kw">private</span> <span class="type">long</span> <span class="var">expiration</span>;
+
+    <span class="cm">// TẠO token từ user</span>
+    <span class="kw">public</span> <span class="type">String</span> <span class="fn">generateToken</span>(<span class="type">User</span> <span class="var">user</span>) {
+        <span class="kw">return</span> <span class="type">Jwts</span>.<span class="fn">builder</span>()
+            .<span class="fn">subject</span>(<span class="var">user</span>.<span class="fn">getEmail</span>())
+            .<span class="fn">claim</span>(<span class="str">"role"</span>, <span class="var">user</span>.<span class="fn">getRole</span>())
+            .<span class="fn">issuedAt</span>(<span class="kw">new</span> <span class="type">Date</span>())
+            .<span class="fn">expiration</span>(<span class="kw">new</span> <span class="type">Date</span>(<span class="type">System</span>.<span class="fn">currentTimeMillis</span>() + <span class="var">expiration</span>))
+            .<span class="fn">signWith</span>(<span class="fn">getSignKey</span>())
+            .<span class="fn">compact</span>();
+    }
+
+    <span class="cm">// LẤY email từ token</span>
+    <span class="kw">public</span> <span class="type">String</span> <span class="fn">extractEmail</span>(<span class="type">String</span> <span class="var">token</span>) {
+        <span class="kw">return</span> <span class="fn">parseClaims</span>(<span class="var">token</span>).<span class="fn">getSubject</span>();
+    }
+
+    <span class="cm">// KIỂM TRA token có hợp lệ không</span>
+    <span class="kw">public boolean</span> <span class="fn">isValid</span>(<span class="type">String</span> <span class="var">token</span>, <span class="type">String</span> <span class="var">email</span>) {
+        <span class="kw">return</span> <span class="fn">extractEmail</span>(<span class="var">token</span>).<span class="fn">equals</span>(<span class="var">email</span>)
+            && !<span class="fn">isExpired</span>(<span class="var">token</span>);
+    }
+
+    <span class="kw">private boolean</span> <span class="fn">isExpired</span>(<span class="type">String</span> <span class="var">token</span>) {
+        <span class="kw">return</span> <span class="fn">parseClaims</span>(<span class="var">token</span>).<span class="fn">getExpiration</span>().<span class="fn">before</span>(<span class="kw">new</span> <span class="type">Date</span>());
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="card card-green">
+          <h3>AuthController — Login/Register</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--green)"></span>AuthController.java</span>
+            </div>
+            <pre><span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="str">"/api/auth"</span>)
+<span class="an">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="type">AuthController</span> {
+
+    <span class="kw">private final</span> <span class="iface">AuthService</span> <span class="var">authService</span>;
+
+    <span class="an">@PostMapping</span>(<span class="str">"/register"</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">AuthResponse</span>&gt; <span class="fn">register</span>(
+            <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="type">RegisterRequest</span> <span class="var">req</span>) {
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">status</span>(<span class="num">201</span>)
+            .<span class="fn">body</span>(<span class="var">authService</span>.<span class="fn">register</span>(<span class="var">req</span>));
+    }
+
+    <span class="an">@PostMapping</span>(<span class="str">"/login"</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">AuthResponse</span>&gt; <span class="fn">login</span>(
+            <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="type">LoginRequest</span> <span class="var">req</span>) {
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">ok</span>(<span class="var">authService</span>.<span class="fn">login</span>(<span class="var">req</span>));
+    }
+
+    <span class="an">@PostMapping</span>(<span class="str">"/refresh"</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">AuthResponse</span>&gt; <span class="fn">refresh</span>(
+            <span class="an">@RequestHeader</span>(<span class="str">"Refresh-Token"</span>) <span class="type">String</span> <span class="var">token</span>) {
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">ok</span>(<span class="var">authService</span>.<span class="fn">refresh</span>(<span class="var">token</span>));
+    }
+}
+
+<span class="cm">// AuthResponse DTO</span>
+<span class="an">@Data</span> <span class="an">@Builder</span>
+<span class="kw">public class</span> <span class="type">AuthResponse</span> {
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">accessToken</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">refreshToken</span>;
+    <span class="kw">private</span> <span class="type">UserResponse</span> <span class="var">user</span>;
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         11. FILTER / MIDDLEWARE
+    ============================================= -->
+    <section id="middleware">
+      <div class="chapter-label"><span class="chapter-num">11</span> Security</div>
+      <h2>Filter / <span>Middleware</span></h2>
+      <p class="section-desc">Filter chặn mọi request trước khi đến Controller. Dùng để verify JWT, log, rate limit.</p>
+
+      <div class="card card-pink">
+        <h3>JwtAuthFilter.java — Verify token mọi request</h3>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-filename"><span class="dot" style="background:var(--pink)"></span>JwtAuthFilter.java</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="an">@Component</span>
+<span class="an">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="type">JwtAuthFilter</span> <span class="kw">extends</span> <span class="type">OncePerRequestFilter</span> {
+
+    <span class="kw">private final</span> <span class="type">JwtService</span> <span class="var">jwtService</span>;
+    <span class="kw">private final</span> <span class="type">UserDetailsService</span> <span class="var">userDetailsService</span>;
+
+    <span class="an">@Override</span>
+    <span class="kw">protected void</span> <span class="fn">doFilterInternal</span>(
+            <span class="type">HttpServletRequest</span> <span class="var">request</span>,
+            <span class="type">HttpServletResponse</span> <span class="var">response</span>,
+            <span class="type">FilterChain</span> <span class="var">filterChain</span>) <span class="kw">throws</span> <span class="type">Exception</span> {
+
+        <span class="cm">// 1. Lấy token từ header "Authorization: Bearer xxx"</span>
+        <span class="kw">final</span> <span class="type">String</span> <span class="var">authHeader</span> = <span class="var">request</span>.<span class="fn">getHeader</span>(<span class="str">"Authorization"</span>);
+
+        <span class="kw">if</span> (<span class="var">authHeader</span> == <span class="kw">null</span> || !<span class="var">authHeader</span>.<span class="fn">startsWith</span>(<span class="str">"Bearer "</span>)) {
+            <span class="var">filterChain</span>.<span class="fn">doFilter</span>(<span class="var">request</span>, <span class="var">response</span>); <span class="cm">← không có token → đi tiếp</span>
+            <span class="kw">return</span>;
+        }
+
+        <span class="cm">// 2. Tách token ra khỏi "Bearer xxx"</span>
+        <span class="kw">final</span> <span class="type">String</span> <span class="var">token</span> = <span class="var">authHeader</span>.<span class="fn">substring</span>(<span class="num">7</span>);
+        <span class="kw">final</span> <span class="type">String</span> <span class="var">email</span> = <span class="var">jwtService</span>.<span class="fn">extractEmail</span>(<span class="var">token</span>);
+
+        <span class="cm">// 3. Verify và set vào SecurityContext</span>
+        <span class="kw">if</span> (<span class="var">email</span> != <span class="kw">null</span> && <span class="type">SecurityContextHolder</span>.<span class="fn">getContext</span>()
+                .<span class="fn">getAuthentication</span>() == <span class="kw">null</span>) {
+
+            <span class="type">UserDetails</span> <span class="var">user</span> = <span class="var">userDetailsService</span>.<span class="fn">loadUserByUsername</span>(<span class="var">email</span>);
+
+            <span class="kw">if</span> (<span class="var">jwtService</span>.<span class="fn">isValid</span>(<span class="var">token</span>, <span class="var">email</span>)) {
+                <span class="cm">// Token hợp lệ → cấp quyền truy cập</span>
+                <span class="type">UsernamePasswordAuthenticationToken</span> <span class="var">authToken</span> =
+                    <span class="kw">new</span> <span class="type">UsernamePasswordAuthenticationToken</span>(
+                        <span class="var">user</span>, <span class="kw">null</span>, <span class="var">user</span>.<span class="fn">getAuthorities</span>());
+                <span class="type">SecurityContextHolder</span>.<span class="fn">getContext</span>().<span class="fn">setAuthentication</span>(<span class="var">authToken</span>);
+            }
+        }
+
+        <span class="cm">// 4. Chuyển tiếp cho filter tiếp theo</span>
+        <span class="var">filterChain</span>.<span class="fn">doFilter</span>(<span class="var">request</span>, <span class="var">response</span>);
+    }
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         12. EXCEPTION HANDLING
+    ============================================= -->
+    <section id="exception">
+      <div class="chapter-label"><span class="chapter-num">12</span> Error Handling</div>
+      <h2>Exception <span>Handling</span></h2>
+      <p class="section-desc">Xử lý lỗi tập trung — thay vì try-catch khắp nơi, dùng @ControllerAdvice để bắt và format lỗi đồng nhất.</p>
+
+      <div class="grid-2">
+        <div class="card card-red">
+          <h3>Custom Exceptions</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--red)"></span>Custom Exceptions</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// Base exception</span>
+<span class="kw">public class</span> <span class="type">AppException</span> <span class="kw">extends</span> <span class="type">RuntimeException</span> {
+    <span class="kw">private final int</span> <span class="var">statusCode</span>;
+
+    <span class="kw">public</span> <span class="fn">AppException</span>(<span class="type">String</span> <span class="var">message</span>, <span class="kw">int</span> <span class="var">statusCode</span>) {
+        <span class="kw">super</span>(<span class="var">message</span>);
+        <span class="kw">this</span>.<span class="var">statusCode</span> = <span class="var">statusCode</span>;
+    }
+}
+
+<span class="cm">// Các exception cụ thể</span>
+<span class="kw">public class</span> <span class="type">NotFoundException</span> <span class="kw">extends</span> <span class="type">AppException</span> {
+    <span class="kw">public</span> <span class="fn">NotFoundException</span>(<span class="type">String</span> <span class="var">msg</span>) {
+        <span class="kw">super</span>(<span class="var">msg</span>, <span class="num">404</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="type">ConflictException</span> <span class="kw">extends</span> <span class="type">AppException</span> {
+    <span class="kw">public</span> <span class="fn">ConflictException</span>(<span class="type">String</span> <span class="var">msg</span>) {
+        <span class="kw">super</span>(<span class="var">msg</span>, <span class="num">409</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="type">UnauthorizedException</span> <span class="kw">extends</span> <span class="type">AppException</span> {
+    <span class="kw">public</span> <span class="fn">UnauthorizedException</span>(<span class="type">String</span> <span class="var">msg</span>) {
+        <span class="kw">super</span>(<span class="var">msg</span>, <span class="num">401</span>);
+    }
+}
+
+<span class="cm">// Sử dụng trong Service</span>
+<span class="type">User</span> <span class="var">user</span> = <span class="var">userRepository</span>.<span class="fn">findById</span>(<span class="var">id</span>)
+    .<span class="fn">orElseThrow</span>(() ->
+        <span class="kw">new</span> <span class="type">NotFoundException</span>(<span class="str">"User không tồn tại: "</span> + <span class="var">id</span>));</pre>
+          </div>
+        </div>
+
+        <div class="card card-orange">
+          <h3>@ControllerAdvice — Bắt lỗi tập trung</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>GlobalExceptionHandler.java</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="an">@RestControllerAdvice</span>            <span class="cm">← bắt exception toàn app</span>
+<span class="kw">public class</span> <span class="type">GlobalExceptionHandler</span> {
+
+    <span class="cm">// Bắt custom exception của mình</span>
+    <span class="an">@ExceptionHandler</span>(<span class="type">AppException</span>.<span class="kw">class</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">ErrorResponse</span>&gt; <span class="fn">handleApp</span>(
+            <span class="type">AppException</span> <span class="var">ex</span>) {
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>
+            .<span class="fn">status</span>(<span class="var">ex</span>.<span class="fn">getStatusCode</span>())
+            .<span class="fn">body</span>(<span class="kw">new</span> <span class="type">ErrorResponse</span>(<span class="var">ex</span>.<span class="fn">getMessage</span>()));
+    }
+
+    <span class="cm">// Bắt lỗi @Valid validation</span>
+    <span class="an">@ExceptionHandler</span>(<span class="type">MethodArgumentNotValidException</span>.<span class="kw">class</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">ErrorResponse</span>&gt; <span class="fn">handleValidation</span>(
+            <span class="type">MethodArgumentNotValidException</span> <span class="var">ex</span>) {
+
+        <span class="type">Map</span>&lt;<span class="type">String</span>, <span class="type">String</span>&gt; <span class="var">errors</span> = <span class="kw">new</span> <span class="type">HashMap</span>&lt;&gt;();
+        <span class="var">ex</span>.<span class="fn">getBindingResult</span>().<span class="fn">getFieldErrors</span>()
+            .<span class="fn">forEach</span>(<span class="var">e</span> -> <span class="var">errors</span>.<span class="fn">put</span>(<span class="var">e</span>.<span class="fn">getField</span>(), <span class="var">e</span>.<span class="fn">getDefaultMessage</span>()));
+
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">badRequest</span>()
+            .<span class="fn">body</span>(<span class="kw">new</span> <span class="type">ErrorResponse</span>(<span class="str">"Validation failed"</span>, <span class="var">errors</span>));
+    }
+
+    <span class="cm">// Bắt tất cả exception còn lại</span>
+    <span class="an">@ExceptionHandler</span>(<span class="type">Exception</span>.<span class="kw">class</span>)
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">ErrorResponse</span>&gt; <span class="fn">handleAll</span>(<span class="type">Exception</span> <span class="var">ex</span>) {
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">status</span>(<span class="num">500</span>)
+            .<span class="fn">body</span>(<span class="kw">new</span> <span class="type">ErrorResponse</span>(<span class="str">"Internal server error"</span>));
+    }
+}
+
+<span class="cm">// Response format thống nhất</span>
+<span class="an">@Data</span> <span class="an">@AllArgsConstructor</span>
+<span class="kw">public class</span> <span class="type">ErrorResponse</span> {
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">message</span>;
+    <span class="kw">private</span> <span class="type">Object</span> <span class="var">details</span>;
+    <span class="kw">private</span> <span class="type">LocalDateTime</span> <span class="var">timestamp</span> = <span class="type">LocalDateTime</span>.<span class="fn">now</span>();
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         13. VALIDATION
+    ============================================= -->
+    <section id="validation">
+      <div class="chapter-label"><span class="chapter-num">13</span> Input</div>
+      <h2>Validation — <span>Kiểm tra Input</span></h2>
+      <p class="section-desc">Validate input từ client trước khi xử lý. Dùng annotation của Bean Validation, không cần viết if thủ công.</p>
+
+      <div class="grid-2">
+        <div class="card card-blue">
+          <h3>Annotation Validation</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>Validation Annotations</span>
+            </div>
+            <pre><span class="an">@Data</span>
+<span class="kw">public class</span> <span class="type">CreatePostRequest</span> {
+
+    <span class="an">@NotBlank</span>(message = <span class="str">"Tiêu đề không được rỗng"</span>)
+    <span class="an">@Size</span>(min = <span class="num">5</span>, max = <span class="num">200</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">title</span>;
+
+    <span class="an">@NotBlank</span>
+    <span class="an">@Size</span>(min = <span class="num">10</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">content</span>;
+
+    <span class="an">@Email</span>(message = <span class="str">"Email không hợp lệ"</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">authorEmail</span>;
+
+    <span class="an">@NotNull</span>
+    <span class="an">@Min</span>(value = <span class="num">1</span>) <span class="an">@Max</span>(value = <span class="num">10</span>)
+    <span class="kw">private</span> <span class="type">Integer</span> <span class="var">priority</span>;
+
+    <span class="an">@Pattern</span>(regexp = <span class="str">"^[A-Za-z0-9_]+$"</span>,
+             message = <span class="str">"Chỉ chứa chữ, số, gạch dưới"</span>)
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">slug</span>;
+
+    <span class="an">@Future</span>(message = <span class="str">"Ngày phải trong tương lai"</span>)
+    <span class="kw">private</span> <span class="type">LocalDate</span> <span class="var">publishDate</span>;
+
+    <span class="an">@URL</span>
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">thumbnailUrl</span>;
+}
+
+<span class="cm">// Trong Controller: thêm @Valid là xong</span>
+<span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;?&gt; <span class="fn">create</span>(
+    <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="type">CreatePostRequest</span> <span class="var">req</span>) {
+    <span class="cm">// Nếu sai → auto throw MethodArgumentNotValidException</span>
+    <span class="cm">// GlobalExceptionHandler bắt và format lỗi</span>
+}</pre>
+          </div>
+        </div>
+
+        <div class="card card-purple">
+          <h3>Custom Validator</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--purple)"></span>Custom Validation</span>
+            </div>
+            <pre><span class="cm">// Tạo annotation riêng</span>
+<span class="an">@Target</span>({<span class="type">ElementType</span>.<span class="var">FIELD</span>})
+<span class="an">@Retention</span>(<span class="type">RetentionPolicy</span>.<span class="var">RUNTIME</span>)
+<span class="an">@Constraint</span>(validatedBy = <span class="type">PhoneValidator</span>.<span class="kw">class</span>)
+<span class="kw">public @interface</span> <span class="iface">ValidPhone</span> {
+    <span class="type">String</span> <span class="fn">message</span>() <span class="kw">default</span> <span class="str">"Số điện thoại không hợp lệ"</span>;
+    <span class="type">Class</span>&lt;?&gt;[] <span class="fn">groups</span>() <span class="kw">default</span> {};
+    <span class="type">Class</span>&lt;?&gt;[] <span class="fn">payload</span>() <span class="kw">default</span> {};
+}
+
+<span class="cm">// Logic validate</span>
+<span class="kw">public class</span> <span class="type">PhoneValidator</span>
+    <span class="kw">implements</span> <span class="iface">ConstraintValidator</span>&lt;<span class="iface">ValidPhone</span>, <span class="type">String</span>&gt; {
+
+    <span class="an">@Override</span>
+    <span class="kw">public boolean</span> <span class="fn">isValid</span>(<span class="type">String</span> <span class="var">phone</span>, <span class="type">ConstraintValidatorContext</span> <span class="var">ctx</span>) {
+        <span class="kw">if</span> (<span class="var">phone</span> == <span class="kw">null</span>) <span class="kw">return true</span>; <span class="cm">// null = ok (dùng @NotNull riêng)</span>
+        <span class="kw">return</span> <span class="var">phone</span>.<span class="fn">matches</span>(<span class="str">"^(0|\\+84)[0-9]{9}$"</span>);
+    }
+}
+
+<span class="cm">// Dùng như annotation bình thường</span>
+<span class="kw">public class</span> <span class="type">UserRequest</span> {
+    <span class="an">@ValidPhone</span>
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">phone</span>; <span class="cm">// VD: 0912345678</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         14. WEBSOCKET
+    ============================================= -->
+    <section id="websocket">
+      <div class="chapter-label"><span class="chapter-num">14</span> Realtime</div>
+      <h2>WebSocket — <span>Realtime</span></h2>
+      <p class="section-desc">WebSocket = kết nối 2 chiều liên tục giữa client và server. Dùng cho chat, notification, live update. Khác HTTP là HTTP thì client hỏi mới trả lời.</p>
+
+      <div class="anno anno-blue">
+        <span class="ico">📡</span>
+        <span><strong>HTTP:</strong> Client gửi request → Server trả response → kết thúc. <strong>WebSocket:</strong> Client kết nối → Server có thể tự đẩy data bất kỳ lúc nào → không cần client hỏi.</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-orange">
+          <h3>WebSocket Config + Message Handler</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>WebSocketConfig.java</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="an">@Configuration</span>
+<span class="an">@EnableWebSocketMessageBroker</span>
+<span class="kw">public class</span> <span class="type">WebSocketConfig</span>
+    <span class="kw">implements</span> <span class="iface">WebSocketMessageBrokerConfigurer</span> {
+
+    <span class="an">@Override</span>
+    <span class="kw">public void</span> <span class="fn">configureMessageBroker</span>(<span class="type">MessageBrokerRegistry</span> <span class="var">config</span>) {
+        <span class="cm">// Client subscribe vào /topic/... để nhận</span>
+        <span class="var">config</span>.<span class="fn">enableSimpleBroker</span>(<span class="str">"/topic"</span>, <span class="str">"/queue"</span>);
+        <span class="cm">// Client gửi message vào /app/...</span>
+        <span class="var">config</span>.<span class="fn">setApplicationDestinationPrefixes</span>(<span class="str">"/app"</span>);
+    }
+
+    <span class="an">@Override</span>
+    <span class="kw">public void</span> <span class="fn">registerStompEndpoints</span>(<span class="type">StompEndpointRegistry</span> <span class="var">registry</span>) {
+        <span class="cm">// Endpoint kết nối WebSocket</span>
+        <span class="var">registry</span>.<span class="fn">addEndpoint</span>(<span class="str">"/ws"</span>)
+            .<span class="fn">setAllowedOriginPatterns</span>(<span class="str">"*"</span>)
+            .<span class="fn">withSockJS</span>(); <span class="cm">← fallback nếu WS không dùng được</span>
+    }
+}</pre>
+          </div>
+          <div class="code-wrap" style="margin-top:0.5rem;">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>ChatController.java</span>
+            </div>
+            <pre><span class="an">@Controller</span>
+<span class="kw">public class</span> <span class="type">ChatController</span> {
+
+    <span class="kw">private final</span> <span class="type">SimpMessagingTemplate</span> <span class="var">messagingTemplate</span>;
+
+    <span class="cm">// Nhận message từ /app/chat.send</span>
+    <span class="an">@MessageMapping</span>(<span class="str">"/chat.send"</span>)
+    <span class="an">@SendTo</span>(<span class="str">"/topic/messages"</span>)    <span class="cm">← broadcast cho tất cả</span>
+    <span class="kw">public</span> <span class="type">ChatMessage</span> <span class="fn">sendMessage</span>(<span class="type">ChatMessage</span> <span class="var">msg</span>) {
+        <span class="var">msg</span>.<span class="fn">setTimestamp</span>(<span class="type">LocalDateTime</span>.<span class="fn">now</span>());
+        <span class="kw">return</span> <span class="var">msg</span>;
+    }
+
+    <span class="cm">// Gửi đến 1 user cụ thể (private)</span>
+    <span class="kw">public void</span> <span class="fn">sendPrivate</span>(<span class="type">String</span> <span class="var">userId</span>, <span class="type">Object</span> <span class="var">payload</span>) {
+        <span class="var">messagingTemplate</span>.<span class="fn">convertAndSendToUser</span>(
+            <span class="var">userId</span>,
+            <span class="str">"/queue/notifications"</span>,
+            <span class="var">payload</span>);
+    }
+
+    <span class="cm">// Gửi notification từ bất kỳ Service nào</span>
+    <span class="kw">public void</span> <span class="fn">broadcastAlert</span>(<span class="type">String</span> <span class="var">topic</span>, <span class="type">Object</span> <span class="var">data</span>) {
+        <span class="var">messagingTemplate</span>.<span class="fn">convertAndSend</span>(<span class="str">"/topic/"</span> + <span class="var">topic</span>, <span class="var">data</span>);
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="card card-blue">
+          <h3>Client-side (JS) kết nối WebSocket</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>websocket-client.js</span>
+            </div>
+            <pre><span class="cm">// Dùng với thư viện SockJS + STOMP</span>
+<span class="kw">import</span> <span class="type">SockJS</span> <span class="kw">from</span> <span class="str">'sockjs-client'</span>;
+<span class="kw">import</span> { <span class="type">Client</span> } <span class="kw">from</span> <span class="str">'@stomp/stompjs'</span>;
+
+<span class="kw">const</span> <span class="var">client</span> = <span class="kw">new</span> <span class="type">Client</span>({
+    <span class="var">webSocketFactory</span>: () => <span class="kw">new</span> <span class="type">SockJS</span>(<span class="str">'http://localhost:8080/ws'</span>),
+
+    <span class="cm">// Kết nối thành công</span>
+    <span class="fn">onConnect</span>: () => {
+        <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Đã kết nối WebSocket!'</span>);
+
+        <span class="cm">// SUBSCRIBE — lắng nghe topic</span>
+        <span class="var">client</span>.<span class="fn">subscribe</span>(<span class="str">'/topic/messages'</span>, (<span class="var">msg</span>) => {
+            <span class="kw">const</span> <span class="var">data</span> = <span class="type">JSON</span>.<span class="fn">parse</span>(<span class="var">msg</span>.<span class="var">body</span>);
+            <span class="fn">displayMessage</span>(<span class="var">data</span>);  <span class="cm">← cập nhật UI</span>
+        });
+
+        <span class="cm">// Subscribe notification riêng</span>
+        <span class="var">client</span>.<span class="fn">subscribe</span>(<span class="str">`/user/${userId}/queue/notifications`</span>, (<span class="var">n</span>) => {
+            <span class="fn">showNotification</span>(<span class="type">JSON</span>.<span class="fn">parse</span>(<span class="var">n</span>.<span class="var">body</span>));
+        });
+    }
+});
+
+<span class="cm">// Kết nối</span>
+<span class="var">client</span>.<span class="fn">activate</span>();
+
+<span class="cm">// GỬI message</span>
+<span class="kw">const</span> <span class="fn">sendMessage</span> = (<span class="var">text</span>) => {
+    <span class="var">client</span>.<span class="fn">publish</span>({
+        <span class="var">destination</span>: <span class="str">'/app/chat.send'</span>,
+        <span class="var">body</span>: <span class="type">JSON</span>.<span class="fn">stringify</span>({ <span class="var">content</span>: <span class="var">text</span>, <span class="var">sender</span>: <span class="str">'Minh'</span> })
+    });
+};</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         15. REQUEST FLOW FULL
+    ============================================= -->
+    <section id="flow">
+      <div class="chapter-label"><span class="chapter-num">15</span> Tổng kết</div>
+      <h2>Full <span>Request Flow</span></h2>
+      <p class="section-desc">Luồng đầy đủ của 1 request từ khi client gửi đến khi nhận response. Hiểu cái này = hiểu toàn bộ backend.</p>
+
+      <div class="card" style="padding:2rem;">
+        <div class="timeline">
+          <div class="tl-item done">
+            <div class="tl-label">Bước 1 — Client</div>
+            <div class="tl-content"><code>POST /api/posts</code> với <code>Authorization: Bearer {JWT}</code> và JSON body trong HTTP request</div>
+          </div>
+          <div class="tl-item done">
+            <div class="tl-label">Bước 2 — Filter Chain</div>
+            <div class="tl-content"><strong>JwtAuthFilter</strong> chặn request, đọc token từ header, verify với JwtService, nếu hợp lệ → set vào SecurityContext, đi tiếp</div>
+          </div>
+          <div class="tl-item done">
+            <div class="tl-label">Bước 3 — Dispatcher Servlet</div>
+            <div class="tl-content">Spring MVC điều hướng request đến đúng method trong Controller dựa vào URL và HTTP method</div>
+          </div>
+          <div class="tl-item done">
+            <div class="tl-label">Bước 4 — Controller</div>
+            <div class="tl-content"><strong>@PostMapping</strong> nhận request, <strong>@Valid</strong> validate DTO, nếu OK → gọi <code>postService.create(request)</code></div>
+          </div>
+          <div class="tl-item done">
+            <div class="tl-label">Bước 5 — Service</div>
+            <div class="tl-content">Chứa toàn bộ business logic: check quyền, validate nghiệp vụ, map DTO → Entity, gọi Repository để save</div>
+          </div>
+          <div class="tl-item done">
+            <div class="tl-label">Bước 6 — Repository</div>
+            <div class="tl-content">JPA/Hibernate sinh SQL <code>INSERT INTO posts...</code>, thực thi với PostgreSQL, trả về Entity đã được gán ID</div>
+          </div>
+          <div class="tl-item done">
+            <div class="tl-label">Bước 7 — Service trở lại</div>
+            <div class="tl-content">Map Entity → DTO Response (loại bỏ field nhạy cảm), trả về Controller</div>
+          </div>
+          <div class="tl-item done">
+            <div class="tl-label">Bước 8 — Controller trở lại</div>
+            <div class="tl-content"><code>ResponseEntity.status(201).body(response)</code> → Spring tự convert sang JSON</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-label">Bước 9 — Client nhận</div>
+            <div class="tl-content">HTTP 201 Created với JSON body chứa post vừa tạo — nếu có lỗi ở bất kỳ bước nào, GlobalExceptionHandler bắt và format thành error response</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:1.5rem;">
+        <div class="card">
+          <div class="badge b-orange" style="margin-bottom:0.75rem;">Tầng 1</div>
+          <div style="font-family:var(--font-ui); font-weight:700; margin-bottom:0.4rem;">Phải tự hiểu</div>
+          <div style="color:var(--muted); font-size:11px; line-height:1.7;">Luồng request, 3-layer, HTTP method/status, JWT flow — không AI nào thay thế được tư duy này</div>
+        </div>
+        <div class="card">
+          <div class="badge b-blue" style="margin-bottom:0.75rem;">Tầng 2</div>
+          <div style="font-family:var(--font-ui); font-weight:700; margin-bottom:0.4rem;">Hiểu để dùng AI</div>
+          <div style="color:var(--muted); font-size:11px; line-height:1.7;">Entity, Repository method query, Validation annotation — biết tên, biết dùng, AI gen code, mình review</div>
+        </div>
+        <div class="card">
+          <div class="badge b-green" style="margin-bottom:0.75rem;">Tầng 3</div>
+          <div style="font-family:var(--font-ui); font-weight:700; margin-bottom:0.4rem;">AI lo hoàn toàn</div>
+          <div style="color:var(--muted); font-size:11px; line-height:1.7;">Boilerplate config, Docker, CI/CD, SecurityConfig phức tạp — chỉ cần biết mục đích, AI code cho</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         16. TESTING
+    ============================================= -->
+    <section id="testing">
+      <div class="chapter-label"><span class="chapter-num">16</span> Production</div>
+      <h2>Testing — <span>JUnit & Mockito</span></h2>
+      <p class="section-desc">Test = viết code để kiểm tra code. Ở công ty, mọi feature đều phải có test. Không test = không merge. Quan trọng hơn 90% dev mới nghĩ.</p>
+
+      <div class="anno">
+        <span class="ico">⚠️</span>
+        <span><strong>Unit Test</strong> test từng method độc lập (mock dependency). <strong>Integration Test</strong> test cả luồng từ controller → database. Cần biết cả hai.</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-green">
+          <h3>Unit Test — Service Layer</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--green)"></span>UserServiceTest.java</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="an">@ExtendWith</span>(<span class="type">MockitoExtension</span>.<span class="kw">class</span>) <span class="cm">← dùng Mockito</span>
+<span class="kw">class</span> <span class="type">UserServiceTest</span> {
+
+    <span class="an">@Mock</span>                         <span class="cm">← tạo object giả</span>
+    <span class="kw">private</span> <span class="type">UserRepository</span> <span class="var">userRepository</span>;
+
+    <span class="an">@Mock</span>
+    <span class="kw">private</span> <span class="type">PasswordEncoder</span> <span class="var">passwordEncoder</span>;
+
+    <span class="an">@InjectMocks</span>                  <span class="cm">← inject mock vào đây</span>
+    <span class="kw">private</span> <span class="type">UserServiceImpl</span> <span class="var">userService</span>;
+
+    <span class="an">@Test</span>
+    <span class="an">@DisplayName</span>(<span class="str">"Tạo user thành công"</span>)
+    <span class="kw">void</span> <span class="fn">createUser_success</span>() {
+        <span class="cm">// ARRANGE — chuẩn bị data</span>
+        <span class="type">UserRequest</span> <span class="var">request</span> = <span class="kw">new</span> <span class="type">UserRequest</span>(<span class="str">"Minh"</span>, <span class="str">"m@g.com"</span>, <span class="str">"pass123"</span>);
+
+        <span class="type">Mockito</span>.<span class="fn">when</span>(<span class="var">userRepository</span>.<span class="fn">existsByEmail</span>(<span class="str">"m@g.com"</span>))
+               .<span class="fn">thenReturn</span>(<span class="kw">false</span>);       <span class="cm">← giả email chưa tồn tại</span>
+
+        <span class="type">Mockito</span>.<span class="fn">when</span>(<span class="var">passwordEncoder</span>.<span class="fn">encode</span>(<span class="str">"pass123"</span>))
+               .<span class="fn">thenReturn</span>(<span class="str">"$2a$10$hashedpass"</span>);
+
+        <span class="type">User</span> <span class="var">savedUser</span> = <span class="type">User</span>.<span class="fn">builder</span>().<span class="fn">id</span>(<span class="num">1L</span>).<span class="fn">name</span>(<span class="str">"Minh"</span>).<span class="fn">email</span>(<span class="str">"m@g.com"</span>).<span class="fn">build</span>();
+        <span class="type">Mockito</span>.<span class="fn">when</span>(<span class="var">userRepository</span>.<span class="fn">save</span>(<span class="type">Mockito</span>.<span class="fn">any</span>()))
+               .<span class="fn">thenReturn</span>(<span class="var">savedUser</span>);
+
+        <span class="cm">// ACT — thực thi</span>
+        <span class="type">UserResponse</span> <span class="var">result</span> = <span class="var">userService</span>.<span class="fn">create</span>(<span class="var">request</span>);
+
+        <span class="cm">// ASSERT — kiểm tra kết quả</span>
+        <span class="type">Assertions</span>.<span class="fn">assertNotNull</span>(<span class="var">result</span>);
+        <span class="type">Assertions</span>.<span class="fn">assertEquals</span>(<span class="str">"Minh"</span>, <span class="var">result</span>.<span class="fn">getName</span>());
+        <span class="type">Assertions</span>.<span class="fn">assertEquals</span>(<span class="num">1L</span>, <span class="var">result</span>.<span class="fn">getId</span>());
+
+        <span class="cm">// Verify repository được gọi đúng 1 lần</span>
+        <span class="type">Mockito</span>.<span class="fn">verify</span>(<span class="var">userRepository</span>, <span class="type">Mockito</span>.<span class="fn">times</span>(<span class="num">1</span>)).<span class="fn">save</span>(<span class="type">Mockito</span>.<span class="fn">any</span>());
+    }
+
+    <span class="an">@Test</span>
+    <span class="an">@DisplayName</span>(<span class="str">"Tạo user thất bại — email đã tồn tại"</span>)
+    <span class="kw">void</span> <span class="fn">createUser_emailExists_throwsConflict</span>() {
+        <span class="type">UserRequest</span> <span class="var">request</span> = <span class="kw">new</span> <span class="type">UserRequest</span>(<span class="str">"Minh"</span>, <span class="str">"m@g.com"</span>, <span class="str">"pass"</span>);
+
+        <span class="type">Mockito</span>.<span class="fn">when</span>(<span class="var">userRepository</span>.<span class="fn">existsByEmail</span>(<span class="str">"m@g.com"</span>))
+               .<span class="fn">thenReturn</span>(<span class="kw">true</span>);          <span class="cm">← email đã tồn tại</span>
+
+        <span class="cm">// Phải throw ConflictException</span>
+        <span class="type">Assertions</span>.<span class="fn">assertThrows</span>(
+            <span class="type">ConflictException</span>.<span class="kw">class</span>,
+            () -> <span class="var">userService</span>.<span class="fn">create</span>(<span class="var">request</span>)
+        );
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="card card-blue">
+          <h3>Integration Test — Controller Layer</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>UserControllerTest.java</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="an">@SpringBootTest</span>               <span class="cm">← load toàn bộ context</span>
+<span class="an">@AutoConfigureMockMvc</span>         <span class="cm">← mock HTTP request</span>
+<span class="an">@Transactional</span>                <span class="cm">← rollback sau mỗi test</span>
+<span class="kw">class</span> <span class="type">UserControllerTest</span> {
+
+    <span class="an">@Autowired</span>
+    <span class="kw">private</span> <span class="type">MockMvc</span> <span class="var">mockMvc</span>;
+
+    <span class="an">@Autowired</span>
+    <span class="kw">private</span> <span class="type">ObjectMapper</span> <span class="var">objectMapper</span>; <span class="cm">← convert object → JSON</span>
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">createUser_returns201</span>() <span class="kw">throws</span> <span class="type">Exception</span> {
+        <span class="type">UserRequest</span> <span class="var">req</span> = <span class="kw">new</span> <span class="type">UserRequest</span>(<span class="str">"Minh"</span>, <span class="str">"m@g.com"</span>, <span class="str">"pass12345"</span>);
+
+        <span class="var">mockMvc</span>.<span class="fn">perform</span>(
+            <span class="type">MockMvcRequestBuilders</span>
+                .<span class="fn">post</span>(<span class="str">"/api/users"</span>)
+                .<span class="fn">contentType</span>(<span class="str">"application/json"</span>)
+                .<span class="fn">content</span>(<span class="var">objectMapper</span>.<span class="fn">writeValueAsString</span>(<span class="var">req</span>))
+        )
+        .<span class="fn">andExpect</span>(<span class="type">MockMvcResultMatchers</span>.<span class="fn">status</span>().<span class="fn">isCreated</span>())
+        .<span class="fn">andExpect</span>(<span class="type">MockMvcResultMatchers</span>.<span class="fn">jsonPath</span>(<span class="str">"$.name"</span>).<span class="fn">value</span>(<span class="str">"Minh"</span>))
+        .<span class="fn">andExpect</span>(<span class="type">MockMvcResultMatchers</span>.<span class="fn">jsonPath</span>(<span class="str">"$.email"</span>).<span class="fn">value</span>(<span class="str">"m@g.com"</span>))
+        .<span class="fn">andExpect</span>(<span class="type">MockMvcResultMatchers</span>.<span class="fn">jsonPath</span>(<span class="str">"$.password"</span>).<span class="fn">doesNotExist</span>()); <span class="cm">← pass không được lộ!</span>
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">createUser_invalidEmail_returns400</span>() <span class="kw">throws</span> <span class="type">Exception</span> {
+        <span class="type">UserRequest</span> <span class="var">req</span> = <span class="kw">new</span> <span class="type">UserRequest</span>(<span class="str">"Minh"</span>, <span class="str">"NOT_AN_EMAIL"</span>, <span class="str">"pass"</span>);
+
+        <span class="var">mockMvc</span>.<span class="fn">perform</span>(
+            <span class="type">MockMvcRequestBuilders</span>.<span class="fn">post</span>(<span class="str">"/api/users"</span>)
+                .<span class="fn">contentType</span>(<span class="str">"application/json"</span>)
+                .<span class="fn">content</span>(<span class="var">objectMapper</span>.<span class="fn">writeValueAsString</span>(<span class="var">req</span>))
+        )
+        .<span class="fn">andExpect</span>(<span class="type">MockMvcResultMatchers</span>.<span class="fn">status</span>().<span class="fn">isBadRequest</span>());
+    }
+}</pre>
+          </div>
+          <div class="anno anno-green" style="margin-top:0.75rem;">
+            <span class="ico">💡</span>
+            <span>Tên test theo convention: <code>methodName_scenario_expectedResult</code>. Đồng nghiệp đọc tên là hiểu test làm gì, không cần đọc code.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         17. LOGGING
+    ============================================= -->
+    <section id="logging">
+      <div class="chapter-label"><span class="chapter-num">17</span> Production</div>
+      <h2>Logging — <span>Slf4j & Logback</span></h2>
+      <p class="section-desc">Log = ghi lại mọi thứ xảy ra trong hệ thống. Khi production lỗi lúc 3 giờ sáng, log là thứ duy nhất giúp bạn debug.</p>
+
+      <div class="grid-2">
+        <div class="card card-yellow">
+          <h3>Cách dùng đúng Logger</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--yellow)"></span>UserService + Logging</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="an">@Service</span>
+<span class="an">@Slf4j</span>  <span class="cm">← Lombok tạo: private static final Logger log</span>
+<span class="kw">public class</span> <span class="type">UserServiceImpl</span> <span class="kw">implements</span> <span class="iface">UserService</span> {
+
+    <span class="kw">public</span> <span class="type">UserResponse</span> <span class="fn">create</span>(<span class="type">UserRequest</span> <span class="var">req</span>) {
+
+        <span class="cm">// DEBUG — chi tiết khi dev (tắt trên production)</span>
+        <span class="var">log</span>.<span class="fn">debug</span>(<span class="str">"Creating user with email: {}"</span>, <span class="var">req</span>.<span class="fn">getEmail</span>());
+
+        <span class="kw">if</span> (<span class="var">userRepository</span>.<span class="fn">existsByEmail</span>(<span class="var">req</span>.<span class="fn">getEmail</span>())) {
+            <span class="cm">// WARN — cảnh báo, không crash nhưng đáng chú ý</span>
+            <span class="var">log</span>.<span class="fn">warn</span>(<span class="str">"Attempt to register with existing email: {}"</span>, <span class="var">req</span>.<span class="fn">getEmail</span>());
+            <span class="kw">throw new</span> <span class="type">ConflictException</span>(<span class="str">"Email đã tồn tại"</span>);
+        }
+
+        <span class="type">User</span> <span class="var">saved</span> = <span class="var">userRepository</span>.<span class="fn">save</span>(<span class="cm">/* ... */</span>);
+
+        <span class="cm">// INFO — sự kiện quan trọng của business</span>
+        <span class="var">log</span>.<span class="fn">info</span>(<span class="str">"User created successfully. id={}, email={}"</span>,
+            <span class="var">saved</span>.<span class="fn">getId</span>(), <span class="var">saved</span>.<span class="fn">getEmail</span>());
+
+        <span class="kw">return</span> <span class="fn">toResponse</span>(<span class="var">saved</span>);
+    }
+
+    <span class="kw">public void</span> <span class="fn">delete</span>(<span class="type">Long</span> <span class="var">id</span>) {
+        <span class="kw">try</span> {
+            <span class="var">userRepository</span>.<span class="fn">deleteById</span>(<span class="var">id</span>);
+            <span class="var">log</span>.<span class="fn">info</span>(<span class="str">"User deleted. id={}"</span>, <span class="var">id</span>);
+        } <span class="kw">catch</span> (<span class="type">Exception</span> <span class="var">e</span>) {
+            <span class="cm">// ERROR — có lỗi thực sự, cần xem xét</span>
+            <span class="var">log</span>.<span class="fn">error</span>(<span class="str">"Failed to delete user. id={}, error={}"</span>, <span class="var">id</span>, <span class="var">e</span>.<span class="fn">getMessage</span>(), <span class="var">e</span>);
+            <span class="kw">throw</span> <span class="var">e</span>;
+        }
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="card card-orange">
+          <h3>Log Levels & Config</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>Log Levels (thứ tự ưu tiên)</span>
+            </div>
+            <pre><span class="cm">// TRACE &lt; DEBUG &lt; INFO &lt; WARN &lt; ERROR</span>
+<span class="cm">// Set level INFO → chỉ in INFO, WARN, ERROR</span>
+
+<span class="var">log</span>.<span class="fn">trace</span>(<span class="str">"..."</span>);  <span class="cm">← rất chi tiết, hiếm dùng</span>
+<span class="var">log</span>.<span class="fn">debug</span>(<span class="str">"..."</span>);  <span class="cm">← dev debug, tắt trên production</span>
+<span class="var">log</span>.<span class="fn">info</span>(<span class="str">"..."</span>);   <span class="cm">← sự kiện bình thường quan trọng</span>
+<span class="var">log</span>.<span class="fn">warn</span>(<span class="str">"..."</span>);   <span class="cm">← cảnh báo, cần theo dõi</span>
+<span class="var">log</span>.<span class="fn">error</span>(<span class="str">"..."</span>);  <span class="cm">← lỗi nghiêm trọng cần xử lý</span></pre>
+          </div>
+          <div class="code-wrap" style="margin-top:0.5rem;">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>application.yml — cấu hình log</span>
+            </div>
+            <pre><span class="var">logging</span>:
+  <span class="var">level</span>:
+    <span class="var">root</span>: <span class="type">INFO</span>                    <span class="cm"># mặc định toàn app</span>
+    <span class="var">com.myapp</span>: <span class="type">DEBUG</span>              <span class="cm"># package của mình: DEBUG</span>
+    <span class="var">org.hibernate.SQL</span>: <span class="type">DEBUG</span>     <span class="cm"># in câu SQL ra console</span>
+  <span class="var">file</span>:
+    <span class="var">name</span>: <span class="str">logs/app.log</span>           <span class="cm"># lưu log vào file</span>
+  <span class="var">pattern</span>:
+    <span class="var">console</span>: <span class="str">"%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"</span>
+
+<span class="cm"># Rule vàng:</span>
+<span class="cm"># - KHÔNG log password, token, thông tin nhạy cảm</span>
+<span class="cm"># - KHÔNG dùng string concat: log.info("User: " + email)</span>
+<span class="cm"># - DÙNG placeholder: log.info("User: {}", email)</span></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         18. SWAGGER / OPENAPI
+    ============================================= -->
+    <section id="swagger">
+      <div class="chapter-label"><span class="chapter-num">18</span> Production</div>
+      <h2>Swagger — <span>Tài liệu API</span></h2>
+      <p class="section-desc">Swagger tự tạo trang web mô tả toàn bộ API của bạn. Frontend dev dùng để biết gọi endpoint nào, truyền gì, nhận gì. Không có cái này = team làm việc rất khó.</p>
+
+      <div class="grid-2">
+        <div class="card card-purple">
+          <h3>Cấu hình Swagger</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--purple)"></span>SwaggerConfig.java</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// pom.xml: springdoc-openapi-starter-webmvc-ui</span>
+
+<span class="an">@Configuration</span>
+<span class="kw">public class</span> <span class="type">SwaggerConfig</span> {
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="type">OpenAPI</span> <span class="fn">openAPI</span>() {
+        <span class="kw">return new</span> <span class="type">OpenAPI</span>()
+            .<span class="fn">info</span>(<span class="kw">new</span> <span class="type">Info</span>()
+                .<span class="fn">title</span>(<span class="str">"My App API"</span>)
+                .<span class="fn">version</span>(<span class="str">"v1.0"</span>)
+                .<span class="fn">description</span>(<span class="str">"Tài liệu API cho My App"</span>)
+                .<span class="fn">contact</span>(<span class="kw">new</span> <span class="type">Contact</span>()
+                    .<span class="fn">name</span>(<span class="str">"Team Backend"</span>)
+                    .<span class="fn">email</span>(<span class="str">"backend@myapp.com"</span>)))
+            .<span class="fn">addSecurityItem</span>(<span class="kw">new</span> <span class="type">SecurityRequirement</span>().<span class="fn">addList</span>(<span class="str">"Bearer"</span>))
+            .<span class="fn">components</span>(<span class="kw">new</span> <span class="type">Components</span>()
+                .<span class="fn">addSecuritySchemes</span>(<span class="str">"Bearer"</span>, <span class="kw">new</span> <span class="type">SecurityScheme</span>()
+                    .<span class="fn">type</span>(<span class="type">SecurityScheme</span>.<span class="type">Type</span>.<span class="var">HTTP</span>)
+                    .<span class="fn">scheme</span>(<span class="str">"bearer"</span>)
+                    .<span class="fn">bearerFormat</span>(<span class="str">"JWT"</span>)));
+    }
+}
+
+<span class="cm">// application.yml</span>
+<span class="var">springdoc</span>:
+  <span class="var">api-docs</span>:
+    <span class="var">path</span>: <span class="str">/api-docs</span>
+  <span class="var">swagger-ui</span>:
+    <span class="var">path</span>: <span class="str">/swagger-ui.html</span>   <span class="cm">← truy cập link này để xem UI</span></pre>
+          </div>
+        </div>
+
+        <div class="card card-blue">
+          <h3>Annotation trên Controller</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>Swagger Annotations</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="an">@Tag</span>(name = <span class="str">"User"</span>, description = <span class="str">"Quản lý người dùng"</span>)
+<span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="str">"/api/users"</span>)
+<span class="kw">public class</span> <span class="type">UserController</span> {
+
+    <span class="an">@Operation</span>(
+        summary = <span class="str">"Tạo user mới"</span>,
+        description = <span class="str">"Tạo tài khoản, trả về 201 nếu thành công"</span>
+    )
+    <span class="an">@ApiResponses</span>({
+        <span class="an">@ApiResponse</span>(responseCode = <span class="str">"201"</span>, description = <span class="str">"Tạo thành công"</span>),
+        <span class="an">@ApiResponse</span>(responseCode = <span class="str">"400"</span>, description = <span class="str">"Dữ liệu không hợp lệ"</span>),
+        <span class="an">@ApiResponse</span>(responseCode = <span class="str">"409"</span>, description = <span class="str">"Email đã tồn tại"</span>)
+    })
+    <span class="an">@PostMapping</span>
+    <span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">UserResponse</span>&gt; <span class="fn">createUser</span>(
+            <span class="an">@Valid</span> <span class="an">@RequestBody</span>
+            <span class="an">@io.swagger.v3.oas.annotations.parameters.RequestBody</span>(
+                description = <span class="str">"Thông tin user cần tạo"</span>
+            )
+            <span class="type">UserRequest</span> <span class="var">request</span>) {
+        <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">body</span>(<span class="var">userService</span>.<span class="fn">create</span>(<span class="var">request</span>));
+    }
+
+    <span class="cm">// Ẩn endpoint nhạy cảm khỏi docs công khai</span>
+    <span class="an">@Hidden</span>
+    <span class="an">@DeleteMapping</span>(<span class="str">"/admin/purge"</span>)
+    <span class="kw">public void</span> <span class="fn">purgeAll</span>() { <span class="cm">/* ... */</span> }
+}
+
+<span class="cm">// Sau khi chạy app → truy cập:</span>
+<span class="cm">// http://localhost:8080/swagger-ui.html</span></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         19. PAGINATION & SORTING
+    ============================================= -->
+    <section id="pagination">
+      <div class="chapter-label"><span class="chapter-num">19</span> Production</div>
+      <h2>Pagination & <span>Sorting</span></h2>
+      <p class="section-desc">Không API nào trả về 10.000 record cùng lúc. Pagination chia nhỏ dữ liệu theo trang. Spring JPA hỗ trợ sẵn, chỉ cần biết dùng đúng.</p>
+
+      <div class="grid-2">
+        <div class="card card-orange">
+          <h3>Repository + Service + Controller</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>Pagination đầy đủ</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// REPOSITORY — dùng Page thay cho List</span>
+<span class="kw">public interface</span> <span class="type">UserRepository</span> <span class="kw">extends</span> <span class="iface">JpaRepository</span>&lt;<span class="type">User</span>, <span class="type">Long</span>&gt; {
+    <span class="type">Page</span>&lt;<span class="type">User</span>&gt; <span class="fn">findByRole</span>(<span class="type">Role</span> <span class="var">role</span>, <span class="type">Pageable</span> <span class="var">pageable</span>);
+    <span class="type">Page</span>&lt;<span class="type">User</span>&gt; <span class="fn">findByNameContainingIgnoreCase</span>(<span class="type">String</span> <span class="var">name</span>, <span class="type">Pageable</span> <span class="var">pageable</span>);
+}
+
+<span class="cm">// SERVICE</span>
+<span class="kw">public</span> <span class="type">Page</span>&lt;<span class="type">UserResponse</span>&gt; <span class="fn">findAll</span>(<span class="kw">int</span> <span class="var">page</span>, <span class="kw">int</span> <span class="var">size</span>, <span class="type">String</span> <span class="var">sortBy</span>) {
+    <span class="type">Pageable</span> <span class="var">pageable</span> = <span class="type">PageRequest</span>.<span class="fn">of</span>(
+        <span class="var">page</span>,                               <span class="cm">← số trang (bắt đầu từ 0)</span>
+        <span class="var">size</span>,                               <span class="cm">← số item mỗi trang</span>
+        <span class="type">Sort</span>.<span class="fn">by</span>(<span class="var">sortBy</span>).<span class="fn">descending</span>()      <span class="cm">← sắp xếp</span>
+    );
+    <span class="kw">return</span> <span class="var">userRepository</span>.<span class="fn">findAll</span>(<span class="var">pageable</span>)
+        .<span class="fn">map</span>(<span class="kw">this</span>::<span class="fn">toResponse</span>);
+}
+
+<span class="cm">// CONTROLLER</span>
+<span class="an">@GetMapping</span>
+<span class="kw">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">Page</span>&lt;<span class="type">UserResponse</span>&gt;&gt; <span class="fn">getAll</span>(
+        <span class="an">@RequestParam</span>(defaultValue = <span class="str">"0"</span>)   <span class="kw">int</span> <span class="var">page</span>,
+        <span class="an">@RequestParam</span>(defaultValue = <span class="str">"20"</span>)  <span class="kw">int</span> <span class="var">size</span>,
+        <span class="an">@RequestParam</span>(defaultValue = <span class="str">"createdAt"</span>) <span class="type">String</span> <span class="var">sortBy</span>) {
+    <span class="kw">return</span> <span class="type">ResponseEntity</span>.<span class="fn">ok</span>(<span class="var">userService</span>.<span class="fn">findAll</span>(<span class="var">page</span>, <span class="var">size</span>, <span class="var">sortBy</span>));
+}
+<span class="cm">// Gọi: GET /api/users?page=0&size=20&sortBy=name</span></pre>
+          </div>
+        </div>
+
+        <div class="card card-green">
+          <h3>Response format chuẩn</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--green)"></span>Response JSON</span>
+            </div>
+            <pre><span class="cm">// Spring tự build response này khi trả Page&lt;T&gt;</span>
+{
+  <span class="str">"content"</span>: [          <span class="cm">← mảng data trang hiện tại</span>
+    { <span class="str">"id"</span>: <span class="num">1</span>, <span class="str">"name"</span>: <span class="str">"Minh"</span> },
+    { <span class="str">"id"</span>: <span class="num">2</span>, <span class="str">"name"</span>: <span class="str">"Nam"</span> }
+  ],
+  <span class="str">"pageable"</span>: {
+    <span class="str">"pageNumber"</span>: <span class="num">0</span>,     <span class="cm">← trang hiện tại</span>
+    <span class="str">"pageSize"</span>: <span class="num">20</span>       <span class="cm">← số item mỗi trang</span>
+  },
+  <span class="str">"totalElements"</span>: <span class="num">153</span>, <span class="cm">← tổng số record trong DB</span>
+  <span class="str">"totalPages"</span>: <span class="num">8</span>,      <span class="cm">← tổng số trang</span>
+  <span class="str">"first"</span>: <span class="kw">true</span>,        <span class="cm">← đang ở trang đầu?</span>
+  <span class="str">"last"</span>: <span class="kw">false</span>,        <span class="cm">← đang ở trang cuối?</span>
+  <span class="str">"numberOfElements"</span>: <span class="num">20</span> <span class="cm">← số item trang này</span>
+}
+
+<span class="cm">// Frontend dùng totalPages để render số trang</span>
+<span class="cm">// dùng first/last để disable nút Prev/Next</span></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         20. FLYWAY — DB MIGRATION
+    ============================================= -->
+    <section id="flyway">
+      <div class="chapter-label"><span class="chapter-num">20</span> Production</div>
+      <h2>Flyway — <span>Database Migration</span></h2>
+      <p class="section-desc">Vấn đề: database trên máy bạn khác database trên server. Flyway quản lý version DB bằng file SQL — giống Git nhưng cho database.</p>
+
+      <div class="anno anno-blue">
+        <span class="ico">🗃️</span>
+        <span>Không bao giờ sửa DB thủ công trên production. Mọi thay đổi schema phải qua migration file, commit vào git, để Flyway tự chạy khi deploy.</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-blue">
+          <h3>Cấu trúc & Quy tắc đặt tên</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>Migration files</span>
+            </div>
+            <pre><span class="str">src/main/resources/db/migration/</span>
+├── <span class="str">V1__create_users_table.sql</span>
+├── <span class="str">V2__create_posts_table.sql</span>
+├── <span class="str">V3__add_role_to_users.sql</span>
+├── <span class="str">V4__create_index_email.sql</span>
+└── <span class="str">V5__add_refresh_token_table.sql</span>
+
+<span class="cm">// QUY TẮC đặt tên:</span>
+<span class="cm">// V{version}__{description}.sql</span>
+<span class="cm">// ↑ số tăng dần  ↑ 2 gạch dưới</span>
+
+<span class="cm">// application.yml</span>
+<span class="var">spring</span>:
+  <span class="var">flyway</span>:
+    <span class="var">enabled</span>: <span class="kw">true</span>
+    <span class="var">locations</span>: <span class="str">classpath:db/migration</span>
+    <span class="var">baseline-on-migrate</span>: <span class="kw">true</span>
+
+<span class="cm">// QUAN TRỌNG: Đã commit file migration?</span>
+<span class="cm">// KHÔNG SỬA file đã chạy trên production!</span>
+<span class="cm">// Nếu cần đổi → tạo file V mới!</span></pre>
+          </div>
+        </div>
+
+        <div class="card card-orange">
+          <h3>Ví dụ Migration Files</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>V1__create_users_table.sql</span>
+            </div>
+            <pre><span class="kw">CREATE TABLE</span> users (
+    id          <span class="type">BIGSERIAL PRIMARY KEY</span>,
+    name        <span class="type">VARCHAR</span>(<span class="num">100</span>)  <span class="kw">NOT NULL</span>,
+    email       <span class="type">VARCHAR</span>(<span class="num">255</span>)  <span class="kw">NOT NULL UNIQUE</span>,
+    password    <span class="type">VARCHAR</span>(<span class="num">255</span>)  <span class="kw">NOT NULL</span>,
+    role        <span class="type">VARCHAR</span>(<span class="num">50</span>)   <span class="kw">NOT NULL DEFAULT</span> <span class="str">'USER'</span>,
+    created_at  <span class="type">TIMESTAMP</span>     <span class="kw">DEFAULT NOW</span>(),
+    updated_at  <span class="type">TIMESTAMP</span>     <span class="kw">DEFAULT NOW</span>()
+);
+
+<span class="kw">CREATE INDEX</span> idx_users_email <span class="kw">ON</span> users(email);</pre>
+          </div>
+          <div class="code-wrap" style="margin-top:0.5rem;">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>V3__add_role_to_users.sql</span>
+            </div>
+            <pre><span class="cm">-- Thêm cột mới (không sửa V1!)</span>
+<span class="kw">ALTER TABLE</span> users
+    <span class="kw">ADD COLUMN</span> avatar_url <span class="type">VARCHAR</span>(<span class="num">500</span>),
+    <span class="kw">ADD COLUMN</span> is_active   <span class="type">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">TRUE</span>;
+
+<span class="cm">-- Update dữ liệu cũ</span>
+<span class="kw">UPDATE</span> users <span class="kw">SET</span> is_active = <span class="kw">TRUE WHERE</span> is_active <span class="kw">IS NULL</span>;</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         21. REDIS CACHE
+    ============================================= -->
+    <section id="redis">
+      <div class="chapter-label"><span class="chapter-num">21</span> Hạ tầng</div>
+      <h2>Redis — <span>Caching</span></h2>
+      <p class="section-desc">Redis = database trong RAM, cực nhanh. Dùng để cache kết quả query nặng, lưu session, lưu OTP. Truy vấn DB mất 50ms, Redis mất 0.1ms.</p>
+
+      <div class="grid-2">
+        <div class="card card-red">
+          <h3>Cache với @Cacheable</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--red)"></span>UserService + Cache</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// pom.xml: spring-boot-starter-data-redis</span>
+<span class="cm">// application.yml:</span>
+<span class="cm">// spring.data.redis.host: localhost</span>
+<span class="cm">// spring.data.redis.port: 6379</span>
+
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="type">UserServiceImpl</span> <span class="kw">implements</span> <span class="iface">UserService</span> {
+
+    <span class="cm">// Cache kết quả vào Redis với key = "users::{id}"</span>
+    <span class="an">@Cacheable</span>(value = <span class="str">"users"</span>, key = <span class="str">"#id"</span>)
+    <span class="kw">public</span> <span class="type">UserResponse</span> <span class="fn">findById</span>(<span class="type">Long</span> <span class="var">id</span>) {
+        <span class="cm">// Lần đầu: query DB, lưu vào Redis</span>
+        <span class="cm">// Lần sau: lấy từ Redis, KHÔNG query DB</span>
+        <span class="kw">return</span> <span class="fn">toResponse</span>(<span class="var">userRepository</span>.<span class="fn">findById</span>(<span class="var">id</span>)
+            .<span class="fn">orElseThrow</span>(() -> <span class="kw">new</span> <span class="type">NotFoundException</span>(<span class="str">"User not found"</span>)));
+    }
+
+    <span class="cm">// Xóa cache khi update</span>
+    <span class="an">@CacheEvict</span>(value = <span class="str">"users"</span>, key = <span class="str">"#id"</span>)
+    <span class="kw">public</span> <span class="type">UserResponse</span> <span class="fn">update</span>(<span class="type">Long</span> <span class="var">id</span>, <span class="type">UserRequest</span> <span class="var">req</span>) {
+        <span class="cm">// Cache cũ bị xóa → lần sau query DB mới</span>
+        <span class="cm">/* update logic */</span>
+    }
+
+    <span class="cm">// Update cache sau khi sửa</span>
+    <span class="an">@CachePut</span>(value = <span class="str">"users"</span>, key = <span class="str">"#result.id"</span>)
+    <span class="kw">public</span> <span class="type">UserResponse</span> <span class="fn">updateAndRefreshCache</span>(<span class="type">Long</span> <span class="var">id</span>, <span class="type">UserRequest</span> <span class="var">req</span>) {
+        <span class="cm">// Luôn chạy method, rồi lưu kết quả vào cache</span>
+        <span class="cm">/* update logic */</span>
+    }
+
+    <span class="cm">// Xóa toàn bộ cache "users"</span>
+    <span class="an">@CacheEvict</span>(value = <span class="str">"users"</span>, allEntries = <span class="kw">true</span>)
+    <span class="kw">public void</span> <span class="fn">clearAllCache</span>() {}
+}</pre>
+          </div>
+        </div>
+
+        <div class="card card-purple">
+          <h3>Redis Template — thao tác thủ công</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--purple)"></span>RedisTemplate trực tiếp</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="an">@Service</span>
+<span class="an">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="type">OtpService</span> {
+
+    <span class="kw">private final</span> <span class="type">RedisTemplate</span>&lt;<span class="type">String</span>, <span class="type">String</span>&gt; <span class="var">redisTemplate</span>;
+
+    <span class="cm">// Lưu OTP với TTL 5 phút</span>
+    <span class="kw">public void</span> <span class="fn">saveOtp</span>(<span class="type">String</span> <span class="var">email</span>, <span class="type">String</span> <span class="var">otp</span>) {
+        <span class="type">String</span> <span class="var">key</span> = <span class="str">"otp:"</span> + <span class="var">email</span>;
+        <span class="var">redisTemplate</span>.<span class="fn">opsForValue</span>().<span class="fn">set</span>(
+            <span class="var">key</span>, <span class="var">otp</span>,
+            <span class="num">5</span>, <span class="type">TimeUnit</span>.<span class="var">MINUTES</span>   <span class="cm">← tự xóa sau 5 phút</span>
+        );
+    }
+
+    <span class="cm">// Xác thực OTP</span>
+    <span class="kw">public boolean</span> <span class="fn">verifyOtp</span>(<span class="type">String</span> <span class="var">email</span>, <span class="type">String</span> <span class="var">otp</span>) {
+        <span class="type">String</span> <span class="var">stored</span> = <span class="var">redisTemplate</span>.<span class="fn">opsForValue</span>().<span class="fn">get</span>(<span class="str">"otp:"</span> + <span class="var">email</span>);
+        <span class="kw">if</span> (<span class="var">otp</span>.<span class="fn">equals</span>(<span class="var">stored</span>)) {
+            <span class="var">redisTemplate</span>.<span class="fn">delete</span>(<span class="str">"otp:"</span> + <span class="var">email</span>); <span class="cm">← dùng 1 lần rồi xóa</span>
+            <span class="kw">return true</span>;
+        }
+        <span class="kw">return false</span>;
+    }
+
+    <span class="cm">// Rate limiting đơn giản</span>
+    <span class="kw">public boolean</span> <span class="fn">isRateLimited</span>(<span class="type">String</span> <span class="var">ip</span>) {
+        <span class="type">String</span> <span class="var">key</span> = <span class="str">"ratelimit:"</span> + <span class="var">ip</span>;
+        <span class="type">Long</span> <span class="var">count</span> = <span class="var">redisTemplate</span>.<span class="fn">opsForValue</span>().<span class="fn">increment</span>(<span class="var">key</span>);
+        <span class="kw">if</span> (<span class="var">count</span> == <span class="num">1</span>) <span class="cm">// lần đầu: set TTL 1 phút</span>
+            <span class="var">redisTemplate</span>.<span class="fn">expire</span>(<span class="var">key</span>, <span class="num">1</span>, <span class="type">TimeUnit</span>.<span class="var">MINUTES</span>);
+        <span class="kw">return</span> <span class="var">count</span> > <span class="num">100</span>; <span class="cm">← quá 100 request/phút → block</span>
+    }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         22. RABBITMQ / QUEUE
+    ============================================= -->
+    <section id="rabbitmq">
+      <div class="chapter-label"><span class="chapter-num">22</span> Hạ tầng</div>
+      <h2>RabbitMQ — <span>Message Queue</span></h2>
+      <p class="section-desc">Queue = hàng đợi xử lý tác vụ nặng bất đồng bộ. Ví dụ: gửi email, resize ảnh, xuất PDF — không làm ngay mà đẩy vào hàng đợi để xử lý sau, không block request.</p>
+
+      <div class="anno anno-blue">
+        <span class="ico">📬</span>
+        <span><strong>Không dùng Queue:</strong> User đăng ký → đợi gửi email xong → trả response (chậm, có thể timeout). <strong>Dùng Queue:</strong> User đăng ký → đẩy task vào queue → trả response ngay → worker gửi email sau.</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-orange">
+          <h3>Config + Producer (gửi message)</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot"></span>RabbitMQ Config + Producer</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// pom.xml: spring-boot-starter-amqp</span>
+
+<span class="an">@Configuration</span>
+<span class="kw">public class</span> <span class="type">RabbitMQConfig</span> {
+
+    <span class="kw">public static final</span> <span class="type">String</span> <span class="var">EMAIL_QUEUE</span>    = <span class="str">"email.queue"</span>;
+    <span class="kw">public static final</span> <span class="type">String</span> <span class="var">EMAIL_EXCHANGE</span> = <span class="str">"email.exchange"</span>;
+    <span class="kw">public static final</span> <span class="type">String</span> <span class="var">EMAIL_KEY</span>      = <span class="str">"email.routing"</span>;
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="type">Queue</span> <span class="fn">emailQueue</span>() {
+        <span class="kw">return</span> <span class="kw">new</span> <span class="type">Queue</span>(<span class="var">EMAIL_QUEUE</span>, <span class="kw">true</span>); <span class="cm">← durable: không mất khi restart</span>
+    }
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="type">DirectExchange</span> <span class="fn">emailExchange</span>() {
+        <span class="kw">return new</span> <span class="type">DirectExchange</span>(<span class="var">EMAIL_EXCHANGE</span>);
+    }
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="type">Binding</span> <span class="fn">emailBinding</span>() {
+        <span class="kw">return</span> <span class="type">BindingBuilder</span>.<span class="fn">bind</span>(<span class="fn">emailQueue</span>())
+            .<span class="fn">to</span>(<span class="fn">emailExchange</span>()).<span class="fn">with</span>(<span class="var">EMAIL_KEY</span>);
+    }
+}
+
+<span class="cm">// PRODUCER — đẩy task vào queue</span>
+<span class="an">@Service</span>
+<span class="an">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="type">EmailProducer</span> {
+
+    <span class="kw">private final</span> <span class="type">RabbitTemplate</span> <span class="var">rabbitTemplate</span>;
+
+    <span class="kw">public void</span> <span class="fn">sendWelcomeEmail</span>(<span class="type">String</span> <span class="var">email</span>, <span class="type">String</span> <span class="var">name</span>) {
+        <span class="type">EmailMessage</span> <span class="var">msg</span> = <span class="kw">new</span> <span class="type">EmailMessage</span>(<span class="var">email</span>, <span class="var">name</span>, <span class="str">"WELCOME"</span>);
+        <span class="var">rabbitTemplate</span>.<span class="fn">convertAndSend</span>(
+            <span class="type">RabbitMQConfig</span>.<span class="var">EMAIL_EXCHANGE</span>,
+            <span class="type">RabbitMQConfig</span>.<span class="var">EMAIL_KEY</span>,
+            <span class="var">msg</span>
+        );
+        <span class="var">log</span>.<span class="fn">info</span>(<span class="str">"Email task queued for: {}"</span>, <span class="var">email</span>);
+        <span class="cm">// Không đợi gửi email xong, trả về luôn!</span>
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="card card-blue">
+          <h3>Consumer (xử lý message)</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>EmailConsumer.java</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="an">@Service</span>
+<span class="an">@Slf4j</span>
+<span class="an">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="type">EmailConsumer</span> {
+
+    <span class="kw">private final</span> <span class="type">JavaMailSender</span> <span class="var">mailSender</span>;
+
+    <span class="cm">// Lắng nghe queue, tự xử lý khi có message</span>
+    <span class="an">@RabbitListener</span>(queues = <span class="type">RabbitMQConfig</span>.<span class="var">EMAIL_QUEUE</span>)
+    <span class="kw">public void</span> <span class="fn">handleEmailTask</span>(<span class="type">EmailMessage</span> <span class="var">message</span>) {
+        <span class="var">log</span>.<span class="fn">info</span>(<span class="str">"Processing email for: {}"</span>, <span class="var">message</span>.<span class="fn">getEmail</span>());
+
+        <span class="kw">try</span> {
+            <span class="type">SimpleMailMessage</span> <span class="var">mail</span> = <span class="kw">new</span> <span class="type">SimpleMailMessage</span>();
+            <span class="var">mail</span>.<span class="fn">setTo</span>(<span class="var">message</span>.<span class="fn">getEmail</span>());
+            <span class="var">mail</span>.<span class="fn">setSubject</span>(<span class="str">"Chào mừng "   </span> + <span class="var">message</span>.<span class="fn">getName</span>());
+            <span class="var">mail</span>.<span class="fn">setText</span>(<span class="str">"Cảm ơn bạn đã đăng ký!"</span>);
+            <span class="var">mailSender</span>.<span class="fn">send</span>(<span class="var">mail</span>);
+
+            <span class="var">log</span>.<span class="fn">info</span>(<span class="str">"Email sent successfully to: {}"</span>, <span class="var">message</span>.<span class="fn">getEmail</span>());
+
+        } <span class="kw">catch</span> (<span class="type">Exception</span> <span class="var">e</span>) {
+            <span class="var">log</span>.<span class="fn">error</span>(<span class="str">"Failed to send email to: {}"</span>, <span class="var">message</span>.<span class="fn">getEmail</span>(), <span class="var">e</span>);
+            <span class="cm">// Message sẽ vào Dead Letter Queue (DLQ)</span>
+            <span class="cm">// để retry hoặc xem xét sau</span>
+            <span class="kw">throw</span> <span class="var">e</span>;
+        }
+    }
+}
+
+<span class="cm">// Data class cho message</span>
+<span class="an">@Data</span> <span class="an">@AllArgsConstructor</span> <span class="an">@NoArgsConstructor</span>
+<span class="kw">public class</span> <span class="type">EmailMessage</span> <span class="kw">implements</span> <span class="iface">Serializable</span> {
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">email</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">name</span>;
+    <span class="kw">private</span> <span class="type">String</span> <span class="var">type</span>; <span class="cm">// WELCOME, RESET_PASSWORD, OTP...</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         23. DOCKER
+    ============================================= -->
+    <section id="docker">
+      <div class="chapter-label"><span class="chapter-num">23</span> Hạ tầng</div>
+      <h2>Docker — <span>Đóng gói ứng dụng</span></h2>
+      <p class="section-desc">Docker đóng gói app + toàn bộ dependencies vào 1 image. Chạy trên máy nào cũng như nhau. "Works on my machine" không còn là lý do biện hộ.</p>
+
+      <div class="grid-2">
+        <div class="card card-blue">
+          <h3>Dockerfile cho Spring Boot</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>Dockerfile</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm"># STAGE 1: Build (dùng Maven để build jar)</span>
+<span class="kw">FROM</span> maven:3.9-eclipse-temurin-17 <span class="kw">AS</span> build
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> pom.xml .
+<span class="kw">RUN</span> mvn dependency:go-offline    <span class="cm">← cache deps trước</span>
+<span class="kw">COPY</span> src ./src
+<span class="kw">RUN</span> mvn package -DskipTests      <span class="cm">← build jar</span>
+
+<span class="cm"># STAGE 2: Run (image nhỏ hơn, chỉ chứa JRE + jar)</span>
+<span class="kw">FROM</span> eclipse-temurin:17-jre-alpine
+<span class="kw">WORKDIR</span> /app
+
+<span class="cm"># Tạo user riêng, không chạy root</span>
+<span class="kw">RUN</span> addgroup -S appgroup && adduser -S appuser -G appgroup
+<span class="kw">USER</span> appuser
+
+<span class="kw">COPY</span> --from=build /app/target/*.jar app.jar
+
+<span class="cm"># Biến môi trường có thể override khi run</span>
+<span class="kw">ENV</span> SPRING_PROFILES_ACTIVE=prod
+<span class="kw">ENV</span> SERVER_PORT=8080
+
+<span class="kw">EXPOSE</span> 8080
+
+<span class="cm"># Tối ưu JVM cho container</span>
+<span class="kw">ENTRYPOINT</span> ["java",
+  "-XX:+UseContainerSupport",
+  "-XX:MaxRAMPercentage=75.0",
+  "-jar", "app.jar"]</pre>
+          </div>
+        </div>
+
+        <div class="card card-green">
+          <h3>docker-compose.yml — Full Stack local</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--green)"></span>docker-compose.yml</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="var">version</span>: <span class="str">'3.8'</span>
+<span class="var">services</span>:
+
+  <span class="cm"># Spring Boot app</span>
+  <span class="var">app</span>:
+    <span class="var">build</span>: .
+    <span class="var">ports</span>:
+      - <span class="str">"8080:8080"</span>
+    <span class="var">environment</span>:
+      - DB_HOST=postgres         <span class="cm">← tên service thay localhost</span>
+      - DB_USERNAME=myuser
+      - DB_PASSWORD=mypass
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+    <span class="var">depends_on</span>:
+      - postgres
+      - redis
+      - rabbitmq
+
+  <span class="cm"># PostgreSQL</span>
+  <span class="var">postgres</span>:
+    <span class="var">image</span>: postgres:15-alpine
+    <span class="var">environment</span>:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypass
+    <span class="var">volumes</span>:
+      - postgres_data:/var/lib/postgresql/data <span class="cm">← data không mất khi restart</span>
+
+  <span class="cm"># Redis</span>
+  <span class="var">redis</span>:
+    <span class="var">image</span>: redis:7-alpine
+    <span class="var">ports</span>:
+      - <span class="str">"6379:6379"</span>
+
+  <span class="cm"># RabbitMQ (có dashboard trên :15672)</span>
+  <span class="var">rabbitmq</span>:
+    <span class="var">image</span>: rabbitmq:3-management-alpine
+    <span class="var">ports</span>:
+      - <span class="str">"5672:5672"</span>
+      - <span class="str">"15672:15672"</span>   <span class="cm">← RabbitMQ Management UI</span>
+
+<span class="var">volumes</span>:
+  <span class="var">postgres_data</span>:</pre>
+          </div>
+          <div style="margin-top:0.75rem; display:flex; flex-direction:column; gap:4px; font-size:12px;">
+            <div style="color:var(--muted);">Lệnh thường dùng:</div>
+            <code style="color:var(--green); background:var(--surface2); padding:0.3rem 0.6rem; border-radius:4px;">docker-compose up -d</code>
+            <code style="color:var(--blue); background:var(--surface2); padding:0.3rem 0.6rem; border-radius:4px;">docker-compose logs -f app</code>
+            <code style="color:var(--orange); background:var(--surface2); padding:0.3rem 0.6rem; border-radius:4px;">docker-compose down -v</code>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         24. CI/CD
+    ============================================= -->
+    <section id="cicd">
+      <div class="chapter-label"><span class="chapter-num">24</span> Hạ tầng</div>
+      <h2>CI/CD — <span>Tự động deploy</span></h2>
+      <p class="section-desc">CI = Continuous Integration (tự động test khi push code). CD = Continuous Deployment (tự động deploy khi test pass). Không CI/CD = deploy tay = sai lầm.</p>
+
+      <div class="flow" style="margin-bottom:1.5rem; gap:4px; flex-wrap:wrap;">
+        <div class="flow-step"><div class="f-title">git push</div><div class="f-sub">developer</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step highlight"><div class="f-title">CI trigger</div><div class="f-sub">GitHub Actions</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="f-title">Build & Test</div><div class="f-sub">mvn test</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="f-title">Build Docker</div><div class="f-sub">docker build</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="f-title">Push Image</div><div class="f-sub">Docker Hub</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step highlight"><div class="f-title">Deploy</div><div class="f-sub">SSH to server</div></div>
+      </div>
+
+      <div class="card card-orange">
+        <h3>GitHub Actions — .github/workflows/deploy.yml</h3>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-filename"><span class="dot"></span>.github/workflows/deploy.yml</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+          <pre><span class="var">name</span>: Build and Deploy
+
+<span class="var">on</span>:
+  <span class="var">push</span>:
+    <span class="var">branches</span>: [ main ]          <span class="cm"># chạy khi push vào main</span>
+
+<span class="var">jobs</span>:
+  <span class="var">build-and-deploy</span>:
+    <span class="var">runs-on</span>: ubuntu-latest
+
+    <span class="var">steps</span>:
+      <span class="cm"># 1. Checkout code</span>
+      - <span class="var">uses</span>: actions/checkout@v4
+
+      <span class="cm"># 2. Cài Java 17</span>
+      - <span class="var">name</span>: Set up JDK 17
+        <span class="var">uses</span>: actions/setup-java@v4
+        <span class="var">with</span>:
+          <span class="var">java-version</span>: <span class="str">'17'</span>
+          <span class="var">distribution</span>: <span class="str">'temurin'</span>
+
+      <span class="cm"># 3. Cache Maven dependencies</span>
+      - <span class="var">name</span>: Cache Maven
+        <span class="var">uses</span>: actions/cache@v4
+        <span class="var">with</span>:
+          <span class="var">path</span>: ~/.m2
+          <span class="var">key</span>: maven-${{ hashFiles('**/pom.xml') }}
+
+      <span class="cm"># 4. Build và Test</span>
+      - <span class="var">name</span>: Build with Maven
+        <span class="var">run</span>: mvn clean package -DskipTests=false
+        <span class="cm"># Test phải pass mới deploy!</span>
+
+      <span class="cm"># 5. Build Docker image</span>
+      - <span class="var">name</span>: Build Docker image
+        <span class="var">run</span>: |
+          docker build -t myapp:${{ github.sha }} .
+          docker tag myapp:${{ github.sha }} myuser/myapp:latest
+
+      <span class="cm"># 6. Push lên Docker Hub</span>
+      - <span class="var">name</span>: Push to Docker Hub
+        <span class="var">run</span>: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u myuser --password-stdin
+          docker push myuser/myapp:latest
+
+      <span class="cm"># 7. SSH vào server và deploy</span>
+      - <span class="var">name</span>: Deploy to server
+        <span class="var">uses</span>: appleboy/ssh-action@v1
+        <span class="var">with</span>:
+          <span class="var">host</span>: ${{ secrets.SERVER_HOST }}
+          <span class="var">username</span>: ${{ secrets.SERVER_USER }}
+          <span class="var">key</span>: ${{ secrets.SERVER_SSH_KEY }}
+          <span class="var">script</span>: |
+            docker pull myuser/myapp:latest
+            docker-compose -f /app/docker-compose.prod.yml up -d --no-deps app
+            docker system prune -f</pre>
+        </div>
+        <div class="anno anno-green" style="margin-top:0.75rem;">
+          <span class="ico">🔐</span>
+          <span>Tất cả secret (DOCKERHUB_TOKEN, SERVER_HOST, SERVER_SSH_KEY) lưu trong GitHub → Settings → Secrets. KHÔNG bao giờ hardcode trong file.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         25. MICROSERVICES
+    ============================================= -->
+    <section id="microservices">
+      <div class="chapter-label"><span class="chapter-num">25</span> Hạ tầng</div>
+      <h2>Microservices — <span>Tách nhỏ service</span></h2>
+      <p class="section-desc">Monolith = 1 app to làm tất cả. Microservices = nhiều app nhỏ, mỗi app làm 1 việc. Phù hợp khi hệ thống lớn, nhiều team. Bắt đầu luôn bằng monolith, scale lên micro khi cần.</p>
+
+      <div class="grid-2">
+        <div class="card card-purple">
+          <h3>Kiến trúc Microservices</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--purple)"></span>Cấu trúc services</span>
+            </div>
+            <pre><span class="cm">// Thay vì 1 monolith to:</span>
+my-app/
+  ├── controller/
+  ├── service/
+  └── repository/
+
+<span class="cm">// Tách thành nhiều service độc lập:</span>
+api-gateway/        <span class="cm">← cổng vào duy nhất (port 80)</span>
+  ↓ điều hướng đến:
+user-service/       <span class="cm">← quản lý user, auth (port 8081)</span>
+product-service/    <span class="cm">← quản lý sản phẩm (port 8082)</span>
+order-service/      <span class="cm">← quản lý đơn hàng (port 8083)</span>
+payment-service/    <span class="cm">← xử lý thanh toán (port 8084)</span>
+notification-svc/   <span class="cm">← gửi email/SMS (port 8085)</span>
+
+<span class="cm">// Mỗi service có database riêng!</span>
+<span class="cm">// Giao tiếp qua REST hoặc Message Queue</span></pre>
+          </div>
+        </div>
+
+        <div class="card card-blue">
+          <h3>API Gateway + Service Discovery</h3>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-filename"><span class="dot" style="background:var(--blue)"></span>Spring Cloud Gateway</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// API Gateway — điều hướng request</span>
+<span class="cm">// pom.xml: spring-cloud-starter-gateway</span>
+
+<span class="var">spring</span>:
+  <span class="var">cloud</span>:
+    <span class="var">gateway</span>:
+      <span class="var">routes</span>:
+        - <span class="var">id</span>: user-service
+          <span class="var">uri</span>: <span class="str">lb://user-service</span>   <span class="cm">← load balanced</span>
+          <span class="var">predicates</span>:
+            - Path=/api/users/**  <span class="cm">← chuyển đến user-service</span>
+
+        - <span class="var">id</span>: product-service
+          <span class="var">uri</span>: <span class="str">lb://product-service</span>
+          <span class="var">predicates</span>:
+            - Path=/api/products/**
+
+<span class="cm">// Gọi service khác từ Order Service</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="type">OrderService</span> {
+
+    <span class="cm">// WebClient — gọi HTTP đến service khác</span>
+    <span class="kw">private final</span> <span class="type">WebClient</span> <span class="var">webClient</span>;
+
+    <span class="kw">public</span> <span class="type">ProductDto</span> <span class="fn">getProduct</span>(<span class="type">Long</span> <span class="var">productId</span>) {
+        <span class="kw">return</span> <span class="var">webClient</span>
+            .<span class="fn">get</span>()
+            .<span class="fn">uri</span>(<span class="str">"http://product-service/api/products/"</span> + <span class="var">productId</span>)
+            .<span class="fn">retrieve</span>()
+            .<span class="fn">bodyToMono</span>(<span class="type">ProductDto</span>.<span class="kw">class</span>)
+            .<span class="fn">block</span>();
+    }
+
+    <span class="kw">public void</span> <span class="fn">placeOrder</span>(<span class="type">OrderRequest</span> <span class="var">req</span>) {
+        <span class="cm">// Sau khi đặt hàng → publish event cho notification-service</span>
+        <span class="var">rabbitTemplate</span>.<span class="fn">convertAndSend</span>(<span class="str">"order.placed"</span>, <span class="var">req</span>);
+    }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem;">
+        <h3 style="color:var(--yellow)">Monolith vs Microservices — Khi nào dùng cái nào?</h3>
+        <div class="grid-2" style="margin-top:0.75rem;">
+          <div style="background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:1.25rem;">
+            <div style="font-family:var(--font-ui); font-weight:700; color:var(--green); margin-bottom:0.75rem;">✅ Monolith — Dùng khi:</div>
+            <div style="font-size:12px; color:var(--muted); line-height:2;">
+              • Team nhỏ (dưới 10 người)<br>
+              • Product mới, chưa rõ scale<br>
+              • Startup, MVP, side project<br>
+              • Deadline gấp<br>
+              • Không có DevOps chuyên nghiệp
+            </div>
+          </div>
+          <div style="background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:1.25rem;">
+            <div style="font-family:var(--font-ui); font-weight:700; color:var(--blue); margin-bottom:0.75rem;">✅ Microservices — Dùng khi:</div>
+            <div style="font-size:12px; color:var(--muted); line-height:2;">
+              • Team lớn, nhiều team độc lập<br>
+              • Scale từng phần khác nhau<br>
+              • Yêu cầu availability cao<br>
+              • Đã có monolith và đang scale vấn đề<br>
+              • Có đội DevOps/Platform Engineering
+            </div>
+          </div>
+        </div>
+        <div class="anno" style="margin-top:1rem;">
+          <span class="ico">💡</span>
+          <span><strong>Lời khuyên thực tế:</strong> Bắt đầu bằng Monolith được thiết kế tốt (module hóa rõ ràng). Khi thực sự cần scale → tách từng module ra thành service riêng. Đừng bắt đầu bằng Microservices khi còn là junior.</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div>// java.backend — 25 chương · Spring Boot · JPA · JWT · WebSocket · Testing · Logging · Redis · RabbitMQ · Docker · CI/CD · Microservices</div>
+  <div style="margin-top:0.25rem;">Đọc code này → hiểu luồng → dùng AI đúng cách → làm việc được ở công ty</div>
+</footer>
+
+<script>
+  // ── COPY BUTTON ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── HTTP TABS ──
+  function switchTab(name) {
+    document.querySelectorAll('.http-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.http-tab').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.remove('hidden');
+    event.target.classList.add('active');
+  }
+
+  // ── SCROLL REVEAL ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('section').forEach(s => observer.observe(s));
+
+  // ── ACTIVE SIDEBAR ──
+  const sections = document.querySelectorAll('section[id]');
+  const sidebarLinks = document.querySelectorAll('.sidebar-item');
+
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        sidebarLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar-item[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+
+  sections.forEach(s => sectionObserver.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frontend Reference — Học Cùng AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    /* =============================================
+       CSS VARIABLES — dùng để quản lý màu & font
+    ============================================= */
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --border: #2a2a3a;
+      --accent: #7cfc6e;
+      --accent2: #fc6e7c;
+      --accent3: #6e9cfc;
+      --text: #e8e8f0;
+      --muted: #7070a0;
+      --font-mono: 'Space Mono', monospace;
+      --font-display: 'Syne', sans-serif;
+      --radius: 8px;
+    }
+
+    /* =============================================
+       RESET & BASE
+    ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* =============================================
+       HTML SEMANTIC — ví dụ thẻ semantic trong thực tế
+    ============================================= */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+    nav {
+      display: flex;            /* FLEXBOX */
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    section {
+      margin-bottom: 4rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    /* =============================================
+       CSS BOX MODEL
+    ============================================= */
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+    h3 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--accent);
+    }
+
+    /* =============================================
+       CSS FLEXBOX — layout chính
+    ============================================= */
+    .grid-2 {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .card {
+      flex: 1 1 300px;         /* flex-grow, flex-shrink, flex-basis */
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* =============================================
+       CSS GRID — layout phức tạp hơn
+    ============================================= */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    /* =============================================
+       BOX MODEL DEMO VISUAL
+    ============================================= */
+    .box-model-demo {
+      background: #1a1a2e;
+      border: 2px dashed var(--accent3);
+      border-radius: 6px;
+      padding: 1.5rem;          /* PADDING = khoảng cách bên trong */
+      margin: 0.5rem 0;         /* MARGIN = khoảng cách bên ngoài */
+      position: relative;
+      text-align: center;
+      font-size: 12px;
+      color: var(--accent3);
+    }
+    .box-inner {
+      background: #0d3349;
+      border: 1px solid var(--accent3);
+      padding: 1rem;
+      border-radius: 4px;
+      color: var(--text);
+    }
+    .box-label {
+      position: absolute;
+      top: 4px; left: 8px;
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    /* =============================================
+       CODE BLOCK
+    ============================================= */
+    pre {
+      background: #0d0d14;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-size: 12px;
+      line-height: 1.8;
+      margin: 0.75rem 0;
+    }
+    .kw { color: #fc6e7c; }   /* keyword */
+    .fn { color: #7cfc6e; }   /* function */
+    .str { color: #fce06e; }  /* string */
+    .cm { color: #505070; }   /* comment */
+    .var { color: #6e9cfc; }  /* variable */
+    .num { color: #fc9e6e; }  /* number */
+
+    /* =============================================
+       INTERACTIVE DEMOS
+    ============================================= */
+    .demo-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    .demo-title {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    /* =============================================
+       FORM ELEMENTS — input, button
+    ============================================= */
+    input[type="text"], input[type="email"], textarea, select {
+      width: 100%;
+      background: #0d0d14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 0.75rem;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    button {
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1.25rem;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a0f;
+      font-weight: 700;
+    }
+    .btn-primary:hover { background: #a0ff94; transform: translateY(-1px); }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger {
+      background: var(--accent2);
+      color: #0a0a0f;
+      font-weight: 700;
+    }
+
+    /* =============================================
+       FLEXBOX PLAYGROUND
+    ============================================= */
+    .flex-playground {
+      display: flex;
+      gap: 8px;
+      background: #0d0d14;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      min-height: 80px;
+      align-items: center;
+      flex-wrap: wrap;
+      transition: all 0.3s;
+    }
+    .flex-item {
+      background: var(--accent3);
+      color: #0a0a0f;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .flex-controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    .tag-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font-mono);
+    }
+    .tag-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(124,252,110,0.08); }
+    .tag-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* =============================================
+       TODO LIST — DOM manipulation demo
+    ============================================= */
+    .todo-list {
+      list-style: none;
+      margin-top: 0.75rem;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      animation: fadeUp 0.3s ease;
+    }
+    .todo-item:last-child { border-bottom: none; }
+    .todo-check {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .todo-check.done { background: var(--accent); border-color: var(--accent); }
+    .todo-check.done::after { content: '✓'; font-size: 10px; color: #0a0a0f; font-weight: 700; }
+    .todo-text { flex: 1; transition: all 0.2s; }
+    .todo-text.done { text-decoration: line-through; color: var(--muted); }
+    .todo-delete {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0;
+      font-size: 16px;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .todo-delete:hover { color: var(--accent2); }
+    .todo-input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .todo-input-row input { margin-bottom: 0; }
+
+    /* =============================================
+       FETCH / ASYNC DEMO
+    ============================================= */
+    .fetch-result {
+      background: #0d0d14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      margin-top: 0.75rem;
+      min-height: 60px;
+      font-size: 12px;
+      color: var(--muted);
+      position: relative;
+    }
+    .fetch-result.loading::after {
+      content: '⏳ Đang gọi API...';
+      color: var(--accent3);
+    }
+    .fetch-result.success { border-color: var(--accent); }
+    .fetch-result.error { border-color: var(--accent2); }
+    .user-card {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent);
+    }
+
+    /* =============================================
+       RESPONSIVE — media query
+    ============================================= */
+    .responsive-demo {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1rem;
+    }
+
+    /* =============================================
+       CSS GRID VISUAL
+    ============================================= */
+    .grid-visual {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      gap: 8px;
+    }
+    .g-item {
+      background: var(--accent3);
+      opacity: 0.15;
+      border-radius: 4px;
+      height: 40px;
+      transition: opacity 0.2s;
+    }
+    .g-item:hover { opacity: 0.5; }
+    .g-span2 { grid-column: span 2; background: var(--accent); opacity: 0.2; }
+
+    /* =============================================
+       ANIMATION
+    ============================================= */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    /* =============================================
+       COUNTER — state demo
+    ============================================= */
+    .counter-display {
+      font-family: var(--font-display);
+      font-size: 4rem;
+      font-weight: 800;
+      text-align: center;
+      padding: 1.5rem 0;
+      color: var(--accent);
+      line-height: 1;
+      transition: all 0.15s;
+    }
+    .counter-display.bump { transform: scale(1.15); color: var(--accent2); }
+    .counter-controls {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    /* =============================================
+       RESPONSIVE BREAKPOINTS
+    ============================================= */
+    @media (max-width: 768px) {
+      .responsive-demo {
+        grid-template-columns: 1fr;    /* 1 cột trên mobile */
+      }
+      .grid-2 { flex-direction: column; }
+      nav { padding: 0 1rem; }
+      .nav-links { display: none; }    /* ẩn menu trên mobile */
+      main { padding: 2rem 1rem 4rem; }
+      h2 { font-size: 1.3rem; }
+      .counter-display { font-size: 3rem; }
+    }
+
+    /* =============================================
+       HERO
+    ============================================= */
+    .hero {
+      padding: 4rem 0 2rem;
+      animation: fadeUp 0.8s ease;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(124,252,110,0.1);
+      border: 1px solid rgba(124,252,110,0.3);
+      color: var(--accent);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      color: var(--muted);
+      max-width: 520px;
+      font-size: 13px;
+      margin-bottom: 1.5rem;
+    }
+    .chapter-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .chapter-tag {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.3rem 0.75rem;
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .chapter-tag:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* =============================================
+       DIVIDER
+    ============================================= */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 2rem 0;
+    }
+
+    /* =============================================
+       STATUS BADGE
+    ============================================= */
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .badge-green { background: rgba(124,252,110,0.15); color: var(--accent); }
+    .badge-blue { background: rgba(110,156,252,0.15); color: var(--accent3); }
+    .badge-red { background: rgba(252,110,124,0.15); color: var(--accent2); }
+
+    /* =============================================
+       EVENT DEMO
+    ============================================= */
+    .event-log {
+      background: #0d0d14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      height: 140px;
+      overflow-y: auto;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .event-log p { color: var(--muted); }
+    .event-entry {
+      display: flex;
+      gap: 0.5rem;
+      animation: fadeUp 0.2s ease;
+    }
+    .event-time { color: var(--accent3); flex-shrink: 0; }
+    .event-msg { color: var(--text); }
+
+    /* =============================================
+       SCOPE DEMO
+    ============================================= */
+    .scope-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .scope-box {
+      flex: 1 1 120px;
+      background: #0d0d14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 12px;
+    }
+    .scope-box .label { color: var(--muted); font-size: 10px; margin-bottom: 0.3rem; }
+    .scope-box .val { color: var(--accent); font-size: 1.2rem; font-weight: 700; }
+
+    /* ARRAY DEMO */
+    .array-visual {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 0.75rem 0;
+    }
+    .arr-item {
+      background: rgba(110,156,252,0.1);
+      border: 1px solid var(--accent3);
+      border-radius: 4px;
+      padding: 0.4rem 0.75rem;
+      font-size: 12px;
+      color: var(--accent3);
+      position: relative;
+    }
+    .arr-item .idx {
+      position: absolute;
+      top: -8px; left: 4px;
+      font-size: 9px;
+      color: var(--muted);
+    }
+    .arr-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+
+    /* OBJECT DEMO */
+    .obj-visual {
+      background: #0d0d14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 12px;
+    }
+    .obj-key { color: var(--accent2); }
+    .obj-val { color: var(--accent); }
+    .obj-punc { color: var(--muted); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       HTML SEMANTIC: header, nav
+  ============================================= -->
+  <header>
+    <nav>
+      <div class="logo">// frontend.ref</div>
+      <ul class="nav-links">
+        <li><a href="#html">HTML</a></li>
+        <li><a href="#css">CSS</a></li>
+        <li><a href="#js">JavaScript</a></li>
+        <li><a href="#async">Async</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#dom">DOM</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="hero-tag">Tài liệu học frontend</div>
+      <h1>Mọi thứ bạn cần biết<br><span>để dùng AI hiệu quả</span></h1>
+      <p>File HTML này chứa tất cả kiến thức frontend cốt lõi: HTML semantic, CSS Box Model, Flexbox, Grid, Responsive, JavaScript, Events, DOM, Fetch/Async. Đọc code, chạy, và hiểu từng phần.</p>
+      <div class="chapter-list">
+        <a href="#html" class="chapter-tag">HTML Semantic</a>
+        <a href="#boxmodel" class="chapter-tag">Box Model</a>
+        <a href="#flexbox" class="chapter-tag">Flexbox</a>
+        <a href="#grid" class="chapter-tag">Grid</a>
+        <a href="#js" class="chapter-tag">JavaScript</a>
+        <a href="#events" class="chapter-tag">Events</a>
+        <a href="#dom" class="chapter-tag">DOM</a>
+        <a href="#async" class="chapter-tag">Async / Fetch</a>
+        <a href="#responsive" class="chapter-tag">Responsive</a>
+      </div>
+    </section>
+
+    <!-- =============================================
+         1. HTML SEMANTIC
+    ============================================= -->
+    <section id="html">
+      <div class="section-label">Chương 01</div>
+      <h2>HTML Semantic</h2>
+      <p style="color:var(--muted); margin-bottom:1.5rem;">HTML semantic nghĩa là dùng đúng thẻ đúng mục đích. Không phải lúc nào cũng dùng &lt;div&gt;.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Thẻ layout chính</h3>
+          <pre><span class="cm">/* Cấu trúc trang đúng chuẩn */</span>
+<span class="kw">&lt;header&gt;</span>   <span class="cm">← đầu trang, logo, nav</span>
+<span class="kw">&lt;nav&gt;</span>      <span class="cm">← menu điều hướng</span>
+<span class="kw">&lt;main&gt;</span>     <span class="cm">← nội dung chính (chỉ 1 cái)</span>
+<span class="kw">&lt;section&gt;</span>  <span class="cm">← nhóm nội dung có tiêu đề</span>
+<span class="kw">&lt;article&gt;</span>  <span class="cm">← nội dung độc lập (bài viết)</span>
+<span class="kw">&lt;aside&gt;</span>    <span class="cm">← sidebar, phụ trợ</span>
+<span class="kw">&lt;footer&gt;</span>   <span class="cm">← chân trang</span></pre>
+        </div>
+
+        <div class="card">
+          <h3>Thẻ nội dung</h3>
+          <pre><span class="kw">&lt;h1&gt;</span>...<span class="kw">&lt;h6&gt;</span>  <span class="cm">← tiêu đề (h1 chỉ 1 lần)</span>
+<span class="kw">&lt;p&gt;</span>         <span class="cm">← đoạn văn</span>
+<span class="kw">&lt;ul&gt;</span> <span class="kw">&lt;ol&gt;</span>  <span class="cm">← danh sách (unordered/ordered)</span>
+<span class="kw">&lt;li&gt;</span>        <span class="cm">← phần tử danh sách</span>
+<span class="kw">&lt;a href=""&gt;</span> <span class="cm">← liên kết</span>
+<span class="kw">&lt;img src=""&gt;</span><span class="cm">← hình ảnh (luôn có alt="")</span>
+<span class="kw">&lt;button&gt;</span>    <span class="cm">← nút bấm</span>
+<span class="kw">&lt;input&gt;</span>     <span class="cm">← ô nhập liệu</span>
+<span class="kw">&lt;form&gt;</span>      <span class="cm">← form nhập liệu</span></pre>
+        </div>
+      </div>
+
+      <div class="demo-box" style="margin-top:1.5rem;">
+        <div class="demo-title">LIVE DEMO — Form HTML đầy đủ</div>
+        <div class="grid-2">
+          <div>
+            <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Tên <span style="color:var(--accent2)">*</span></label>
+            <input type="text" placeholder="Nhập tên của bạn..." id="demo-name" />
+
+            <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Email</label>
+            <input type="email" placeholder="email@example.com" id="demo-email" />
+
+            <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Vai trò</label>
+            <select id="demo-role" style="margin-bottom:0.75rem;">
+              <option value="">-- Chọn vai trò --</option>
+              <option value="frontend">Frontend Dev</option>
+              <option value="backend">Backend Dev</option>
+              <option value="fullstack">Fullstack Dev</option>
+            </select>
+
+            <button class="btn-primary" onclick="submitForm()">Gửi thông tin</button>
+          </div>
+          <div>
+            <div class="obj-visual" id="form-output">
+              <div style="color:var(--muted); font-size:12px;">Điền form và nhấn Gửi để xem kết quả ở đây...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         2. CSS BOX MODEL
+    ============================================= -->
+    <section id="boxmodel">
+      <div class="section-label">Chương 02</div>
+      <h2>CSS Box Model</h2>
+      <p style="color:var(--muted); margin-bottom:1.5rem;">Mọi element HTML đều là một cái hộp. Hiểu Box Model = hiểu 80% lý do layout bị vỡ.</p>
+
+      <div class="grid-2">
+        <div>
+          <div class="box-model-demo">
+            <span class="box-label">MARGIN (khoảng ngoài)</span>
+            <div style="background: rgba(252,110,124,0.15); border: 1px dashed var(--accent2); padding: 1rem; border-radius: 4px;">
+              <div style="font-size:10px; color:var(--accent2); margin-bottom:0.5rem;">BORDER</div>
+              <div style="background: rgba(110,156,252,0.15); border: 1px dashed var(--accent3); padding: 1rem; border-radius: 4px;">
+                <div style="font-size:10px; color:var(--accent3); margin-bottom:0.5rem;">PADDING (khoảng trong)</div>
+                <div class="box-inner">CONTENT (nội dung thực)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Code tương ứng</h3>
+          <pre><span class="var">.box</span> {
+  <span class="cm">/* MARGIN — đẩy ra ngoài */</span>
+  <span class="kw">margin</span>: <span class="num">16px</span>;         <span class="cm">← 4 phía</span>
+  <span class="kw">margin-top</span>: <span class="num">8px</span>;     <span class="cm">← chỉ trên</span>
+
+  <span class="cm">/* BORDER — đường viền */</span>
+  <span class="kw">border</span>: <span class="num">1px</span> <span class="str">solid</span> <span class="str">red</span>;
+
+  <span class="cm">/* PADDING — khoảng trong */</span>
+  <span class="kw">padding</span>: <span class="num">16px</span>;        <span class="cm">← 4 phía</span>
+  <span class="kw">padding</span>: <span class="num">8px 16px</span>;   <span class="cm">← trên/dưới trái/phải</span>
+
+  <span class="cm">/* KÍCH THƯỚC */</span>
+  <span class="kw">width</span>: <span class="num">300px</span>;
+  <span class="kw">height</span>: <span class="num">auto</span>;
+
+  <span class="cm">/* QUAN TRỌNG: dùng border-box */</span>
+  <span class="kw">box-sizing</span>: <span class="str">border-box</span>;
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         3. CSS FLEXBOX
+    ============================================= -->
+    <section id="flexbox">
+      <div class="section-label">Chương 03</div>
+      <h2>CSS Flexbox</h2>
+      <p style="color:var(--muted); margin-bottom:1.5rem;">Flexbox = sắp xếp các phần tử theo 1 chiều (ngang hoặc dọc). Dùng cho navbar, card row, button group...</p>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <h3>Bấm để xem flexbox thay đổi</h3>
+        <div class="flex-playground" id="flex-demo">
+          <div class="flex-item">A</div>
+          <div class="flex-item">BB</div>
+          <div class="flex-item">CCC</div>
+          <div class="flex-item">D</div>
+        </div>
+        <div class="flex-controls">
+          <span style="font-size:11px; color:var(--muted); align-self:center;">justify-content:</span>
+          <button class="tag-btn active" onclick="setFlex('justify','flex-start',this)">flex-start</button>
+          <button class="tag-btn" onclick="setFlex('justify','center',this)">center</button>
+          <button class="tag-btn" onclick="setFlex('justify','flex-end',this)">flex-end</button>
+          <button class="tag-btn" onclick="setFlex('justify','space-between',this)">space-between</button>
+          <button class="tag-btn" onclick="setFlex('justify','space-around',this)">space-around</button>
+        </div>
+        <div class="flex-controls" style="margin-top:0.4rem;">
+          <span style="font-size:11px; color:var(--muted); align-self:center;">align-items:</span>
+          <button class="tag-btn active" onclick="setFlex('align','center',this)">center</button>
+          <button class="tag-btn" onclick="setFlex('align','flex-start',this)">flex-start</button>
+          <button class="tag-btn" onclick="setFlex('align','flex-end',this)">flex-end</button>
+          <button class="tag-btn" onclick="setFlex('align','stretch',this)">stretch</button>
+        </div>
+        <div class="flex-controls" style="margin-top:0.4rem;">
+          <span style="font-size:11px; color:var(--muted); align-self:center;">flex-direction:</span>
+          <button class="tag-btn active" onclick="setFlex('dir','row',this)">row</button>
+          <button class="tag-btn" onclick="setFlex('dir','column',this)">column</button>
+          <button class="tag-btn" onclick="setFlex('dir','row-reverse',this)">row-reverse</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Cheat Sheet Flexbox</h3>
+        <pre><span class="cm">/* CONTAINER (parent) */</span>
+<span class="var">.container</span> {
+  <span class="kw">display</span>: <span class="str">flex</span>;
+  <span class="kw">flex-direction</span>: <span class="str">row</span> | <span class="str">column</span>;
+  <span class="kw">justify-content</span>: <span class="str">flex-start</span> | <span class="str">center</span> | <span class="str">space-between</span>;
+  <span class="kw">align-items</span>: <span class="str">stretch</span> | <span class="str">center</span> | <span class="str">flex-end</span>;
+  <span class="kw">flex-wrap</span>: <span class="str">wrap</span>;     <span class="cm">← xuống dòng khi hết chỗ</span>
+  <span class="kw">gap</span>: <span class="num">16px</span>;          <span class="cm">← khoảng cách giữa items</span>
+}
+
+<span class="cm">/* ITEM (child) */</span>
+<span class="var">.item</span> {
+  <span class="kw">flex</span>: <span class="num">1</span>;             <span class="cm">← chiếm không gian đều nhau</span>
+  <span class="kw">flex</span>: <span class="num">1 1 200px</span>;    <span class="cm">← grow shrink basis</span>
+  <span class="kw">align-self</span>: <span class="str">center</span>; <span class="cm">← override của riêng item đó</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- =============================================
+         4. CSS GRID
+    ============================================= -->
+    <section id="grid">
+      <div class="section-label">Chương 04</div>
+      <h2>CSS Grid</h2>
+      <p style="color:var(--muted); margin-bottom:1.5rem;">Grid = sắp xếp theo 2 chiều (hàng + cột). Dùng cho layout trang, dashboard, gallery...</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Grid visual</h3>
+          <div class="grid-visual" id="grid-demo">
+            <div class="g-item g-span2" title="grid-column: span 2"></div>
+            <div class="g-item" style="opacity:0.3"></div>
+            <div class="g-item" style="opacity:0.2"></div>
+            <div class="g-item" style="background:var(--accent2); opacity:0.2"></div>
+            <div class="g-item" style="opacity:0.15"></div>
+          </div>
+          <div style="margin-top:0.75rem; font-size:11px; color:var(--muted)">
+            Cell đầu tiên dùng <code style="color:var(--accent)">grid-column: span 2</code>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Cheat Sheet Grid</h3>
+          <pre><span class="var">.container</span> {
+  <span class="kw">display</span>: <span class="str">grid</span>;
+  
+  <span class="cm">/* 3 cột đều nhau */</span>
+  <span class="kw">grid-template-columns</span>: <span class="fn">repeat</span>(<span class="num">3</span>, <span class="num">1fr</span>);
+  
+  <span class="cm">/* tự động chia cột ≥ 200px */</span>
+  <span class="kw">grid-template-columns</span>:
+    <span class="fn">repeat</span>(<span class="str">auto-fit</span>, <span class="fn">minmax</span>(<span class="num">200px</span>, <span class="num">1fr</span>));
+  
+  <span class="kw">gap</span>: <span class="num">16px</span>;
+}
+
+<span class="var">.item-wide</span> {
+  <span class="kw">grid-column</span>: <span class="str">span 2</span>; <span class="cm">← chiếm 2 cột</span>
+  <span class="kw">grid-row</span>: <span class="str">span 2</span>;    <span class="cm">← chiếm 2 hàng</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         5. JAVASCRIPT
+    ============================================= -->
+    <section id="js">
+      <div class="section-label">Chương 05</div>
+      <h2>JavaScript — Biến, Hàm, Array, Object</h2>
+
+      <!-- VARIABLES -->
+      <div class="card" style="margin-bottom:1rem;">
+        <h3>Variables — var / let / const</h3>
+        <pre><span class="cm">// const — không thay đổi được (dùng mặc định)</span>
+<span class="kw">const</span> <span class="var">name</span> = <span class="str">"Minh"</span>;
+<span class="kw">const</span> <span class="var">age</span> = <span class="num">25</span>;
+<span class="kw">const</span> <span class="var">isStudent</span> = <span class="kw">true</span>;
+
+<span class="cm">// let — có thể thay đổi</span>
+<span class="kw">let</span> <span class="var">count</span> = <span class="num">0</span>;
+<span class="var">count</span>++;   <span class="cm">// count = 1</span>
+<span class="var">count</span> += <span class="num">5</span>; <span class="cm">// count = 6</span>
+
+<span class="cm">// Template string (dùng backtick `)</span>
+<span class="kw">const</span> <span class="var">message</span> = <span class="str">`Xin chào, ${name}! Bạn ${age} tuổi.`</span>;</pre>
+        <div class="scope-row" id="var-demo">
+          <div class="scope-box">
+            <div class="label">name (const)</div>
+            <div class="val" id="d-name">Minh</div>
+          </div>
+          <div class="scope-box">
+            <div class="label">count (let)</div>
+            <div class="val" id="d-count">0</div>
+          </div>
+          <div class="scope-box">
+            <div class="label">Template string</div>
+            <div class="val" id="d-msg" style="font-size:0.75rem;">Xin chào, Minh!</div>
+          </div>
+        </div>
+        <div style="margin-top:0.75rem; display:flex; gap:0.5rem;">
+          <button class="btn-primary" onclick="incrementCount()">count++</button>
+          <button class="btn-secondary" onclick="resetCount()">Reset</button>
+        </div>
+      </div>
+
+      <!-- FUNCTIONS -->
+      <div class="card" style="margin-bottom:1rem;">
+        <h3>Functions — 3 cách viết</h3>
+        <pre><span class="cm">// 1. Function declaration</span>
+<span class="kw">function</span> <span class="fn">add</span>(<span class="var">a</span>, <span class="var">b</span>) {
+  <span class="kw">return</span> <span class="var">a</span> + <span class="var">b</span>;
+}
+
+<span class="cm">// 2. Arrow function (phổ biến nhất hiện nay)</span>
+<span class="kw">const</span> <span class="fn">multiply</span> = (<span class="var">a</span>, <span class="var">b</span>) => <span class="var">a</span> * <span class="var">b</span>;
+
+<span class="cm">// 3. Arrow function nhiều dòng</span>
+<span class="kw">const</span> <span class="fn">greet</span> = (<span class="var">name</span>) => {
+  <span class="kw">const</span> <span class="var">msg</span> = <span class="str">`Xin chào, ${name}!`</span>;
+  <span class="kw">return</span> <span class="var">msg</span>;
+};</pre>
+      </div>
+
+      <!-- ARRAY -->
+      <div class="card" style="margin-bottom:1rem;">
+        <h3>Array — Mảng & các method quan trọng</h3>
+        <div class="array-visual" id="array-visual"></div>
+        <pre><span class="kw">const</span> <span class="var">fruits</span> = [<span class="str">"🍎"</span>, <span class="str">"🍌"</span>, <span class="str">"🍊"</span>, <span class="str">"🍇"</span>];
+
+<span class="cm">// Truy cập phần tử</span>
+<span class="var">fruits</span>[<span class="num">0</span>]     <span class="cm">// "🍎" (index từ 0)</span>
+<span class="var">fruits</span>.<span class="fn">length</span> <span class="cm">// 4</span>
+
+<span class="cm">// Thêm / xóa</span>
+<span class="var">fruits</span>.<span class="fn">push</span>(<span class="str">"🍓"</span>)    <span class="cm">← thêm cuối</span>
+<span class="var">fruits</span>.<span class="fn">pop</span>()         <span class="cm">← xóa cuối</span>
+<span class="var">fruits</span>.<span class="fn">unshift</span>(<span class="str">"🫐"</span>) <span class="cm">← thêm đầu</span>
+
+<span class="cm">// Duyệt mảng (phổ biến nhất)</span>
+<span class="var">fruits</span>.<span class="fn">forEach</span>(<span class="var">fruit</span> => <span class="fn">console</span>.<span class="fn">log</span>(<span class="var">fruit</span>));
+
+<span class="cm">// Biến đổi mảng → mảng mới</span>
+<span class="kw">const</span> <span class="var">upper</span> = <span class="var">fruits</span>.<span class="fn">map</span>(<span class="var">f</span> => <span class="var">f</span>.<span class="fn">toUpperCase</span>());
+
+<span class="cm">// Lọc mảng</span>
+<span class="kw">const</span> <span class="var">long</span> = <span class="var">fruits</span>.<span class="fn">filter</span>(<span class="var">f</span> => <span class="var">f</span>.<span class="fn">length</span> > <span class="num">4</span>);
+
+<span class="cm">// Tìm kiếm</span>
+<span class="kw">const</span> <span class="var">found</span> = <span class="var">fruits</span>.<span class="fn">find</span>(<span class="var">f</span> => <span class="var">f</span>.<span class="fn">includes</span>(<span class="str">"🍎"</span>));</pre>
+        <div class="arr-controls">
+          <button class="btn-primary" onclick="arrPush()">push() thêm cuối</button>
+          <button class="btn-secondary" onclick="arrPop()">pop() xóa cuối</button>
+          <button class="btn-secondary" onclick="arrUnshift()">unshift() thêm đầu</button>
+        </div>
+      </div>
+
+      <!-- OBJECT -->
+      <div class="card" style="margin-bottom:1rem;">
+        <h3>Object — Đối tượng</h3>
+        <pre><span class="kw">const</span> <span class="var">user</span> = {
+  <span class="obj-key">name</span>: <span class="str">"Minh"</span>,
+  <span class="obj-key">age</span>: <span class="num">25</span>,
+  <span class="obj-key">skills</span>: [<span class="str">"React"</span>, <span class="str">"Node.js"</span>],
+  <span class="obj-key">greet</span>: <span class="kw">function</span>() {         <span class="cm">← method trong object</span>
+    <span class="kw">return</span> <span class="str">`Tôi là ${<span class="kw">this</span>.name}`</span>;
+  }
+};
+
+<span class="cm">// Truy cập</span>
+<span class="var">user</span>.<span class="var">name</span>          <span class="cm">// "Minh"</span>
+<span class="var">user</span>[<span class="str">"age"</span>]        <span class="cm">// 25</span>
+<span class="var">user</span>.<span class="fn">greet</span>()       <span class="cm">// "Tôi là Minh"</span>
+
+<span class="cm">// Destructuring (tách nhanh)</span>
+<span class="kw">const</span> { <span class="var">name</span>, <span class="var">age</span> } = <span class="var">user</span>;
+
+<span class="cm">// Spread (sao chép + thêm)</span>
+<span class="kw">const</span> <span class="var">newUser</span> = { ...<span class="var">user</span>, <span class="var">role</span>: <span class="str">"admin"</span> };</pre>
+        <div class="obj-visual" id="obj-visual">
+          <div><span class="obj-key">name</span><span class="obj-punc">: </span><span class="obj-val">"Minh"</span></div>
+          <div><span class="obj-key">age</span><span class="obj-punc">: </span><span class="obj-val">25</span></div>
+          <div><span class="obj-key">skills</span><span class="obj-punc">: </span><span class="obj-val">["React", "Node.js"]</span></div>
+        </div>
+      </div>
+
+      <!-- COUNTER INTERACTIVE -->
+      <div class="demo-box">
+        <div class="demo-title">LIVE DEMO — State bằng JS thuần</div>
+        <div class="counter-display" id="counter-val">0</div>
+        <div class="counter-controls">
+          <button class="btn-secondary" onclick="changeCounter(-10)">-10</button>
+          <button class="btn-secondary" onclick="changeCounter(-1)">-1</button>
+          <button class="btn-danger" onclick="changeCounter(0,true)">Reset</button>
+          <button class="btn-primary" onclick="changeCounter(1)">+1</button>
+          <button class="btn-primary" onclick="changeCounter(10)">+10</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         6. EVENTS
+    ============================================= -->
+    <section id="events">
+      <div class="section-label">Chương 06</div>
+      <h2>JavaScript Events</h2>
+      <p style="color:var(--muted); margin-bottom:1.5rem;">Event = sự kiện người dùng làm (click, gõ, rê chuột...). JS lắng nghe và phản ứng lại.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Các event phổ biến</h3>
+          <pre><span class="cm">// Cách 1: inline (tránh dùng)</span>
+<span class="kw">&lt;button</span> <span class="var">onclick</span>=<span class="str">"doSomething()"</span><span class="kw">&gt;</span>Click<span class="kw">&lt;/button&gt;</span>
+
+<span class="cm">// Cách 2: addEventListener (đúng chuẩn)</span>
+<span class="var">btn</span>.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, (<span class="var">e</span>) => {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Đã click!'</span>, <span class="var">e</span>);
+});
+
+<span class="cm">// Các loại event thường dùng:</span>
+<span class="str">'click'</span>      <span class="cm">← bấm chuột</span>
+<span class="str">'input'</span>      <span class="cm">← gõ vào input</span>
+<span class="str">'change'</span>     <span class="cm">← thay đổi value</span>
+<span class="str">'submit'</span>     <span class="cm">← submit form</span>
+<span class="str">'keydown'</span>    <span class="cm">← bấm phím</span>
+<span class="str">'mouseover'</span>  <span class="cm">← chuột đi vào</span>
+<span class="str">'scroll'</span>     <span class="cm">← cuộn trang</span></pre>
+        </div>
+
+        <div class="card">
+          <h3>Event Log — Thử tương tác</h3>
+          <div style="margin-bottom:0.75rem;">
+            <input type="text" placeholder="Gõ gì đó vào đây..." id="event-input" style="margin-bottom:0.5rem;" />
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <button class="btn-primary" id="event-btn">Click tôi</button>
+              <button class="btn-secondary" id="event-btn2" onmouseover="logEvent('mouseover vào btn 2')" onmouseout="logEvent('mouseout khỏi btn 2')">Hover tôi</button>
+            </div>
+          </div>
+          <div class="event-log" id="event-log">
+            <p>← Tương tác để xem events xuất hiện...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         7. DOM MANIPULATION
+    ============================================= -->
+    <section id="dom">
+      <div class="section-label">Chương 07</div>
+      <h2>DOM Manipulation</h2>
+      <p style="color:var(--muted); margin-bottom:1.5rem;">DOM = Document Object Model. JS dùng DOM để đọc, thêm, sửa, xóa HTML elements.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Cheat Sheet DOM</h3>
+          <pre><span class="cm">// TÌM ELEMENT</span>
+<span class="kw">const</span> <span class="var">el</span> = <span class="var">document</span>.<span class="fn">getElementById</span>(<span class="str">'myId'</span>);
+<span class="kw">const</span> <span class="var">el</span> = <span class="var">document</span>.<span class="fn">querySelector</span>(<span class="str">'.myClass'</span>);
+<span class="kw">const</span> <span class="var">els</span> = <span class="var">document</span>.<span class="fn">querySelectorAll</span>(<span class="str">'li'</span>);
+
+<span class="cm">// ĐỌC / THAY ĐỔI NỘI DUNG</span>
+<span class="var">el</span>.<span class="var">textContent</span> = <span class="str">"Text mới"</span>;   <span class="cm">← chỉ text</span>
+<span class="var">el</span>.<span class="var">innerHTML</span> = <span class="str">"&lt;b&gt;Bold&lt;/b&gt;"</span>; <span class="cm">← có thể HTML</span>
+
+<span class="cm">// CSS / CLASS</span>
+<span class="var">el</span>.<span class="var">style</span>.<span class="var">color</span> = <span class="str">"red"</span>;
+<span class="var">el</span>.<span class="var">classList</span>.<span class="fn">add</span>(<span class="str">"active"</span>);
+<span class="var">el</span>.<span class="var">classList</span>.<span class="fn">remove</span>(<span class="str">"active"</span>);
+<span class="var">el</span>.<span class="var">classList</span>.<span class="fn">toggle</span>(<span class="str">"active"</span>);
+
+<span class="cm">// TẠO / THÊM / XÓA ELEMENT</span>
+<span class="kw">const</span> <span class="var">li</span> = <span class="var">document</span>.<span class="fn">createElement</span>(<span class="str">'li'</span>);
+<span class="var">li</span>.<span class="var">textContent</span> = <span class="str">"Item mới"</span>;
+<span class="var">list</span>.<span class="fn">appendChild</span>(<span class="var">li</span>);
+<span class="var">li</span>.<span class="fn">remove</span>();</pre>
+        </div>
+
+        <div class="card">
+          <h3>TODO List — DOM thực tế</h3>
+          <ul class="todo-list" id="todo-list">
+            <li class="todo-item">
+              <div class="todo-check" onclick="toggleTodo(this)"></div>
+              <span class="todo-text">Học HTML Semantic</span>
+              <button class="todo-delete" onclick="deleteTodo(this)">×</button>
+            </li>
+            <li class="todo-item">
+              <div class="todo-check" onclick="toggleTodo(this)"></div>
+              <span class="todo-text">Hiểu CSS Flexbox</span>
+              <button class="todo-delete" onclick="deleteTodo(this)">×</button>
+            </li>
+            <li class="todo-item">
+              <div class="todo-check done" onclick="toggleTodo(this)">✓</div>
+              <span class="todo-text done">Đọc file này</span>
+              <button class="todo-delete" onclick="deleteTodo(this)">×</button>
+            </li>
+          </ul>
+          <div class="todo-input-row">
+            <input type="text" id="todo-input" placeholder="Thêm task mới..." onkeydown="if(event.key==='Enter')addTodo()" />
+            <button class="btn-primary" onclick="addTodo()">Thêm</button>
+          </div>
+          <div style="font-size:11px; color:var(--muted); margin-top:0.5rem;" id="todo-stats"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================
+         8. ASYNC / FETCH API
+    ============================================= -->
+    <section id="async">
+      <div class="section-label">Chương 08</div>
+      <h2>Async / Await & Fetch API</h2>
+      <p style="color:var(--muted); margin-bottom:1.5rem;">Async/Await = cách gọi API không làm đứng trình duyệt. Hiểu đây là hiểu cách frontend nói chuyện với backend.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Cấu trúc Async/Await</h3>
+          <pre><span class="cm">// ❌ CÁCH CŨ — callback hell</span>
+<span class="fn">fetch</span>(<span class="str">'/api/user'</span>)
+  .<span class="fn">then</span>(<span class="var">res</span> => <span class="var">res</span>.<span class="fn">json</span>())
+  .<span class="fn">then</span>(<span class="var">data</span> => <span class="fn">console</span>.<span class="fn">log</span>(<span class="var">data</span>))
+  .<span class="fn">catch</span>(<span class="var">err</span> => <span class="fn">console</span>.<span class="fn">error</span>(<span class="var">err</span>));
+
+<span class="cm">// ✅ CÁCH MỚI — async/await (dễ đọc hơn)</span>
+<span class="kw">const</span> <span class="fn">getUser</span> = <span class="kw">async</span> () => {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'/api/user'</span>);
+    
+    <span class="kw">if</span> (!<span class="var">res</span>.<span class="var">ok</span>) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Lỗi!'</span>);
+    
+    <span class="kw">const</span> <span class="var">data</span> = <span class="kw">await</span> <span class="var">res</span>.<span class="fn">json</span>();
+    <span class="kw">return</span> <span class="var">data</span>;
+    
+  } <span class="kw">catch</span> (<span class="var">err</span>) {
+    <span class="fn">console</span>.<span class="fn">error</span>(<span class="str">'Có lỗi:'</span>, <span class="var">err</span>);
+  }
+};</pre>
+        </div>
+
+        <div class="card">
+          <h3>Gọi API thực tế (JSONPlaceholder)</h3>
+          <div id="fetch-result" class="fetch-result">
+            <div style="color:var(--muted); font-size:12px;">Nhấn nút để gọi API thật...</div>
+          </div>
+          <div style="display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap;">
+            <button class="btn-primary" onclick="fetchUser(1)">GET User #1</button>
+            <button class="btn-secondary" onclick="fetchUser(2)">GET User #2</button>
+            <button class="btn-secondary" onclick="fetchUser(3)">GET User #3</button>
+            <button class="btn-secondary" onclick="fetchPosts()">GET Posts</button>
+          </div>
+          <div style="margin-top:0.75rem; font-size:11px; color:var(--muted);">
+            API: <code style="color:var(--accent3)">jsonplaceholder.typicode.com</code> (miễn phí, dùng để test)
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem;">
+        <h3>POST request — gửi data lên server</h3>
+        <pre><span class="kw">const</span> <span class="fn">createPost</span> = <span class="kw">async</span> (<span class="var">postData</span>) => {
+  <span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.example.com/posts'</span>, {
+    <span class="var">method</span>: <span class="str">'POST'</span>,                    <span class="cm">← GET, POST, PUT, DELETE</span>
+    <span class="var">headers</span>: {
+      <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+      <span class="str">'Authorization'</span>: <span class="str">`Bearer ${token}`</span> <span class="cm">← auth token</span>
+    },
+    <span class="var">body</span>: <span class="var">JSON</span>.<span class="fn">stringify</span>(<span class="var">postData</span>)      <span class="cm">← object → JSON string</span>
+  });
+  <span class="kw">return</span> <span class="var">res</span>.<span class="fn">json</span>();
+};</pre>
+      </div>
+    </section>
+
+    <!-- =============================================
+         9. RESPONSIVE
+    ============================================= -->
+    <section id="responsive">
+      <div class="section-label">Chương 09</div>
+      <h2>Responsive Design</h2>
+      <p style="color:var(--muted); margin-bottom:1.5rem;">Thu nhỏ cửa sổ trình duyệt để thấy layout tự thay đổi.</p>
+
+      <div class="responsive-demo">
+        <div class="card">
+          <h3>Trên desktop (2 cột)</h3>
+          <p style="color:var(--muted); font-size:12px;">Nội dung chính, chiếm 2/3 chiều rộng</p>
+          <pre><span class="cm">/* Mobile First — viết cho mobile trước */</span>
+<span class="var">.container</span> {
+  <span class="kw">display</span>: <span class="str">block</span>;      <span class="cm">← mobile: 1 cột</span>
+}
+
+<span class="cm">/* Tablet (≥ 768px) */</span>
+<span class="kw">@media</span> (<span class="kw">min-width</span>: <span class="num">768px</span>) {
+  <span class="var">.container</span> { <span class="kw">display</span>: <span class="str">grid</span>; <span class="kw">grid-template-columns</span>: <span class="num">2fr 1fr</span>; }
+}
+
+<span class="cm">/* Desktop (≥ 1024px) */</span>
+<span class="kw">@media</span> (<span class="kw">min-width</span>: <span class="num">1024px</span>) {
+  <span class="var">.container</span> { <span class="kw">max-width</span>: <span class="num">1200px</span>; <span class="kw">margin</span>: <span class="num">0</span> <span class="str">auto</span>; }
+}</pre>
+        </div>
+        <div class="card">
+          <h3>Trên mobile (1 cột)</h3>
+          <p style="color:var(--muted); font-size:12px;">Sidebar tự xuống dưới</p>
+          <div style="margin-top:1rem;">
+            <div class="badge badge-green" style="margin-bottom:0.5rem; display:block; text-align:center;">✓ RESPONSIVE</div>
+            <div style="font-size:12px; color:var(--muted); line-height:1.8;">
+              Thu nhỏ cửa sổ xuống &lt; 768px để thấy layout này chuyển thành 1 cột
+            </div>
+            <div style="margin-top:1rem; display:flex; gap:0.5rem; flex-direction:column; font-size:12px;">
+              <div style="padding:0.4rem; background:#0d0d14; border-radius:4px; border-left:2px solid var(--accent);">📱 Mobile: &lt; 768px</div>
+              <div style="padding:0.4rem; background:#0d0d14; border-radius:4px; border-left:2px solid var(--accent3);">📟 Tablet: 768–1024px</div>
+              <div style="padding:0.4rem; background:#0d0d14; border-radius:4px; border-left:2px solid var(--accent2);">🖥️ Desktop: &gt; 1024px</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TÓM TẮT -->
+    <section>
+      <div class="section-label">Tổng kết</div>
+      <h2>Cần nhớ gì để dùng AI hiệu quả</h2>
+      <div class="grid-3" style="margin-top:1rem;">
+        <div class="card">
+          <div class="badge badge-green" style="margin-bottom:0.75rem;">Tầng 1</div>
+          <h3 style="color:var(--text)">Phải hiểu luồng</h3>
+          <p style="color:var(--muted); font-size:12px;">Data đi từ đâu → qua đâu → render ra sao. Không có cái này, AI generate ra gì bạn cũng không kiểm soát được.</p>
+        </div>
+        <div class="card">
+          <div class="badge badge-blue" style="margin-bottom:0.75rem;">Tầng 2</div>
+          <h3 style="color:var(--text)">Đủ để debug</h3>
+          <p style="color:var(--muted); font-size:12px;">Mở DevTools, đọc console error, biết inspect element. Khi UI vỡ bạn phải tự tìm được chỗ vỡ trước khi hỏi AI.</p>
+        </div>
+        <div class="card">
+          <div class="badge badge-red" style="margin-bottom:0.75rem;">Tầng 3</div>
+          <h3 style="color:var(--text)">AI lo phần còn lại</h3>
+          <p style="color:var(--muted); font-size:12px;">Animation, config phức tạp, boilerplate — để AI gen. Bạn review, hiểu ý định, sửa nếu cần. Không cần nhớ thuộc lòng.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>// frontend.ref — đọc code này là bạn đã biết frontend cơ bản rồi</div>
+    <div style="margin-top:0.25rem;">HTML · CSS · JavaScript · Flexbox · Grid · DOM · Events · Async · Responsive</div>
+  </footer>
+
+  <!-- =============================================
+       JAVASCRIPT — toàn bộ logic
+  ============================================= -->
+  <script>
+    // =============================================
+    // FORM SUBMIT
+    // =============================================
+    function submitForm() {
+      const name = document.getElementById('demo-name').value;
+      const email = document.getElementById('demo-email').value;
+      const role = document.getElementById('demo-role').value;
+
+      if (!name) { alert('Vui lòng nhập tên!'); return; }
+
+      const output = document.getElementById('form-output');
+      output.innerHTML = `
+        <div style="font-size:12px; line-height:2;">
+          <div><span class="obj-key">name</span><span class="obj-punc">: </span><span class="obj-val">"${name}"</span></div>
+          <div><span class="obj-key">email</span><span class="obj-punc">: </span><span class="obj-val">"${email || '(trống)'}"</span></div>
+          <div><span class="obj-key">role</span><span class="obj-punc">: </span><span class="obj-val">"${role || '(chưa chọn)'}"</span></div>
+          <div><span class="obj-key">timestamp</span><span class="obj-punc">: </span><span class="obj-val">"${new Date().toLocaleTimeString('vi-VN')}"</span></div>
+        </div>`;
+    }
+
+    // =============================================
+    // FLEXBOX PLAYGROUND
+    // =============================================
+    const flexState = { justify: 'flex-start', align: 'center', dir: 'row' };
+
+    function setFlex(type, value, btn) {
+      const map = { justify: 'justifyContent', align: 'alignItems', dir: 'flexDirection' };
+      flexState[type] = value;
+
+      const demo = document.getElementById('flex-demo');
+      demo.style[map[type]] = value;
+
+      // update active button trong cùng group
+      btn.parentElement.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // =============================================
+    // VARIABLES DEMO
+    // =============================================
+    let count = 0;
+    function incrementCount() {
+      count++;
+      document.getElementById('d-count').textContent = count;
+      document.getElementById('d-msg').textContent = `Xin chào, Minh! Count: ${count}`;
+    }
+    function resetCount() {
+      count = 0;
+      document.getElementById('d-count').textContent = count;
+      document.getElementById('d-msg').textContent = `Xin chào, Minh!`;
+    }
+
+    // =============================================
+    // COUNTER
+    // =============================================
+    let counterVal = 0;
+    function changeCounter(n, reset = false) {
+      if (reset) counterVal = 0;
+      else counterVal += n;
+
+      const el = document.getElementById('counter-val');
+      el.textContent = counterVal;
+      el.classList.add('bump');
+      setTimeout(() => el.classList.remove('bump'), 150);
+    }
+
+    // =============================================
+    // ARRAY DEMO
+    // =============================================
+    let fruits = ['🍎', '🍌', '🍊', '🍇'];
+    const extras = ['🍓', '🫐', '🥝', '🍑', '🍒'];
+    let extraIdx = 0;
+
+    function renderArray() {
+      const v = document.getElementById('array-visual');
+      v.innerHTML = fruits.map((f, i) =>
+        `<div class="arr-item"><span class="idx">[${i}]</span>${f}</div>`
+      ).join('') || '<span style="color:var(--muted);font-size:12px;">Mảng rỗng</span>';
+    }
+
+    function arrPush() {
+      fruits.push(extras[extraIdx % extras.length]);
+      extraIdx++;
+      renderArray();
+    }
+    function arrPop() {
+      if (fruits.length) fruits.pop();
+      renderArray();
+    }
+    function arrUnshift() {
+      fruits.unshift(extras[extraIdx % extras.length]);
+      extraIdx++;
+      renderArray();
+    }
+    renderArray();
+
+    // =============================================
+    // EVENTS LOG
+    // =============================================
+    const eventLog = document.getElementById('event-log');
+
+    function logEvent(msg) {
+      const p = document.createElement('div');
+      p.className = 'event-entry';
+      p.innerHTML = `<span class="event-time">${new Date().toLocaleTimeString('vi-VN', {hour12:false})}</span><span class="event-msg">${msg}</span>`;
+      eventLog.appendChild(p);
+      eventLog.scrollTop = eventLog.scrollHeight;
+      // xóa placeholder
+      const placeholder = eventLog.querySelector('p');
+      if (placeholder) placeholder.remove();
+    }
+
+    document.getElementById('event-btn').addEventListener('click', () => logEvent('🖱️ click event trên button'));
+    document.getElementById('event-input').addEventListener('input', (e) => logEvent(`⌨️ input: "${e.target.value}"`));
+    document.getElementById('event-input').addEventListener('keydown', (e) => logEvent(`🔑 keydown: key="${e.key}"`));
+
+    // =============================================
+    // TODO LIST
+    // =============================================
+    function updateTodoStats() {
+      const items = document.querySelectorAll('.todo-item');
+      const done = document.querySelectorAll('.todo-check.done');
+      document.getElementById('todo-stats').textContent =
+        `${done.length}/${items.length} hoàn thành`;
+    }
+
+    function toggleTodo(checkEl) {
+      checkEl.classList.toggle('done');
+      if (checkEl.classList.contains('done')) checkEl.innerHTML = '✓';
+      else checkEl.innerHTML = '';
+      checkEl.nextElementSibling.classList.toggle('done');
+      updateTodoStats();
+    }
+
+    function deleteTodo(btn) {
+      btn.closest('.todo-item').remove();
+      updateTodoStats();
+    }
+
+    function addTodo() {
+      const input = document.getElementById('todo-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const li = document.createElement('li');
+      li.className = 'todo-item';
+      li.innerHTML = `
+        <div class="todo-check" onclick="toggleTodo(this)"></div>
+        <span class="todo-text">${text}</span>
+        <button class="todo-delete" onclick="deleteTodo(this)">×</button>`;
+      document.getElementById('todo-list').appendChild(li);
+      input.value = '';
+      updateTodoStats();
+    }
+
+    updateTodoStats();
+
+    // =============================================
+    // FETCH API
+    // =============================================
+    async function fetchUser(id) {
+      const result = document.getElementById('fetch-result');
+      result.innerHTML = '<div class="spinner"></div> <span style="color:var(--accent3);font-size:12px; margin-left:8px;">Đang gọi API...</span>';
+      result.className = 'fetch-result';
+
+      try {
+        const res = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        result.className = 'fetch-result success';
+        result.innerHTML = `
+          <div class="user-card">
+            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">${data.name[0]}</div>
+            <div style="font-size:12px; line-height:1.9;">
+              <div><span class="obj-key">name</span>: <span class="obj-val">"${data.name}"</span></div>
+              <div><span class="obj-key">email</span>: <span class="obj-val">"${data.email}"</span></div>
+              <div><span class="obj-key">company</span>: <span class="obj-val">"${data.company.name}"</span></div>
+              <div><span class="obj-key">website</span>: <span class="obj-val">"${data.website}"</span></div>
+              <div><span class="obj-key">city</span>: <span class="obj-val">"${data.address.city}"</span></div>
+            </div>
+          </div>`;
+      } catch (err) {
+        result.className = 'fetch-result error';
+        result.innerHTML = `<span style="color:var(--accent2);">❌ Lỗi: ${err.message}</span>`;
+      }
+    }
+
+    async function fetchPosts() {
+      const result = document.getElementById('fetch-result');
+      result.innerHTML = '<div class="spinner"></div> <span style="color:var(--accent3);font-size:12px; margin-left:8px;">Đang tải posts...</span>';
+      result.className = 'fetch-result';
+
+      try {
+        const res = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=3');
+        const posts = await res.json();
+        result.className = 'fetch-result success';
+        result.innerHTML = posts.map(p => `
+          <div style="margin-bottom:0.75rem; padding-bottom:0.75rem; border-bottom:1px solid var(--border); font-size:12px;">
+            <div style="color:var(--accent); margin-bottom:0.2rem;">${p.title}</div>
+            <div style="color:var(--muted);">${p.body.substring(0,80)}...</div>
+          </div>`).join('');
+      } catch (err) {
+        result.className = 'fetch-result error';
+        result.innerHTML = `<span style="color:var(--accent2);">❌ Lỗi: ${err.message}</span>`;
+      }
+    }
+
+    // =============================================
+    // SCROLL ANIMATION
+    // =============================================
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.animationPlayState = 'running';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('section').forEach((s, i) => {
+      s.style.animationDelay = `${i * 0.05}s`;
+      s.style.animationPlayState = 'paused';
+      observer.observe(s);
+    });
+  </script>
+
+</body>
+</html>
