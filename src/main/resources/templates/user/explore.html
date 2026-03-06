@@ -1174,8 +1174,9 @@
                                 </div>
                                 <div class="hoverOverlay">
                                     <button class="hoverBtn btnPreview" type="button" th:data-id="${product.id}"
-                                        th:data-name="${product.name}" th:data-price="${product.minPrice}"
-                                        th:data-rating="${product.ratingAvg}" th:data-sold="${product.totalSold}"
+                                        th:data-slug="${product.slug}" th:data-name="${product.name}"
+                                        th:data-price="${product.minPrice}" th:data-rating="${product.ratingAvg}"
+                                        th:data-sold="${product.totalSold}"
                                         th:data-rating-count="${product.ratingCount}"
                                         th:data-desc="${product.shortDescription}"
                                         th:data-category="${product.category != null ? product.category.name : ''}"

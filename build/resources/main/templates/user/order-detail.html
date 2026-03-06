@@ -201,9 +201,45 @@
                                 </a>
                             </div>
                         </div>
-                    </section>
 
-                    <!-- Actions (Now moved back down or removed if it wasn't here) Wait, I will just remove it. -->
+                    </section>
+                    <div th:if="${order.status.name() == 'PENDING'}" class="od-actions">
+                        <!-- Balance Payment Button → opens Modal 1 -->
+                        <button type="button" onclick="openBalanceModal()"
+                            style="width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-dark,#059669));color:#fff;font-weight:600;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s;margin-bottom:10px">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                <line x1="1" y1="10" x2="23" y2="10" />
+                            </svg>
+                            Thanh toán bằng số dư
+                        </button>
+                        <!-- Bank Transfer Button → opens Modal 2 -->
+                        <button type="button" onclick="openBankModal()"
+                            style="width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-weight:600;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s;margin-bottom:10px">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                            </svg>
+                            Chuyển khoản ngân hàng
+                        </button>
+                        <!-- Cancel Order -->
+                        <form id="cancelOrderForm" th:action="@{/orders/{num}/cancel(num=${order.orderNumber})}"
+                            method="post">
+                            <button type="button"
+                                onclick="handleOrderAction(this.closest('form'), 'Bạn chắc chắn muốn hủy đơn hàng này?', {title:'Hủy đơn hàng', type:'danger', danger:true, confirmText:'Hủy đơn'})"
+                                class="cancel-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                                Hủy đơn hàng
+                            </button>
+                        </form>
+                    </div>
+                    <!-- Support Section -->
                     <section class="od-section"
                         th:if="${order.status.name() == 'COMPLETED' || order.status.name() == 'PROCESSING'}">
                         <h3 class="section-title">
@@ -296,39 +332,219 @@
                             </div>
                         </div>
                     </section>
-
-                    <!-- Actions -->
-                    <div th:if="${order.status.name() == 'PENDING'}" class="od-actions">
-                        <form id="confirmPaymentForm"
-                            th:action="@{/orders/{num}/confirm-payment(num=${order.orderNumber})}" method="post">
-                            <button type="button"
-                                onclick="handleOrderAction(this.closest('form'), 'Xác nhận bạn đã thanh toán đơn hàng này?', {title:'Xác nhận thanh toán', type:'success', confirmText:'Đã thanh toán'})"
-                                style="width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-dark,#059669));color:#fff;font-weight:600;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s;margin-bottom:10px">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                    <polyline points="22 4 12 14.01 9 11.01" />
-                                </svg>
-                                Đã thanh toán
-                            </button>
-                        </form>
-                        <form id="cancelOrderForm" th:action="@{/orders/{num}/cancel(num=${order.orderNumber})}"
-                            method="post">
-                            <button type="button"
-                                onclick="handleOrderAction(this.closest('form'), 'Bạn chắc chắn muốn hủy đơn hàng này?', {title:'Hủy đơn hàng', type:'danger', danger:true, confirmText:'Hủy đơn'})"
-                                class="cancel-btn">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <line x1="18" y1="6" x2="6" y2="18" />
-                                    <line x1="6" y1="6" x2="18" y2="18" />
-                                </svg>
-                                Hủy đơn hàng
-                            </button>
-                        </form>
-                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- ═══════════════════════════════════════
+             Modal 1: Thanh toán bằng số dư
+             ═══════════════════════════════════════ -->
+        <div class="od-modal-overlay" id="balanceModal">
+            <div class="od-modal">
+                <!-- Header -->
+                <div class="od-modal-header">
+                    <div class="od-modal-header-icon"
+                        style="background:linear-gradient(135deg,var(--primary),var(--primary-dark,#059669))">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                            <line x1="1" y1="10" x2="23" y2="10" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="od-modal-title">Thanh toán đơn hàng</h3>
+                        <p class="od-modal-subtitle">Trừ tiền tài khoản</p>
+                    </div>
+                    <button class="od-modal-close" onclick="closeBalanceModal()" type="button" aria-label="Đóng">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Payment Info -->
+                <div class="od-modal-body">
+                    <div class="od-modal-info-card">
+                        <div class="od-modal-info-row">
+                            <span class="od-modal-info-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                    <line x1="1" y1="10" x2="23" y2="10" />
+                                </svg>
+                                Phương thức thanh toán
+                            </span>
+                            <span class="od-modal-info-value">Trừ tiền tài khoản</span>
+                        </div>
+                        <div class="od-modal-info-divider"></div>
+                        <div class="od-modal-info-row">
+                            <span class="od-modal-info-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                                    <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
+                                </svg>
+                                Số dư của bạn
+                            </span>
+                            <span class="od-modal-info-value od-modal-balance" id="balanceAmount">500,000₫</span>
+                        </div>
+                        <div class="od-modal-info-divider"></div>
+                        <div class="od-modal-info-row">
+                            <span class="od-modal-info-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="12" y1="8" x2="12" y2="16" />
+                                    <line x1="8" y1="12" x2="16" y2="12" />
+                                </svg>
+                                Tổng giá trị đơn hàng
+                            </span>
+                            <span class="od-modal-info-value od-modal-total" id="balanceOrderTotal">150,000₫</span>
+                        </div>
+                    </div>
+
+                    <!-- Insufficient notice (hidden by default, show via JS if needed) -->
+                    <div class="od-modal-notice" id="balanceNotice" style="display:none">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                        Số dư không đủ. Vui lòng nạp thêm tiền hoặc chọn phương thức khác.
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="od-modal-footer">
+                    <button type="button" class="od-modal-btn od-modal-btn--cancel"
+                        onclick="closeBalanceModal()">Hủy</button>
+                    <button type="button" class="od-modal-btn od-modal-btn--pay" id="balancePayBtn"
+                        onclick="confirmBalancePayment()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                        Thanh toán
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             Modal 2: Chuyển khoản ngân hàng
+             ═══════════════════════════════════════ -->
+        <div class="od-modal-overlay" id="bankModal">
+            <div class="od-modal" style="max-width:540px">
+                <!-- Header -->
+                <div class="od-modal-header">
+                    <div class="od-modal-header-icon" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="od-modal-title">Xác nhận thanh toán</h3>
+                        <p class="od-modal-subtitle">Chuyển khoản ngân hàng</p>
+                    </div>
+                    <button class="od-modal-close" onclick="closeBankModal()" type="button" aria-label="Đóng">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Amount -->
+                <div class="od-modal-amount">
+                    <span class="od-modal-amount-label">Số tiền cần thanh toán</span>
+                    <span class="od-modal-amount-value" id="bankOrderTotal">150,000₫</span>
+                </div>
+
+                <!-- Bank Transfer Info -->
+                <div class="od-modal-body">
+                    <!-- QR Code -->
+                    <div class="od-modal-qr">
+                        <div class="od-modal-qr-box" id="bankQrBox">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" opacity=".4">
+                                <rect x="3" y="3" width="7" height="7" />
+                                <rect x="14" y="3" width="7" height="7" />
+                                <rect x="3" y="14" width="7" height="7" />
+                                <rect x="14" y="14" width="4" height="4" />
+                                <line x1="21" y1="14" x2="21" y2="21" />
+                                <line x1="14" y1="21" x2="21" y2="21" />
+                            </svg>
+                            <span>QR Code</span>
+                        </div>
+                    </div>
+
+                    <!-- Bank Info Rows -->
+                    <div class="od-modal-bank-info">
+                        <div class="od-modal-bank-row">
+                            <span class="od-modal-bank-label">Ngân hàng</span>
+                            <span class="od-modal-bank-value">VietcomBank</span>
+                        </div>
+                        <div class="od-modal-bank-row">
+                            <span class="od-modal-bank-label">Số tài khoản</span>
+                            <span class="od-modal-bank-value od-modal-copy" onclick="odCopyText(this, '1234567890')">
+                                1234567890
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="od-modal-bank-row">
+                            <span class="od-modal-bank-label">Chủ tài khoản</span>
+                            <span class="od-modal-bank-value">NGUYEN VAN A</span>
+                        </div>
+                        <div class="od-modal-bank-row">
+                            <span class="od-modal-bank-label">Nội dung CK</span>
+                            <span class="od-modal-bank-value od-modal-copy" id="bankTransferNote"
+                                onclick="odCopyText(this, 'ORD-0001')">
+                                ORD-0001
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <p class="od-modal-note">
+                        Quét mã QR bằng app ngân hàng <strong>bất kỳ</strong> hoặc chuyển khoản theo thông tin trên.
+                        <br>Đơn hàng sẽ được xử lý sau khi xác nhận thanh toán.
+                    </p>
+
+                    <!-- Timer -->
+                    <div class="od-modal-timer">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        Thời gian thanh toán: <strong id="bankCountdown">15:00</strong>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="od-modal-footer">
+                    <button type="button" class="od-modal-btn od-modal-btn--cancel"
+                        onclick="closeBankModal()">Hủy</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <th:block layout:fragment="scripts">
@@ -344,6 +560,84 @@
             const errorMsg = '[[${error}]]';
             if (successMsg && successMsg !== '') showToast(successMsg, 'success');
             if (errorMsg && errorMsg !== '') showToast(errorMsg, 'error');
+
+            // ═══ Modal 1: Balance Payment ═══
+            function openBalanceModal() {
+                document.getElementById('balanceModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeBalanceModal() {
+                document.getElementById('balanceModal').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            function confirmBalancePayment() {
+                // TODO: Connect to backend API
+                // Example: POST /orders/{orderNumber}/pay-balance
+                showToast('Đang xử lý thanh toán...', 'info');
+                closeBalanceModal();
+            }
+
+            // ═══ Modal 2: Bank Transfer ═══
+            let bankCountdownInterval = null;
+
+            function openBankModal() {
+                document.getElementById('bankModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+                startBankCountdown(15 * 60);
+            }
+
+            function closeBankModal() {
+                document.getElementById('bankModal').classList.remove('active');
+                document.body.style.overflow = '';
+                if (bankCountdownInterval) {
+                    clearInterval(bankCountdownInterval);
+                    bankCountdownInterval = null;
+                }
+            }
+
+            function startBankCountdown(seconds) {
+                if (bankCountdownInterval) clearInterval(bankCountdownInterval);
+                let remaining = seconds;
+                const el = document.getElementById('bankCountdown');
+                function tick() {
+                    const m = Math.floor(remaining / 60);
+                    const s = remaining % 60;
+                    el.textContent = m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+                    if (remaining <= 60) el.style.color = '#ef4444';
+                    if (remaining <= 0) {
+                        clearInterval(bankCountdownInterval);
+                        closeBankModal();
+                        showToast('Hết thời gian thanh toán', 'error');
+                    }
+                    remaining--;
+                }
+                tick();
+                bankCountdownInterval = setInterval(tick, 1000);
+            }
+
+            // ═══ Copy text util ═══
+            function odCopyText(el, text) {
+                navigator.clipboard.writeText(text.trim());
+                showToast('Đã sao chép!', 'success');
+            }
+
+            // Close modals on Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeBalanceModal();
+                    closeBankModal();
+                }
+            });
+
+            // Close modals on overlay click
+            document.getElementById('balanceModal')?.addEventListener('click', function (e) {
+                if (e.target === this) closeBalanceModal();
+            });
+            document.getElementById('bankModal')?.addEventListener('click', function (e) {
+                if (e.target === this) closeBankModal();
+            });
 
             // Parse and render account JSON entries
             document.querySelectorAll('.account-entries').forEach(container => {

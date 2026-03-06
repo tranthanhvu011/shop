@@ -74,7 +74,6 @@ public class PaymentService {
         ResponseEntity<PaymentMethod> response = restTemplate.exchange(
                 PAYOS_API_URL, HttpMethod.POST, request, PaymentMethod.class
         );
-
         PaymentMethod body = response.getBody();
         log.info("[PayOS] Response for order #{}: code={}, desc={}",
                 order.getOrderNumber(),

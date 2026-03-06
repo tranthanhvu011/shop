@@ -5,9 +5,9 @@ server:
       timeout: 30m
 payos:
   webhook-url: "https://nonadoptable-doria-shockingly.ngrok-free.dev/webhook/payos"  # thêm /webhook/payos
-  client-id: "ff8d8ec5-ccc0-4d72-9c1b-ff0fa5e2d5bb"
-  api-key: "b1badf41-73c3-4f04-8b4d-70c5ee0828da"
-  checksum-key: "3e6d69ac4db2ced7a7ec9de5bd28b48afc958e7dbe98d537730a6a7e63ed6a7d"
+  client-id: "7c1983b7-a194-44e5-9553-36b0d0687c3b"
+  api-key: "2eceb27f-8df7-44f0-82e6-61928a93dc0d"
+  checksum-key: "518f506feb205cc11188171bef8b1f3c07ec78ade7ff4493b6152b7d6843e32e"
 spring:
   session:
     store-type: redis

@@ -595,3 +595,379 @@
         width: 24px;
     }
 }
+
+/* ═══════════════════════════════════════
+   Payment Modals
+   ═══════════════════════════════════════ */
+@keyframes odModalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.od-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .65);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s;
+}
+
+.od-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.od-modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+    animation: odModalSlideIn .4s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+}
+
+/* Header */
+.od-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.od-modal-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.od-modal-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.od-modal-subtitle {
+    font-size: .82rem;
+    color: var(--text-muted);
+    margin: 2px 0 0;
+}
+
+.od-modal-close {
+    margin-left: auto;
+    background: var(--bg-darker, rgba(0, 0, 0, .15));
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all .2s;
+}
+
+.od-modal-close:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, .08);
+}
+
+/* Body */
+.od-modal-body {
+    margin-bottom: 20px;
+}
+
+/* Info Card (Modal 1) */
+.od-modal-info-card {
+    background: var(--bg-darker, rgba(0, 0, 0, .15));
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.od-modal-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+}
+
+.od-modal-info-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .88rem;
+    color: var(--text-muted);
+}
+
+.od-modal-info-label svg {
+    flex-shrink: 0;
+    opacity: .6;
+}
+
+.od-modal-info-value {
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.od-modal-balance {
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.od-modal-total {
+    color: #f59e0b;
+    font-size: 1.05rem;
+}
+
+.od-modal-info-divider {
+    height: 1px;
+    background: var(--border-color);
+}
+
+/* Notice */
+.od-modal-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: rgba(239, 68, 68, .08);
+    border: 1px solid rgba(239, 68, 68, .2);
+    border-radius: 12px;
+    font-size: .85rem;
+    color: #ef4444;
+    font-weight: 500;
+}
+
+/* Amount (Modal 2) */
+.od-modal-amount {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, transparent), color-mix(in srgb, var(--primary) 3%, transparent));
+    border: 1px solid color-mix(in srgb, var(--primary) 15%, var(--border-color));
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.od-modal-amount-label {
+    font-size: .8rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.od-modal-amount-value {
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary), var(--success, #10b981));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* QR Code */
+.od-modal-qr {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.od-modal-qr-box {
+    width: 180px;
+    height: 180px;
+    background: #fff;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .1);
+    color: #1a1a2e;
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+/* Bank Info */
+.od-modal-bank-info {
+    background: var(--bg-darker, rgba(0, 0, 0, .15));
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 4px 18px;
+    margin-bottom: 16px;
+}
+
+.od-modal-bank-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.od-modal-bank-row:last-child {
+    border-bottom: none;
+}
+
+.od-modal-bank-label {
+    font-size: .82rem;
+    color: var(--text-muted);
+}
+
+.od-modal-bank-value {
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.od-modal-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: color .2s;
+}
+
+.od-modal-copy:hover {
+    color: var(--primary);
+}
+
+.od-modal-copy svg {
+    opacity: .5;
+    transition: opacity .2s;
+}
+
+.od-modal-copy:hover svg {
+    opacity: 1;
+}
+
+/* Note */
+.od-modal-note {
+    font-size: .85rem;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.od-modal-note strong {
+    color: var(--primary);
+}
+
+/* Timer */
+.od-modal-timer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: var(--bg-darker, rgba(0, 0, 0, .15));
+    border-radius: 12px;
+    font-size: .85rem;
+    color: var(--text-muted);
+}
+
+.od-modal-timer strong {
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+/* Footer */
+.od-modal-footer {
+    display: flex;
+    gap: 12px;
+}
+
+.od-modal-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: all .3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    font-family: inherit;
+}
+
+.od-modal-btn--cancel {
+    background: var(--bg-darker, rgba(0, 0, 0, .15));
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.od-modal-btn--cancel:hover {
+    border-color: var(--text-muted);
+    transform: translateY(-1px);
+}
+
+.od-modal-btn--pay {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark, #059669));
+    color: #fff;
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.od-modal-btn--pay:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+.od-modal-btn--pay:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Modal responsive */
+@media (max-width:640px) {
+    .od-modal {
+        padding: 20px;
+        border-radius: 18px;
+        max-width: 95%;
+    }
+
+    .od-modal-amount-value {
+        font-size: 1.5rem;
+    }
+
+    .od-modal-qr-box {
+        width: 150px;
+        height: 150px;
+    }
+
+    .od-modal-footer {
+        flex-direction: column;
+    }
+}

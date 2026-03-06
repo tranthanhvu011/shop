@@ -378,14 +378,14 @@
                 <!-- Actions -->
                 <div class="pm-actions">
                     <button class="pm-btn pm-btn--secondary" onclick="closePaymentModal()" type="button">Hủy</button>
-                    <button class="pm-btn pm-btn--primary" onclick="confirmPayment()" type="button">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                            <polyline points="22 4 12 14.01 9 11.01" />
-                        </svg>
-                        Đã thanh toán
-                    </button>
+<!--                    <button class="pm-btn pm-btn&#45;&#45;primary" onclick="confirmPayment()" type="button">-->
+<!--                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"-->
+<!--                            stroke-width="2">-->
+<!--                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />-->
+<!--                            <polyline points="22 4 12 14.01 9 11.01" />-->
+<!--                        </svg>-->
+<!--                        Đã thanh toán-->
+<!--                    </button>-->
                 </div>
             </div>
         </div>
@@ -511,11 +511,6 @@
                 if (countdownInterval) clearInterval(countdownInterval);
             }
 
-            function confirmPayment() {
-                closePaymentModal();
-                // Submit the actual form
-                document.getElementById('checkoutForm').submit();
-            }
 
             function startCountdown(seconds) {
                 if (countdownInterval) clearInterval(countdownInterval);

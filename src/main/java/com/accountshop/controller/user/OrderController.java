@@ -1,12 +1,17 @@
 package com.accountshop.controller.user;
 
+import com.accountshop.config.AppProperties;
 import com.accountshop.entity.Order;
+import com.accountshop.entity.PaymentMethod;
 import com.accountshop.entity.User;
 import com.accountshop.repository.OrderRepository;
+import com.accountshop.repository.UserRepository;
 import com.accountshop.security.SecurityUtils;
 import com.accountshop.service.OrderService;
+import com.accountshop.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +28,9 @@ public class OrderController {
     private final SecurityUtils securityUtils;
     private final OrderRepository orderRepository;
     private final OrderService orderService;
+    private final UserRepository userRepository;
+    private final PaymentService paymentService;
+    private final AppProperties appProperties;
 
     @GetMapping("/orders")
     public String orders(@RequestParam(required = false) String status,
@@ -66,15 +74,28 @@ public class OrderController {
     }
 
     @PostMapping("/orders/{orderNumber}/confirm-payment")
-    public String confirmPayment(@PathVariable String orderNumber, RedirectAttributes redirectAttributes) {
+    public ResponseEntity<?> confirmPayment(@PathVariable String orderNumber) {
         User user = securityUtils.getCurrentUser()
                 .orElseThrow(() -> new RuntimeException("Chưa đăng nhập"));
-        try {
-            orderService.confirmPayment(user, orderNumber);
-            redirectAttributes.addFlashAttribute("success", "Thanh toán đã được xác nhận! Tài khoản đã được cấp phát.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại"));
+
+        if (user.getBalance().compareTo(order.getTotalAmount()) >= 0) {
+            user.setBalance(user.getBalance().subtract(order.getTotalAmount()));
+            order.setPaymentStatus(Order.PaymentStatus.PAID);
+            order.setStatus(Order.OrderStatus.COMPLETED);
+            orderRepository.save(order);
+            userRepository.save(user);
+            return ResponseEntity.ok("Thanh toán thành công với số tiền: " + order.getTotalAmount());
+        } else {
+            String baseUrl = appProperties.getBaseUrl();
+            PaymentMethod result = paymentService.createPaymentLink(
+                    order,
+                    baseUrl + "/orders/cancel",
+                    baseUrl + "/orders/" + order.getOrderNumber()
+            );
+            return ResponseEntity.ok(result);
         }
-        return "redirect:/orders/" + orderNumber;
     }
 }

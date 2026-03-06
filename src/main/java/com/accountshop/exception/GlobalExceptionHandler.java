@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * GlobalExceptionHandler — centralized exception handling for the application.
@@ -17,6 +18,27 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    /**
+     * Handle missing static resources (e.g. favicon.ico) → 404 silently
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public Object handleNoResource(NoResourceFoundException ex, HttpServletRequest request) {
+        String uri = request.getRequestURI();
+
+        // Favicon requests → return 204 No Content silently (no template rendering)
+        if (uri.contains("favicon")) {
+            return ResponseEntity.noContent().build();
+        }
+
+        log.warn("[404] {} — {}", uri, ex.getMessage());
+
+        if (isApiRequest(request)) {
+            ApiResponse<?> response = ApiResponse.error("NOT_FOUND", "Resource not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        return "error/404";
+    }
 
     /**
      * Handle ResourceNotFoundException → 404
