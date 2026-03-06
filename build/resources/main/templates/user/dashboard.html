@@ -29,6 +29,9 @@
             <h1 class="welcomeTitle">
                 Xin chào, <span class="gradient-text" th:text="${currentUser.username}">User</span>!
             </h1>
+            <h2>
+                Số dư: <span class="gradient-text" th:text="${currentUser.balance}">0</span> VNĐ
+            </h2>
 
             <div class="quickLinks">
                 <a th:href="@{/orders}" class="card quickLink">

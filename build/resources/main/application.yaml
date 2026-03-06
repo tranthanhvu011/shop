@@ -91,3 +91,9 @@ logging:
   level:
     com.accountshop: DEBUG
     org.springframework.security: DEBUG
+minio:
+  endpoint: http://127.0.0.1:9000
+  accessKey: minioadmin
+  secretKey: minioadmin123
+  bucket: product-images
+  publicBaseUrl: http://127.0.0.1:9000/product-images

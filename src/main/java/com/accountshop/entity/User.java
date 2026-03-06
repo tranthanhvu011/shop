@@ -3,6 +3,7 @@ package com.accountshop.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,6 +34,9 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean emailVerified = false;
+
+    @Column(nullable = false)
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))

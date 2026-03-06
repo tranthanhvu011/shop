@@ -8,9 +8,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
+
+    // Dashboard: revenue per month (only PAID orders)
+    @Query("SELECT FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt), COALESCE(SUM(o.totalAmount), 0) FROM Order o " +
+           "WHERE o.paymentStatus = 'PAID' AND o.createdAt >= :since " +
+           "GROUP BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt) " +
+           "ORDER BY FUNCTION('YEAR', o.createdAt), FUNCTION('MONTH', o.createdAt)")
+    List<Object[]> getRevenuePerMonth(@Param("since") LocalDateTime since);
     Optional<Order> findByOrderNumber(String orderNumber);
     Page<Order> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
     Page<Order> findAllByOrderByCreatedAtDesc(Pageable pageable);

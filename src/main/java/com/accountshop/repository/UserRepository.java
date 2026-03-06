@@ -7,9 +7,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    // Dashboard: count new users per month
+    @Query("SELECT FUNCTION('YEAR', u.createdAt), FUNCTION('MONTH', u.createdAt), COUNT(u) FROM User u " +
+           "WHERE u.createdAt >= :since GROUP BY FUNCTION('YEAR', u.createdAt), FUNCTION('MONTH', u.createdAt) " +
+           "ORDER BY FUNCTION('YEAR', u.createdAt), FUNCTION('MONTH', u.createdAt)")
+    List<Object[]> countNewUsersPerMonth(@Param("since") LocalDateTime since);
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
     boolean existsByEmail(String email);

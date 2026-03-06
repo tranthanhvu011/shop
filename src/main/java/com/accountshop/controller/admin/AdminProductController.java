@@ -1,26 +1,32 @@
 package com.accountshop.controller.admin;
 
+import com.accountshop.common.ApiResponse;
 import com.accountshop.entity.*;
 import com.accountshop.repository.CategoryRepository;
 import com.accountshop.repository.DigitalAccountRepository;
 import com.accountshop.repository.ProductRepository;
 import com.accountshop.repository.VariantPricingRepository;
+import com.accountshop.service.CategoryService;
+import com.accountshop.service.MinioStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
 /**
- * AdminProductController — admin product CRUD + digital account management.
- * Routes: /admin/products/**, /admin/pricing/**, /admin/accounts/**
+ * AdminProductController — admin product CRUD + digital account management + category API.
+ * Routes: /admin/products/**, /admin/pricing/**, /admin/accounts/**, /admin/api/categories/**
  */
 @Controller
 @RequestMapping("/admin")
@@ -31,6 +37,69 @@ public class AdminProductController {
     private final CategoryRepository categoryRepository;
     private final DigitalAccountRepository digitalAccountRepository;
     private final VariantPricingRepository variantPricingRepository;
+    private final CategoryService categoryService;
+    private final MinioStorageService minioStorageService;
+
+    // ── Category REST API ──
+
+    @GetMapping("/api/categories")
+    @ResponseBody
+    public ResponseEntity<List<Category>> getCategories() {
+        return ResponseEntity.ok(categoryRepository.findAllByOrderByDisplayOrderAsc());
+    }
+
+    @PostMapping("/api/categories")
+    @ResponseBody
+    public ResponseEntity<?> createCategory(@RequestBody Map<String, String> body) {
+        try {
+            String name = body.get("name");
+            if (name == null || name.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Tên danh mục không được để trống"));
+            }
+            String slug = generateSlug(name);
+            Category cat = Category.builder()
+                    .name(name.trim())
+                    .slug(slug)
+                    .icon(body.getOrDefault("icon", ""))
+                    .displayOrder(0)
+                    .build();
+            cat = categoryRepository.save(cat);
+            return ResponseEntity.ok(cat);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Danh mục đã tồn tại hoặc lỗi: " + e.getMessage()));
+        }
+    }
+
+    @PutMapping("/api/categories/{id}")
+    @ResponseBody
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        try {
+            Category cat = categoryRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
+            String name = body.get("name");
+            if (name == null || name.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Tên danh mục không được để trống"));
+            }
+            cat.setName(name.trim());
+            cat.setSlug(generateSlug(name));
+            if (body.containsKey("icon")) cat.setIcon(body.get("icon"));
+            cat = categoryRepository.save(cat);
+            return ResponseEntity.ok(cat);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/api/categories/{id}")
+    @ResponseBody
+    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
+        try {
+            categoryRepository.deleteById(id);
+            return ResponseEntity.ok(Map.of("message", "Đã xóa danh mục"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Không thể xóa: " + e.getMessage()));
+        }
+    }
 
     // ── Product CRUD ──
 
@@ -87,7 +156,7 @@ public class AdminProductController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String shortDescription,
             @RequestParam(required = false) String detailDescription,
-            @RequestParam(required = false) String imageUrl,
+            @RequestParam(value = "imageFiles", required = false) MultipartFile[] imageFiles,
             @RequestParam(required = false, defaultValue = "false") Boolean active,
             @RequestParam Map<String, String> allParams,
             RedirectAttributes redirectAttributes) {
@@ -111,15 +180,25 @@ public class AdminProductController {
             categoryRepository.findById(categoryId).ifPresent(product::setCategory);
         }
 
-        // Image
-        if (imageUrl != null && !imageUrl.isBlank()) {
-            ProductImage img = ProductImage.builder()
-                    .product(product)
-                    .imageUrl(imageUrl)
-                    .isPrimary(true)
-                    .displayOrder(0)
-                    .build();
-            product.getImages().add(img);
+        // Image — add to product's list, cascade will save them with product
+        if (imageFiles == null || imageFiles.length == 0) {
+            System.out.print("Không có hình ảnh nào được upload lên");
+        } else {
+            int displayOrder = 0;
+
+            for (MultipartFile file : imageFiles) {
+                if (file.isEmpty()) continue;
+                try {
+                    String url = minioStorageService.upload(file);
+                    System.out.println("Uploaded: " + url);
+
+                    ProductImage image = new ProductImage(product, url, displayOrder, displayOrder == 0);
+                    product.getImages().add(image);
+                    displayOrder++;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         // Parse variants from form params
